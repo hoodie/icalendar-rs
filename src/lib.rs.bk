@@ -12,28 +12,19 @@ use period::Period;
 #[derive(Debug,Clone)]
 pub enum Repeats {
     Annually,
-    Years(usize),
-    Months(usize),
-    Weeks(usize),
-    Days(usize),
-    Daily,
-    Not,
+    Years(usize), Months(usize),
+    Weeks(usize), Days(usize),
+    Daily, Not,
 }
 
-pub enum Numeration {
-    First,
-    Second,
-    Third,
-    Forth,
-    Fifth,
-    Sixth,
-    Seventh,
-    Last,
+pub enum Numerations{
+    First,Second,Third,Forth,Fifth,Sixth,Seventh,Last
 }
 
-impl Numeration {
-    pub fn monday() -> Repeats {
-        Repeats::Not
+impl Numeration{
+    pub fn monday()->Repeats{
+        match *self{
+        }
     }
 }
 
@@ -54,7 +45,7 @@ pub struct Event {
 }
 
 impl Event {
-    pub fn new(summary: &str) -> Event {
+    pub fn new(summary: &str) -> Event{
         Event {
             summary: String::from(summary),
             description: String::new(),

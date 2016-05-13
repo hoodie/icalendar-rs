@@ -4,3 +4,5 @@ version = "0.1.0"
 authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
 
 [dependencies]
+chrono = "*"
+uuid = { version = "0.2", features = ["v4"] }
