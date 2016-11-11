@@ -103,14 +103,17 @@ pub trait Component {
         Ok(())
     }
 
+    /// Set the summary
     fn summary(&mut self, desc: &str) -> &mut Self {
         self.add_property("SUMMARY", desc)
     }
 
+    /// Set the description
     fn description(&mut self, desc: &str) -> &mut Self {
         self.add_property("DESCRIPTION", desc)
     }
 
+    /// Set the visibility class
     fn class(&mut self, class: Class) -> &mut Self {
         self.append_property(class.into())
     }
@@ -119,8 +122,12 @@ pub trait Component {
 macro_rules! component_impl {
     ($t:ty, $kind:expr) => {
             impl Component for $t {
+                /// Tells you what kind of `Component` this is
+                ///
+                /// Might be `VEVENT`, `VTODO`, `VALARM` etc
                 fn component_kind() -> &'static str { $kind }
 
+                /// Read-only access to properties
                 fn properties<'a>(&'a self) -> &'a HashMap<String, Property>{
                     &self.properties
                 }
