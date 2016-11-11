@@ -19,12 +19,14 @@ extern crate vobject;
 //pub mod period;
 mod components;
 mod properties;
+mod calendar;
 
 pub mod repeats;
 //pub use components::{Property, Parameter, Component};
 //pub use components::{event, todo};
 pub use components::{Event, Todo, Component};
-pub use properties::{Class};
+pub use properties::Class;
+pub use calendar::Calendar;
 
 #[test]
 fn it_works() {

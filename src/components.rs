@@ -54,15 +54,16 @@ pub trait Component {
     fn properties<'a>(&'a self) -> &'a HashMap<String,Property>;
 
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
-        try!(writeln!(out, "BEGIN:{}", Self::component_kind()));
-        let now = UTC::now().format("%Y%m%dT%H%M%SZ");
-        try!(writeln!(out, "DTSTAMP:{}", now));
-        try!(writeln!(out, "UID:{}", Uuid::new_v4()));
 
-        for (_, component) in self.properties() {
-            try!(component.fmt_write(out));
+        writeln!(out, "BEGIN:{}", Self::component_kind())?;
+        let now = UTC::now().format("%Y%m%dT%H%M%SZ");
+        writeln!(out, "DTSTAMP:{}", now)?;
+        writeln!(out, "UID:{}", Uuid::new_v4())?;
+
+        for (_, property) in self.properties() {
+            property.fmt_write(out)?;
         }
-        try!(writeln!(out, "END:{}", Self::component_kind()));
+        writeln!(out, "END:{}", Self::component_kind())?;
         Ok(())
     }
 
@@ -116,9 +117,9 @@ pub trait Component {
 }
 
 macro_rules! component_impl {
-    ($($t:ty)*) => ($(
+    ($t:ty, $kind:expr) => {
             impl Component for $t {
-                fn component_kind() -> &'static str { "VEVENT" }
+                fn component_kind() -> &'static str { $kind }
 
                 fn properties<'a>(&'a self) -> &'a HashMap<String, Property>{
                     &self.properties
@@ -130,9 +131,9 @@ macro_rules! component_impl {
                     self
                 }
             }
-
-            )*)
+    }
 }
 
-component_impl! { Event Todo }
+component_impl! { Event, "VEVENT" }
+component_impl! { Todo , "VTODO"}
 
