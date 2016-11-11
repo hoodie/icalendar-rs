@@ -124,6 +124,17 @@ pub trait Component {
         self
     }
 
+    /// Set the DTSTART `Property`, date only
+    fn all_day<TZ:TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+        where TZ::Offset: fmt::Display
+    {
+        // DTSTART
+        self.append_property( Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref()).append_parameter(ValueType::Date).done() )
+            .append_property( Property::new("DTEND",   date.format("%Y%m%d").to_string().as_ref()).append_parameter(ValueType::Date).done() )
+            ;
+        self
+    }
+
 
     /// Prints to stdout
     fn print(&self) -> Result<(), fmt::Error> {

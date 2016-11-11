@@ -33,6 +33,11 @@ BYOB: Bring your own beer.
 Hendrik"#
 )
         .done();
+
+    let bday2 = Event::new()
+        .all_day(UTC.ymd(2016, 3, 15))
+        .done();
+
     let todo = Todo::new().summary("Buy some milk").done();
 
 
@@ -44,6 +49,7 @@ Hendrik"#
     calendar.add(event);
     calendar.add(todo);
     calendar.add(bday);
+    calendar.add(bday2);
 
     calendar.print().unwrap();
 }
