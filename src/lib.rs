@@ -2,8 +2,6 @@
 //! This is still just an early idea, there is nothing implemented,
 //! I haven't even read the [spec](http://tools.ietf.org/html/rfc5545) yet.
 //!
-//! I'd love to create iCal files with a very [diesel](https://diesel.rs/) or [active support](https://github.com/wycats/rust-activesupport) like syntax.
-//!
 //! ## Structure
 //! * `Calendar`s consist of `Components`
 //! * `Component`s are e.g. `Event` or `Todo`
@@ -22,7 +20,7 @@ mod properties;
 mod calendar;
 
 pub mod repeats;
-//pub use components::{Property, Parameter, Component};
+pub use properties::{Property, Parameter};
 //pub use components::{event, todo};
 pub use components::{Event, Todo, Component};
 pub use properties::Class;

@@ -73,13 +73,17 @@ pub trait Component {
         out_string
     }
 
+    /// Append a given `Property`
     fn append_property(&mut self, property: Property) -> &mut Self;
 
+    /// Construct and append a `Property`
     fn add_property(&mut self, key: &str, val: &str) -> &mut Self {
         self.append_property( Property::new(key, val));
         self
     }
 
+
+    /// Set the DTSTART `Property`
     fn starts<TZ:TimeZone>(&mut self, dt: DateTime<TZ>) -> &mut Self
         where TZ::Offset: fmt::Display
     {
@@ -88,12 +92,38 @@ pub trait Component {
         self
     }
 
+    /// Set the DTEND `Property`
     fn ends<TZ:TimeZone>(&mut self, dt: DateTime<TZ>) -> &mut Self
         where TZ::Offset: fmt::Display
     {
         self.add_property("DTEND", dt.format("%Y%m%dT%H%M%SZ").to_string().as_ref());
         self
     }
+
+    /// Set the DTSTART `Property`, date only
+    fn start_date<TZ:TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+        where TZ::Offset: fmt::Display
+    {
+        // DTSTART
+        self.append_property(
+            Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
+            .parameter("VALUE", "DATE")
+            .done());
+        self
+    }
+
+    /// Set the DTEND `Property`, date only
+    fn end_date<TZ:TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+        where TZ::Offset: fmt::Display
+    {
+        // DTSTART
+        self.append_property(
+            Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
+            .parameter("VALUE", "DATE")
+            .done());
+        self
+    }
+
 
     /// Prints to stdout
     fn print(&self) -> Result<(), fmt::Error> {

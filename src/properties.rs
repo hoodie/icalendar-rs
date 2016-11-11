@@ -1,5 +1,6 @@
 use std::fmt;
 use std::mem;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 /// key-value pairs inside of `Property`s
@@ -17,8 +18,8 @@ impl Parameter {
     }
 }
 
-type EntryParameters = Vec<Parameter>;
-// type EntryParameters = HashMap<EPKey,String>;
+//type EntryParameters = Vec<Parameter>;
+type EntryParameters = HashMap<String,Parameter>;
 
 #[derive(Debug)]
 /// key-value pairs inside of `Component`s
@@ -34,7 +35,7 @@ impl Property {
         Property {
             key: key.to_owned(),
             value: val.replace('\n', "\\n"),
-            parameters: Vec::new(),
+            parameters: HashMap::new(),
         }
     }
 
@@ -45,7 +46,7 @@ impl Property {
 
     /// Builder method, adds a new `Parameter`
     pub fn parameter(&mut self, key: &str, val: &str) -> &mut Self {
-        self.parameters.push(Parameter::new(key, val));
+        self.parameters.insert(key.to_owned(),Parameter::new(key, val));
         self
     }
 
@@ -54,14 +55,14 @@ impl Property {
         Property {
             key: mem::replace(&mut self.key, String::new()),
             value: mem::replace(&mut self.value, String::new()),
-            parameters: mem::replace(&mut self.parameters, Vec::new()),
+            parameters: mem::replace(&mut self.parameters, HashMap::new()),
         }
     }
 
     /// Writes this Property to `out`
     pub fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         try!(write!(out, "{}", self.key));
-        for &Parameter { ref key, ref value } in &self.parameters {
+        for (_key, &Parameter { ref key, ref value }) in &self.parameters {
             try!(write!(out, ";{}={}", key, value));
         }
         try!(writeln!(out, ":{}", self.value));
@@ -84,7 +85,7 @@ impl Into<Property> for Class {
                 Class::Private => "PRIVATE",
                 Class::Confidential => "CONFIDENTIAL",
             }),
-            parameters: Vec::new()
+            parameters: HashMap::new()
         }
     }
 }
