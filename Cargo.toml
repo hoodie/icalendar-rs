@@ -1,8 +1,13 @@
 [package]
+authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
 name = "icalendar"
 version = "0.1.0"
-authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
 
 [dependencies]
 chrono = "*"
-uuid = { version = "0.2", features = ["v4"] }
+error-chain = "*"
+vobject = {path="../hub/vobject"}
+
+[dependencies.uuid]
+features = ["v4"]
+version = "0.2"

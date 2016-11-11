@@ -1,9 +1,14 @@
 # iCalendar in Rust
 
 This is still just an early idea, there is nothing implemented,
-I haven't even read the completely [spec](http://tools.ietf.org/html/rfc5545) yet.
+I haven't even read the [spec](http://tools.ietf.org/html/rfc5545) yet.
 
 I'd love to create iCal files with a very [diesel](https://diesel.rs/) or [active support](https://github.com/wycats/rust-activesupport) like syntax.
+
+## Ideas
+
+These are only some ideas for what the API might look like.
+We're still far from that and many of these may never happen.
 
 ```rust
 fn main(){
