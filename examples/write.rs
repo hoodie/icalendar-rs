@@ -15,7 +15,7 @@ fn main() {
         //.repeats(Every::second().wednesday())
         .ends(UTC::now() + Duration::days(1))
         //.all_day()
-        .append_property(Property::new("test", "foobar")
+        .append_property(Property::new("TEST", "FOOBAR")
                   .add_parameter("IMPORTANCE", "very")
                   .add_parameter("DUE", "tomorrow")
                   .done())
@@ -26,9 +26,7 @@ fn main() {
         .end_date(UTC.ymd(2016, 3, 15))
         .summary("My Birthday")
         .description(
-r#"Hier mach ich ja sowas von Part.
-Ich könnt gerne alle kommen.
-
+r#"Hey, I'm gonna have a party
 BYOB: Bring your own beer.
 Hendrik"#
 )

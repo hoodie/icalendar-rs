@@ -6,7 +6,6 @@ use std::fmt;
 use std::mem;
 use std::collections::HashMap;
 
-use repeats::*;
 use properties::*;
 
 /// VEVENT [(RFC 5545, Section 3.6.1 )](https://tools.ietf.org/html/rfc5545#section-3.6.1)
@@ -27,9 +26,9 @@ impl Event {
     }
 
 
-    pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
-        unimplemented!()
-    }
+    //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
+    //    unimplemented!()
+    //}
 }
 
 
@@ -42,9 +41,9 @@ impl Todo {
         Todo { properties: mem::replace(&mut self.properties, HashMap::new()) }
     }
 
-    pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
-        unimplemented!()
-    }
+    //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
+    //    unimplemented!()
+    //}
 }
 
 

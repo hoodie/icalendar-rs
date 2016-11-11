@@ -1,78 +1,45 @@
 # iCalendar in Rust
 
+A library (far from anything) to generate icalendars
 This is still just an early idea, there is nothing implemented,
-I haven't even read the [spec](http://tools.ietf.org/html/rfc5545) yet.
+I haven't even read the full [spec](http://tools.ietf.org/html/rfc5545) yet.
 
-I'd love to create iCal files with a very [diesel](https://diesel.rs/) or [active support](https://github.com/wycats/rust-activesupport) like syntax.
+You want to help make this more mature? Please talk to me, Pull Requests and suggestions are very welcome.
 
-## Ideas
-
-These are only some ideas for what the API might look like.
-We're still far from that and many of these may never happen.
+## Examples 
 
 ```rust
-fn main(){
+let event = Event::new()
+    .summary("test event")
+    .description("here I have something really important to do")
+    .starts(UTC::now())
+    .class(Class::Confidential)
+    .ends(UTC::now() + Duration::days(1))
+    .append_property(Property::new("TEST", "FOOBAR")
+              .add_parameter("IMPORTANCE", "very")
+              .add_parameter("DUE", "tomorrow")
+              .done())
+    .done();
 
-    use Repeats::*;
-    let important_meeting
-        .start_date(chrono::Date::new("2016.05.09"))
-        .repeats(BiWeekly);
+let bday = Event::new()
+    .all_day(UTC.ymd(2016, 3, 15))
+    .summary("My Birthday")
+    .description(
+r#"Hey, I'm gonna have a party
+BYOB: Bring your own beer.
+Hendrik"#
+)
+    .done();
 
-    let important_meeting
-        .start_date(chrono::Date::new("2016.05.09"))
-        .every(7.days());
-
-    let birthday = Event::new()
-        .start_date(chrono::Date::new("1987.03.15"))
-        .repeats(Annually);
-
-    let birthday = Event::new()
-        .every(15.march());
-
-    let xmas = Event::every(24.december());
+let todo = Todo::new().summary("Buy some milk").done();
 
 
-    use Month::*;
-    let sysadminday = Event::every(Last.friday().of(July));
+vobject::parse_component(&bday.to_string()).unwrap();
+vobject::parse_component(&todo.to_string()).unwrap();
+vobject::parse_component(&event.to_string()).unwrap();
 
-    let tdo = Todo::new("buy milk");
-
-    let tdo = Alarm::new("get up").at("05:30").every(Thursday);
-    let tdo = Alarm::new("get up").at("06:00").on(Fridays);
-
-    let dont_disturb = Busy::between("09.05.2016").and("12.05.2016");
-    let dont_disturb = Busy::between("09..12").am().on(Mondays);
-
-    let dear_diary = Journal::from_description("Dear Diary\nToday my cat ran away. Now I'm sad");
-
-    let brush_teeth = Alarm::new("Brush Your Teeth").twice().every(Day);
-
-    let event = Event::new("this is a summary")
-        .start_date(chrono::Date())
-        .end_date(chrono::Date())
-        .description("This property provides a more complete description of the
-                           calendar component than that provided by the \"SUMMARY\" property.")
-        .attendee("mailto:john.doe@example.com")
-        .attendee(Attendee::new("jane.doe@hoodie.de").has_declined())
-        .attendee(Attendee::new("jane.doe@hoodie.de").has_accepted())
-        .trigger("-PT15M")
-        .repeats_every(Repeats::First.wednesday())
-        .ip_class(IpClass::Private)
-        ;
-
-}
+let mut calendar = Calendar::new();
+calendar.add(event);
+calendar.add(todo);
+calendar.add(bday);
 ```
-
-# Steps
-
-1. flesh out an api
-2. implement types and datastructures
-3. implement serialization
-4. find some way to test it
-
-
-
-Perhaps you can already use [vobject](http://rust-vobject.unterwaditzer.net/vobject/) to parse iCalendar files.
-I need to test this still.
-
-
