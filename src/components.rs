@@ -107,7 +107,7 @@ pub trait Component {
         // DTSTART
         self.append_property(
             Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
-            .parameter("VALUE", "DATE")
+            .append_parameter(ValueType::Date)
             .done());
         self
     }
@@ -119,7 +119,7 @@ pub trait Component {
         // DTSTART
         self.append_property(
             Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
-            .parameter("VALUE", "DATE")
+            .append_parameter(ValueType::Date)
             .done());
         self
     }

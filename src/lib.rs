@@ -20,10 +20,9 @@ mod properties;
 mod calendar;
 
 pub mod repeats;
-pub use properties::{Property, Parameter};
+pub use properties::{Property, Parameter, Class, ValueType};
 //pub use components::{event, todo};
 pub use components::{Event, Todo, Component};
-pub use properties::Class;
 pub use calendar::Calendar;
 
 #[test]

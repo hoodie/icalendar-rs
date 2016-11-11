@@ -16,13 +16,14 @@ fn main() {
         .ends(UTC::now() + Duration::days(1))
         //.all_day()
         .append_property(Property::new("test", "foobar")
-                  .parameter("IMPORTANCE", "very")
-                  .parameter("DUE", "tomorrow")
+                  .add_parameter("IMPORTANCE", "very")
+                  .add_parameter("DUE", "tomorrow")
                   .done())
         .done();
 
     let bday = Event::new()
         .start_date(UTC.ymd(2016, 3, 15))
+        .end_date(UTC.ymd(2016, 3, 15))
         .summary("My Birthday")
         .description(
 r#"Hier mach ich ja sowas von Part.

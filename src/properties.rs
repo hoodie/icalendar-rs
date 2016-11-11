@@ -1,6 +1,7 @@
 use std::fmt;
 use std::mem;
 use std::collections::HashMap;
+use std::convert::Into;
 
 #[derive(Debug)]
 /// key-value pairs inside of `Property`s
@@ -44,9 +45,14 @@ impl Property {
         self.key.clone()
     }
 
-    /// Builder method, adds a new `Parameter`
-    pub fn parameter(&mut self, key: &str, val: &str) -> &mut Self {
-        self.parameters.insert(key.to_owned(),Parameter::new(key, val));
+    pub fn append_parameter<I:Into<Parameter>>(&mut self, into_parameter: I) -> &mut Self {
+        let parameter = into_parameter.into();
+        self.parameters.insert(parameter.key.to_owned(), parameter);
+        self
+    }
+
+    pub fn add_parameter(&mut self, key: &str, val: &str) -> &mut Self {
+        self.append_parameter(Parameter::new(key, val));
         self
     }
 
@@ -75,7 +81,6 @@ pub enum Class {
     Public, Private, Confidential
 }
 
-use std::convert::Into;
 impl Into<Property> for Class {
     fn into(self) -> Property {
         Property {
@@ -90,3 +95,44 @@ impl Into<Property> for Class {
     }
 }
 
+pub enum ValueType{
+    Binary,
+    Boolean,
+    CalAddress,
+    Date,
+    DateTime,
+    Duration,
+    Float,
+    Integer,
+    Period,
+    Recur,
+    Text,
+    Time,
+    Uri,
+    UtcOffset,
+}
+
+
+impl Into<Parameter> for ValueType {
+    fn into(self) -> Parameter {
+        Parameter {
+            key: String::from("VALUE"),
+            value: String::from(match self {
+                ValueType::Binary     => "BINARY",
+                ValueType::Boolean    => "BOOLEAN",
+                ValueType::CalAddress => "CAL-ADDRESS",
+                ValueType::Date       => "DATE",
+                ValueType::DateTime   => "DATE-TIME",
+                ValueType::Duration   => "DURATION",
+                ValueType::Float      => "FLOAT",
+                ValueType::Integer    => "INTEGER",
+                ValueType::Period     => "PERIOD",
+                ValueType::Recur      => "RECUR",
+                ValueType::Text       => "TEXT",
+                ValueType::Time       => "TIME",
+                ValueType::Uri        => "URI",
+                ValueType::UtcOffset  => "UTC-OFFSET"
+            })
+        }
+    }
+}
