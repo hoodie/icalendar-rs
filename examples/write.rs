@@ -1,6 +1,5 @@
 extern crate chrono;
 extern crate icalendar;
-extern crate vobject;
 
 use chrono::*;
 use icalendar::*;
@@ -38,10 +37,6 @@ Hendrik"#
 
     let todo = Todo::new().summary("Buy some milk").done();
 
-
-    vobject::parse_component(&bday.to_string()).unwrap();
-    vobject::parse_component(&todo.to_string()).unwrap();
-    vobject::parse_component(&event.to_string()).unwrap();
 
     let mut calendar = Calendar::new();
     calendar.add(event);

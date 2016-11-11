@@ -6,7 +6,7 @@ version = "0.1.0"
 [dependencies]
 chrono = "*"
 error-chain = "*"
-vobject = {path="../hub/vobject"}
+#vobject = {path="../hub/vobject"}
 
 [dependencies.uuid]
 features = ["v4"]

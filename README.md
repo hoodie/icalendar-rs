@@ -6,7 +6,7 @@ I haven't even read the full [spec](http://tools.ietf.org/html/rfc5545) yet.
 
 You want to help make this more mature? Please talk to me, Pull Requests and suggestions are very welcome.
 
-## Examples 
+## Examples
 
 ```rust
 let event = Event::new()
@@ -33,10 +33,6 @@ Hendrik"#
 
 let todo = Todo::new().summary("Buy some milk").done();
 
-
-vobject::parse_component(&bday.to_string()).unwrap();
-vobject::parse_component(&todo.to_string()).unwrap();
-vobject::parse_component(&event.to_string()).unwrap();
 
 let mut calendar = Calendar::new();
 calendar.add(event);
