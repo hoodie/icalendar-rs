@@ -1,7 +1,7 @@
 # iCalendar in Rust
 
-A library (far from anything) to generate icalendars
-This is still just an early idea, there is nothing implemented,
+A very WIP library to generate rfc5545 calendars.
+This is still just an early idea, there is not much implemented yet.
 I haven't even read the full [spec](http://tools.ietf.org/html/rfc5545) yet.
 
 You want to help make this more mature? Please talk to me, Pull Requests and suggestions are very welcome.

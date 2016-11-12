@@ -53,6 +53,8 @@ impl Calendar {
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         writeln!(out, "BEGIN:VCALENDAR")?;
         writeln!(out, "VERSION:2.0")?;
+        writeln!(out, "PRODID:ICALENDAR-RS")?;
+        writeln!(out, "CALSCALE:GREGORIAN")?;
         writeln!(out, "\n")?;
 
         for component in &self.components {
