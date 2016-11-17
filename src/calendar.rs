@@ -1,6 +1,7 @@
 use components::*;
 
 use std::fmt;
+use std::ops::Deref;
 use std::convert::Into;
 
 
@@ -9,7 +10,7 @@ pub enum CalendarElement{
     Event(Event)
 }
 
-impl Into<CalendarElement> for Event{
+impl Into<CalendarElement> for Event {
     fn into(self) -> CalendarElement {
         CalendarElement::Event(self)
     }
@@ -76,10 +77,19 @@ impl Calendar {
 
 
 }
+
 impl ToString for Calendar {
     fn to_string(&self) -> String {
         let mut out_string = String::new();
         self.fmt_write(&mut out_string).unwrap();
         out_string
+    }
+}
+
+impl Deref for Calendar {
+    type Target = [CalendarElement];
+
+    fn deref(&self) -> &[CalendarElement]{
+        self.components.deref()
     }
 }
