@@ -39,14 +39,23 @@ pub struct Calendar {
 }
 
 impl Calendar {
-
     pub fn new() -> Self {
         Calendar {
             components: Vec::new()
         }
     }
 
+    #[deprecated(note="Use .push instead")]
+    #[doc(hidden)]
     pub fn add<T:Into<CalendarElement>>(&mut self, component:T) -> &mut Self {
+        self.push(component)
+    }
+
+    pub fn append(&mut self, other: &mut Calendar) {
+        self.components.append(&mut other.components);
+    }
+
+    pub fn push<T:Into<CalendarElement>>(&mut self, component:T) -> &mut Self {
         self.components.push(component.into());
         self
     }
@@ -60,7 +69,7 @@ impl Calendar {
 
         for component in &self.components {
             component.fmt_write(out)?;
-            writeln!(out, "\n")?;
+            write!(out, "\n")?;
         }
         writeln!(out, "END:VCALENDAR")?;
         Ok(())
@@ -74,8 +83,6 @@ impl Calendar {
         println!("{}", out);
         Ok(())
     }
-
-
 }
 
 impl ToString for Calendar {
