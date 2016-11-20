@@ -38,10 +38,10 @@ Hendrik"#
 
 
     let mut calendar = Calendar::new();
-    calendar.add(event);
-    calendar.add(todo);
-    calendar.add(bday);
-    calendar.add(bday2);
+    calendar.push(event);
+    calendar.push(todo);
+    calendar.push(bday);
+    calendar.push(bday2);
 
     calendar.print().unwrap();
 }
