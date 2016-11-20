@@ -29,10 +29,10 @@ impl Event {
         Event { properties: mem::replace(&mut self.properties, HashMap::new()) }
     }
 
-
     //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
     //    unimplemented!()
     //}
+
 }
 
 
@@ -52,6 +52,7 @@ impl Todo {
     //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
     //    unimplemented!()
     //}
+
 }
 
 
@@ -153,7 +154,6 @@ pub trait Component {
         self
     }
 
-
     /// Prints to stdout
     fn print(&self) -> Result<(), fmt::Error> {
         let mut out = String::new();
@@ -170,6 +170,13 @@ pub trait Component {
     /// Set the description
     fn description(&mut self, desc: &str) -> &mut Self {
         self.add_property("DESCRIPTION", desc)
+    }
+
+    /// Set the LOCATION
+    /// 3.8.1.7.  Location
+    fn location(&mut self, location: &str) -> &mut Self {
+        self.add_property("LOCATION", location);
+        self
     }
 
     /// Set the visibility class
