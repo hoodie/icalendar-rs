@@ -5,6 +5,7 @@ use std::ops::Deref;
 use std::convert::Into;
 
 
+#[derive(Debug)]
 pub enum CalendarElement{
     Todo(Todo),
     Event(Event)
@@ -34,6 +35,7 @@ impl CalendarElement {
 /// Represents a calendar
 ///
 /// You can `.add()` `Component`s to this.
+#[derive(Default,Debug)]
 pub struct Calendar {
     components: Vec<CalendarElement>
 }
@@ -42,12 +44,10 @@ impl Calendar {
 
     /// Creates a new Calendar.
     pub fn new() -> Self {
-        Calendar {
-            components: Vec::new()
-        }
+        Default::default()
     }
 
-    #[deprecated(note="Use .push instead")]
+    #[deprecated(note="Use .push() instead")]
     #[doc(hidden)]
     pub fn add<T:Into<CalendarElement>>(&mut self, component:T) -> &mut Self {
         self.push(component)

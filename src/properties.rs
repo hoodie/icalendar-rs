@@ -73,7 +73,7 @@ impl Property {
     /// Writes this Property to `out`
     pub fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         try!(write!(out, "{}", self.key));
-        for (_key, &Parameter { ref key, ref value }) in &self.parameters {
+        for &Parameter { ref key, ref value } in self.parameters.values() {
             try!(write!(out, ";{}={}", key, value));
         }
         try!(writeln!(out, ":{}", self.value));
@@ -82,7 +82,7 @@ impl Property {
 }
 
 /// Defines: `Public`, `Private`, `Confidential`
-#[derive(Copy,Clone)]
+#[derive(Copy,Clone,Debug)]
 pub enum Class {
     /// Public
     Public,
@@ -107,7 +107,7 @@ impl Into<Property> for Class {
 }
 
 /// see 8.3.4. [Value Data Types Registry](https://tools.ietf.org/html/rfc5545#section-8.3.4)
-#[derive(Copy,Clone)]
+#[derive(Copy,Clone,Debug)]
 pub enum ValueType{
     /// Binary
     Binary,

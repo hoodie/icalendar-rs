@@ -9,18 +9,18 @@ use std::collections::HashMap;
 use properties::*;
 
 /// VEVENT [(RFC 5545, Section 3.6.1 )](https://tools.ietf.org/html/rfc5545#section-3.6.1)
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Event { properties: HashMap<String,Property> }
 
 /// VTODO  [(RFC 5545, Section 3.6.2 )](https://tools.ietf.org/html/rfc5545#section-3.6.2)
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Todo { properties: HashMap<String,Property> }
 
 impl Event {
 
     /// Creates a new Event.
     pub fn new() -> Self {
-        Event { properties: HashMap::new() }
+        Default::default()
     }
 
     /// End of builder pattern.
@@ -40,7 +40,7 @@ impl Todo {
 
     /// Creates a new Todo.
     pub fn new() -> Self {
-        Todo { properties: HashMap::new() }
+        Default::default()
     }
 
     /// End of builder pattern.
@@ -66,7 +66,7 @@ pub trait Component {
     fn component_kind() -> &'static str;
 
     /// Allows access to the inner properties HashMap.
-    fn properties<'a>(&'a self) -> &'a HashMap<String,Property>;
+    fn properties(&self) -> &HashMap<String,Property>;
 
     /// Writes `Component` into a `Writer` using `std::fmt`.
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
@@ -76,7 +76,7 @@ pub trait Component {
         writeln!(out, "DTSTAMP:{}", now)?;
         writeln!(out, "UID:{}", Uuid::new_v4())?;
 
-        for (_, property) in self.properties() {
+        for property in self.properties().values() {
             property.fmt_write(out)?;
         }
         writeln!(out, "END:{}", Self::component_kind())?;
@@ -187,7 +187,7 @@ macro_rules! component_impl {
                 fn component_kind() -> &'static str { $kind }
 
                 /// Read-only access to properties
-                fn properties<'a>(&'a self) -> &'a HashMap<String, Property>{
+                fn properties(&self) -> &HashMap<String, Property> {
                     &self.properties
                 }
 

@@ -52,8 +52,9 @@
         trivial_casts, trivial_numeric_casts,
         unsafe_code,
         unstable_features,
-        unused_import_braces, unused_qualifications)]
-//#![warn(missing_debug_implementations)]
+        unused_import_braces, unused_qualifications,
+        missing_debug_implementations
+        )]
 
 extern crate chrono;
 extern crate uuid;
