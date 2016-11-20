@@ -1,6 +1,5 @@
 extern crate chrono;
 extern crate icalendar;
-
 use chrono::*;
 use icalendar::*;
 

@@ -1,6 +1,8 @@
 //! A library (far from anything) to generate icalendars
-//! This is still just an early idea, there is nothing implemented,
-//! I haven't even read the [spec](http://tools.ietf.org/html/rfc5545) yet.
+//! This implementation is still far from complete, I haven't even read the entire [spec](http://tools.ietf.org/html/rfc5545) yet.
+//! Instead I implemented the parts I needed first.
+//! More to come, contributions very welcome.
+//!
 //!
 //! ## Structure
 //! * `Calendar`s consist of `Components`
@@ -44,6 +46,14 @@
 //! calendar.add(bday);
 //!
 //! ```
+
+#![warn(missing_docs,
+        missing_copy_implementations,
+        trivial_casts, trivial_numeric_casts,
+        unsafe_code,
+        unstable_features,
+        unused_import_braces, unused_qualifications)]
+//#![warn(missing_debug_implementations)]
 
 extern crate chrono;
 extern crate uuid;

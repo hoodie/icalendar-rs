@@ -17,10 +17,14 @@ pub struct Event { properties: HashMap<String,Property> }
 pub struct Todo { properties: HashMap<String,Property> }
 
 impl Event {
+
+    /// Creates a new Event.
     pub fn new() -> Self {
         Event { properties: HashMap::new() }
     }
 
+    /// End of builder pattern.
+    /// copies over everything
     pub fn done(&mut self) -> Self {
         Event { properties: mem::replace(&mut self.properties, HashMap::new()) }
     }
@@ -33,10 +37,14 @@ impl Event {
 
 
 impl Todo {
+
+    /// Creates a new Todo.
     pub fn new() -> Self {
         Todo { properties: HashMap::new() }
     }
 
+    /// End of builder pattern.
+    /// copies over everything
     pub fn done(&mut self) -> Self {
         Todo { properties: mem::replace(&mut self.properties, HashMap::new()) }
     }
@@ -49,9 +57,18 @@ impl Todo {
 
 /// Implemented by everything that goes into a `Calendar`
 pub trait Component {
+
+    /// Returns kind of component.
+    ///
+    ///
+    /// Must be ALL CAPS
+    /// These are used in the `BEGIN` and `END` line of the component.
     fn component_kind() -> &'static str;
+
+    /// Allows access to the inner properties HashMap.
     fn properties<'a>(&'a self) -> &'a HashMap<String,Property>;
 
+    /// Writes `Component` into a `Writer` using `std::fmt`.
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
 
         writeln!(out, "BEGIN:{}", Self::component_kind())?;
@@ -66,6 +83,7 @@ pub trait Component {
         Ok(())
     }
 
+    /// Guess what
     fn to_string(&self) -> String {
         let mut out_string = String::new();
         self.fmt_write(&mut out_string).unwrap();

@@ -6,11 +6,13 @@ use std::convert::Into;
 #[derive(Debug)]
 /// key-value pairs inside of `Property`s
 pub struct Parameter {
-    pub key: String,
-    pub value: String,
+    key: String,
+    value: String,
 }
 
 impl Parameter {
+
+    /// Creates a new `Parameter`
     pub fn new(key: &str, val: &str) -> Self {
         Parameter {
             key: key.to_owned(),
@@ -31,6 +33,7 @@ pub struct Property {
 }
 
 impl Property {
+
     /// Guess what this does :D
     pub fn new(key: &str, val: &str) -> Self {
         Property {
@@ -40,23 +43,25 @@ impl Property {
         }
     }
 
-    /// Clones the key field
+    /// Clones the key field.
     pub fn key(&self) -> String {
         self.key.clone()
     }
 
+    /// Appends a new parameter.
     pub fn append_parameter<I:Into<Parameter>>(&mut self, into_parameter: I) -> &mut Self {
         let parameter = into_parameter.into();
         self.parameters.insert(parameter.key.to_owned(), parameter);
         self
     }
 
+    /// Creates and appends a parameter.
     pub fn add_parameter(&mut self, key: &str, val: &str) -> &mut Self {
         self.append_parameter(Parameter::new(key, val));
         self
     }
 
-    /// End of Builder Pattern
+    /// End of Builder Pattern.
     pub fn done(&mut self) -> Self {
         Property {
             key: mem::replace(&mut self.key, String::new()),
@@ -77,8 +82,14 @@ impl Property {
 }
 
 /// Defines: `Public`, `Private`, `Confidential`
+#[derive(Copy,Clone)]
 pub enum Class {
-    Public, Private, Confidential
+    /// Public
+    Public,
+    /// Private
+    Private,
+    /// Confidential
+    Confidential
 }
 
 impl Into<Property> for Class {
@@ -95,20 +106,36 @@ impl Into<Property> for Class {
     }
 }
 
+/// see 8.3.4. [Value Data Types Registry](https://tools.ietf.org/html/rfc5545#section-8.3.4)
+#[derive(Copy,Clone)]
 pub enum ValueType{
+    /// Binary
     Binary,
+    /// Boolean
     Boolean,
+    /// CalAddress
     CalAddress,
+    /// Date
     Date,
+    /// DateTime
     DateTime,
+    /// Duration
     Duration,
+    /// Float
     Float,
+    /// Integer
     Integer,
+    /// Period
     Period,
+    /// Recur
     Recur,
+    /// Text
     Text,
+    /// Time
     Time,
+    /// Uri
     Uri,
+    /// UtcOffset
     UtcOffset,
 }
 

@@ -39,6 +39,8 @@ pub struct Calendar {
 }
 
 impl Calendar {
+
+    /// Creates a new Calendar.
     pub fn new() -> Self {
         Calendar {
             components: Vec::new()
@@ -51,15 +53,18 @@ impl Calendar {
         self.push(component)
     }
 
+    /// Moves all the elements of other into Self, leaving other empty.
     pub fn append(&mut self, other: &mut Calendar) {
         self.components.append(&mut other.components);
     }
 
+    /// Appends an element to the back of the `Calendar`.
     pub fn push<T:Into<CalendarElement>>(&mut self, component:T) -> &mut Self {
         self.components.push(component.into());
         self
     }
 
+    /// Writes `Calendar` into a `Writer` using `std::fmt`.
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         writeln!(out, "BEGIN:VCALENDAR")?;
         writeln!(out, "VERSION:2.0")?;

@@ -10,4 +10,4 @@ error-chain = "*"
 
 [dependencies.uuid]
 features = ["v4"]
-version = "0.2"
+version = "0.3"
