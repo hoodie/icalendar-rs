@@ -20,7 +20,7 @@ include = [
 
 
 [dependencies]
-chrono = "*"
+chrono = "0.2"
 #error-chain = "*"
 #vobject = {path="../hub/vobject"}
 
