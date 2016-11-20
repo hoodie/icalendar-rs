@@ -11,6 +11,13 @@ documentation = "https://docs.rs/icalendar/"
 repository = "https://github.com/hoodie/icalendar-rs"
 readme = "README.md"
 
+include = [
+  ".gitignore",
+  ".travis.yml",
+  "Cargo.toml",
+  "src/*.rs",
+]
+
 
 [dependencies]
 chrono = "*"
