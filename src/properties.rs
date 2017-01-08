@@ -163,3 +163,69 @@ impl Into<Parameter> for ValueType {
         }
     }
 }
+
+
+#[derive(Copy,Clone,Debug)]
+/// Encodes the status of an `Event`
+pub enum EventStatus {
+    /// Indicates event is tentative.
+    Tentative,
+    /// Indicates event is definite.
+    Confirmed,
+    /// Indicates event was cancelled.
+    Cancelled,
+    //Custom(&str)
+}
+
+#[derive(Copy,Clone,Debug)]
+/// Encodes the status of a `Todo`
+pub enum TodoStatus {
+    /// Indicates to-do needs action.
+    NeedsAction,
+    /// Indicates to-do is completed.
+    Completed,
+    /// Indicates to-do is in process.
+    InProcess,
+    /// Indicates to-do was cancelled.
+    Cancelled,
+    //Custom(&str)
+}
+
+//pub enum JournalStatuw{
+//    Draft,
+//    Final,
+//    Cancelled,
+//    Custom(&str)
+//}
+
+
+impl Into<Property> for EventStatus {
+    fn into(self) -> Property {
+        Property {
+            key: String::from("STATUS"),
+            value: String::from(match self {
+                EventStatus::Tentative => "TENTATIVE",
+                EventStatus::Confirmed => "CONFIRMED",
+                EventStatus::Cancelled => "CANCELLED",
+            }),
+            parameters: HashMap::new()
+        }
+    }
+}
+
+impl Into<Property> for TodoStatus {
+    fn into(self) -> Property {
+        Property {
+            key: String::from("STATUS"),
+            value: String::from(match self {
+                TodoStatus::NeedsAction => "NEEDS-ACTION",
+                TodoStatus::Completed   => "COMPLETED",
+                TodoStatus::InProcess   => "IN-PROCESS",
+                TodoStatus::Cancelled   => "CANCELLED",
+                //TodoStatus::Custom(s)   => "CU",
+            }),
+            parameters: HashMap::new()
+        }
+    }
+}
+

@@ -91,6 +91,7 @@ impl Calendar {
 }
 
 impl ToString for Calendar {
+    /// # panics
     fn to_string(&self) -> String {
         let mut out_string = String::new();
         self.fmt_write(&mut out_string).unwrap();

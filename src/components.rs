@@ -29,9 +29,18 @@ impl Event {
         Event { properties: mem::replace(&mut self.properties, HashMap::new()) }
     }
 
+    ///  Defines the overall status or confirmation
+    pub fn status(&mut self, status: EventStatus) -> &mut Self {
+        self.append_property(status.into());
+        self
+    }
+
     //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
     //    unimplemented!()
     //}
+
+
+
 
 }
 
@@ -49,6 +58,38 @@ impl Todo {
         Todo { properties: mem::replace(&mut self.properties, HashMap::new()) }
     }
 
+    /// Set the PERCENT-COMPLETE `Property`
+    ///
+    /// Ranges between 0 - 100
+    pub fn percent_complete(&mut self, percent: u8) -> &mut Self {
+        self.add_property("PERCENT-COMPLETE", &percent.to_string());
+        self
+    }
+
+
+    /// Set the COMPLETED `Property`, date only
+    pub fn due<TZ:TimeZone>(&mut self, dt: DateTime<TZ>) -> &mut Self
+        where TZ::Offset: fmt::Display
+    {
+        self.add_property("DUE", dt.format("%Y%m%dT%H%M%S").to_string().as_ref());
+        self
+    }
+
+    /// Set the COMPLETED `Property`, date only
+    pub fn completed<TZ:TimeZone>(&mut self, dt: DateTime<TZ>) -> &mut Self
+        where TZ::Offset: fmt::Display
+    {
+        self.add_property("COMPLETED", dt.format("%Y%m%dT%H%M%S").to_string().as_ref());
+        self
+    }
+
+    ///  Defines the overall status or confirmation
+    pub fn status(&mut self, status: TodoStatus) -> &mut Self {
+        self.append_property(status.into());
+        self
+    }
+
+
     //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
     //    unimplemented!()
     //}
@@ -58,7 +99,6 @@ impl Todo {
 
 /// Implemented by everything that goes into a `Calendar`
 pub trait Component {
-
     /// Returns kind of component.
     ///
     ///
@@ -154,6 +194,15 @@ pub trait Component {
         self
     }
 
+    ///  Defindes the relative priority.
+    ///
+    ///  Ranges from 0 to 10, larger values will be truncated
+    fn priority(&mut self, priority:u32) -> &mut Self {
+        let priority = ::std::cmp::min(priority, 10);
+        self.add_property("PRIORITY", &priority.to_string());
+        self
+    }
+
     /// Prints to stdout
     fn print(&self) -> Result<(), fmt::Error> {
         let mut out = String::new();
@@ -172,6 +221,12 @@ pub trait Component {
         self.add_property("DESCRIPTION", desc)
     }
 
+    // TODO there can be multiple attendees, this requires to changed the underlying datastructure
+    ///// Set the description
+    //fn attendee(&mut self, desc: &str) -> &mut Self {
+    //    self.add_multi_property("ATTENDEE", desc) // multiproperties should be a multimap
+    //}
+
     /// Set the LOCATION
     /// 3.8.1.7.  Location
     fn location(&mut self, location: &str) -> &mut Self {
@@ -184,6 +239,7 @@ pub trait Component {
         self.append_property(class.into())
     }
 }
+
 
 macro_rules! component_impl {
     ($t:ty, $kind:expr) => {
