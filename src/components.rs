@@ -10,14 +10,30 @@ use properties::*;
 
 /// VEVENT [(RFC 5545, Section 3.6.1 )](https://tools.ietf.org/html/rfc5545#section-3.6.1)
 #[derive(Debug, Default)]
-pub struct Event { properties: HashMap<String,Property> }
+pub struct Event { inner: InnerComponent }
 
 /// VTODO  [(RFC 5545, Section 3.6.2 )](https://tools.ietf.org/html/rfc5545#section-3.6.2)
 #[derive(Debug, Default)]
-pub struct Todo { properties: HashMap<String,Property> }
+pub struct Todo { inner: InnerComponent }
+
+#[derive(Debug, Default)]
+struct InnerComponent{
+    properties: HashMap<String,Property>,
+    multi_properties: Vec<Property>
+}
+
+impl InnerComponent {
+    /// End of builder pattern.
+    /// copies over everything
+    pub fn done(&mut self) -> Self {
+        InnerComponent{
+            properties: mem::replace(&mut self.properties, HashMap::new()),
+            multi_properties: mem::replace(&mut self.multi_properties, Vec::new()),
+        }
+    }
+}
 
 impl Event {
-
     /// Creates a new Event.
     pub fn new() -> Self {
         Default::default()
@@ -26,7 +42,7 @@ impl Event {
     /// End of builder pattern.
     /// copies over everything
     pub fn done(&mut self) -> Self {
-        Event { properties: mem::replace(&mut self.properties, HashMap::new()) }
+        Event { inner: self.inner.done() }
     }
 
     ///  Defines the overall status or confirmation
@@ -38,15 +54,10 @@ impl Event {
     //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
     //    unimplemented!()
     //}
-
-
-
-
 }
 
 
 impl Todo {
-
     /// Creates a new Todo.
     pub fn new() -> Self {
         Default::default()
@@ -55,7 +66,7 @@ impl Todo {
     /// End of builder pattern.
     /// copies over everything
     pub fn done(&mut self) -> Self {
-        Todo { properties: mem::replace(&mut self.properties, HashMap::new()) }
+        Todo { inner: self.inner.done() }
     }
 
     /// Set the PERCENT-COMPLETE `Property`
@@ -93,7 +104,6 @@ impl Todo {
     //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
     //    unimplemented!()
     //}
-
 }
 
 
@@ -109,6 +119,10 @@ pub trait Component {
     /// Allows access to the inner properties HashMap.
     fn properties(&self) -> &HashMap<String,Property>;
 
+    /// Read-only access to `multi_properties`
+    fn multi_properties(&self) -> &Vec<Property> ;
+
+
     /// Writes `Component` into a `Writer` using `std::fmt`.
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
 
@@ -120,6 +134,11 @@ pub trait Component {
         for property in self.properties().values() {
             property.fmt_write(out)?;
         }
+
+        for property in self.multi_properties() {
+            property.fmt_write(out)?;
+        }
+
         writeln!(out, "END:{}", Self::component_kind())?;
         Ok(())
     }
@@ -134,9 +153,18 @@ pub trait Component {
     /// Append a given `Property`
     fn append_property(&mut self, property: Property) -> &mut Self;
 
+    /// Adds a `Property` of which there may be many
+    fn append_multi_property(&mut self, property: Property) -> &mut Self;
+
     /// Construct and append a `Property`
     fn add_property(&mut self, key: &str, val: &str) -> &mut Self {
         self.append_property( Property::new(key, val));
+        self
+    }
+
+    /// Construct and append a `Property`
+    fn add_multi_property(&mut self, key: &str, val: &str) -> &mut Self {
+        self.append_multi_property( Property::new(key, val));
         self
     }
 
@@ -221,11 +249,10 @@ pub trait Component {
         self.add_property("DESCRIPTION", desc)
     }
 
-    // TODO there can be multiple attendees, this requires to changed the underlying datastructure
-    ///// Set the description
-    //fn attendee(&mut self, desc: &str) -> &mut Self {
-    //    self.add_multi_property("ATTENDEE", desc) // multiproperties should be a multimap
-    //}
+    /// Set the description
+    fn attendee(&mut self, desc: &str) -> &mut Self {
+        self.add_multi_property("ATTENDEE", desc) // multi_properties should be a multimap
+    }
 
     /// Set the LOCATION
     /// 3.8.1.7.  Location
@@ -249,14 +276,27 @@ macro_rules! component_impl {
                 /// Might be `VEVENT`, `VTODO`, `VALARM` etc
                 fn component_kind() -> &'static str { $kind }
 
-                /// Read-only access to properties
+                /// Read-only access to `properties`
                 fn properties(&self) -> &HashMap<String, Property> {
-                    &self.properties
+                    &self.inner.properties
+                }
+
+                /// Read-only access to `multi_properties`
+                fn multi_properties(&self) -> &Vec<Property> {
+                    &self.inner.multi_properties
                 }
 
                 /// Adds a `Property`
                 fn append_property(&mut self, property: Property) -> &mut Self {
-                    self.properties.insert(property.key(), property);
+                    self.inner.properties.insert(property.key(), property);
+                    self
+                }
+
+                /// Adds a `Property` of which there may be many
+                fn append_multi_property(&mut self, property: Property) -> &mut Self {
+                    self.inner
+                        .multi_properties
+                        .push(property);
                     self
                 }
             }
