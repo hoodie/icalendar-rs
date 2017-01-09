@@ -14,6 +14,7 @@ fn main(){
         .status(TodoStatus::Completed)
         .completed(Local::now())
         .due(Local::now())
+        .due(Local::now())
         .done();
 
     println!("{}", todo.to_string());

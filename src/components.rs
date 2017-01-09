@@ -249,10 +249,11 @@ pub trait Component {
         self.add_property("DESCRIPTION", desc)
     }
 
-    /// Set the description
-    fn attendee(&mut self, desc: &str) -> &mut Self {
-        self.add_multi_property("ATTENDEE", desc) // multi_properties should be a multimap
-    }
+    ///// Set the description
+    ///// TODO `Attendee` needs to be its own type
+    //fn attendee(&mut self, desc: &str) -> &mut Self {
+    //    self.add_multi_property("ATTENDEE", desc) // multi_properties should be a multimap
+    //}
 
     /// Set the LOCATION
     /// 3.8.1.7.  Location

@@ -229,3 +229,29 @@ impl Into<Property> for TodoStatus {
     }
 }
 
+//pub enum AttendeeRole {
+//    /// CHAIR           (RFC 5545, Section 3.2.16)
+//    Chair,
+//
+//    /// REQ-PARTICIPANT (RFC 5545, Section 3.2.16)
+//    ReqParticipant,
+//
+//    /// OPT-PARTICIPANT (RFC 5545, Section 3.2.16)
+//    OptParticipant,
+//
+//    /// NON-PARTICIPANT (RFC 5545, Section 3.2.16)
+//    NonParticipant
+//}
+//
+//pub struct Attendee {
+//    cn: String,
+//    role: AttendeeRole,
+//    delegated_from: String,
+//    partstat: String,
+//    sent_by: String,
+//    dir: String,
+//}
+//
+//impl Into<Property> for Attendee {
+//}
+
