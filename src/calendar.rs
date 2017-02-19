@@ -58,6 +58,13 @@ impl Calendar {
         self.components.append(&mut other.components);
     }
 
+    /// Extends this `Calendar` with the contends of another.
+    pub fn extend<T>(&mut self, other: T)
+        where T: IntoIterator<Item=CalendarElement>
+    {
+        self.components.extend(other);
+    }
+
     /// Appends an element to the back of the `Calendar`.
     pub fn push<T:Into<CalendarElement>>(&mut self, component:T) -> &mut Self {
         self.components.push(component.into());
