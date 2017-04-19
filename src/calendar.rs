@@ -73,17 +73,15 @@ impl Calendar {
 
     /// Writes `Calendar` into a `Writer` using `std::fmt`.
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
-        writeln!(out, "BEGIN:VCALENDAR")?;
-        writeln!(out, "VERSION:2.0")?;
-        writeln!(out, "PRODID:ICALENDAR-RS")?;
-        writeln!(out, "CALSCALE:GREGORIAN")?;
-        writeln!(out, "\n")?;
+        write_crlf!(out, "BEGIN:VCALENDAR")?;
+        write_crlf!(out, "VERSION:2.0")?;
+        write_crlf!(out, "PRODID:ICALENDAR-RS")?;
+        write_crlf!(out, "CALSCALE:GREGORIAN")?;
 
         for component in &self.components {
             component.fmt_write(out)?;
-            write!(out, "\n")?;
         }
-        writeln!(out, "END:VCALENDAR")?;
+        write_crlf!(out, "END:VCALENDAR")?;
         Ok(())
     }
 
@@ -92,7 +90,7 @@ impl Calendar {
     pub fn print(&self) -> Result<(), fmt::Error> {
         let mut out = String::new();
         try!(self.fmt_write(&mut out));
-        println!("{}", out);
+        print_crlf!("{}", out);
         Ok(())
     }
 }
