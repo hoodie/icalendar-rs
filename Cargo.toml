@@ -14,12 +14,15 @@ readme = "README.md"
 
 include = [
   "Cargo.toml",
+  "README.md",
   "src/*.rs",
 ]
 
 
 [dependencies]
 chrono = "0.4"
+nom = "6.0"
+aho-corasick = "0.7.15"
 #error-chain = "*"
 #vobject = {path="../hub/vobject"}
 
@@ -28,4 +31,4 @@ features = ["v4"]
 version = "0.8"
 
 [dev-dependencies]
-pretty_assertions = "0.6"
+pretty_assertions = "0.7.1"

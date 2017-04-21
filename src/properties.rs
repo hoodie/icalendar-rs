@@ -20,7 +20,7 @@ impl Parameter {
 }
 
 //type EntryParameters = Vec<Parameter>;
-type EntryParameters = HashMap<String, Parameter>;
+pub type EntryParameters = HashMap<String, Parameter>;
 
 #[derive(Debug)]
 /// key-value pairs inside of `Component`s
@@ -291,7 +291,7 @@ mod tests {
     #[test]
     fn fold_line_short() {
         let line = String::from("This is a short line");
-        assert_eq!(line.clone(), fold_line(&line));
+        assert_eq!(line, fold_line(&line));
     }
 
     #[test]

@@ -78,6 +78,13 @@ struct InnerComponent {
     multi_properties: Vec<Property>,
 }
 
+//impl<'a> Into<InnerComponent> for parse::Component<'a> {
+//    fn into(self) -> InnerComponent {
+//        unimplemented!()
+//    }
+//}
+
+
 impl InnerComponent {
     /// End of builder pattern.
     /// copies over everything
