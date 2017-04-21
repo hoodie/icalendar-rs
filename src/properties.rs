@@ -20,7 +20,7 @@ impl Parameter {
 }
 
 //type EntryParameters = Vec<Parameter>;
-type EntryParameters = HashMap<String, Parameter>;
+pub type EntryParameters = HashMap<String, Parameter>;
 
 #[derive(Debug)]
 /// key-value pairs inside of `Component`s
