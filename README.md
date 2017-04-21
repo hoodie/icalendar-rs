@@ -1,5 +1,8 @@
 # iCalendar in Rust
 
+[![Travis](https://img.shields.io/travis/hoodie/icalendar-rs.svg)](https://travis-ci.org/hoodie/icalendar-rs/)
+[![Crates.io](https://img.shields.io/crates/d/icalendar.svg)](https://crates.io/crates/icalendar)
+
 A very WIP library to generate rfc5545 calendars.
 This is still just an early idea, there is not much implemented yet.
 I haven't even read the full [spec](http://tools.ietf.org/html/rfc5545) yet.
@@ -39,3 +42,5 @@ calendar.add(event);
 calendar.add(todo);
 calendar.add(bday);
 ```
+
+# License
