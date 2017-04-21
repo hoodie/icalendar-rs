@@ -15,6 +15,7 @@
 //! # extern crate icalendar;
 //! # use chrono::*;
 //! # use icalendar::*;
+//! # fn main() {
 //! let event = Event::new()
 //!     .summary("test event")
 //!     .description("here I have something really important to do")
@@ -44,7 +45,7 @@
 //! calendar.add(event);
 //! calendar.add(todo);
 //! calendar.add(bday);
-//!
+//! # }
 //! ```
 
 #![warn(missing_docs,
