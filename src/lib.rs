@@ -15,6 +15,7 @@
 //! # extern crate icalendar;
 //! # use chrono::*;
 //! # use icalendar::*;
+//! # fn main() {
 //! let event = Event::new()
 //!     .summary("test event")
 //!     .description("here I have something really important to do")
@@ -44,7 +45,7 @@
 //! calendar.add(event);
 //! calendar.add(todo);
 //! calendar.add(bday);
-//!
+//! # }
 //! ```
 
 #![warn(missing_docs,
@@ -59,6 +60,24 @@
 extern crate chrono;
 extern crate uuid;
 //extern crate vobject;
+
+macro_rules! print_crlf {
+    () => (print!("\r\n"));
+    ($fmt:expr) => (print!(concat!($fmt, "\r\n")));
+    ($fmt:expr, $($arg:tt)*) => (print!(concat!($fmt, "\r\n"), $($arg)*));
+}
+
+macro_rules! write_crlf {
+    ($dst:expr) => (
+        write!($dst, "\r\n")
+    );
+    ($dst:expr, $fmt:expr) => (
+        write!($dst, concat!($fmt, "\r\n"))
+    );
+    ($dst:expr, $fmt:expr, $($arg:tt)*) => (
+        write!($dst, concat!($fmt, "\r\n"), $($arg)*)
+    );
+}
 
 //pub mod period;
 mod components;

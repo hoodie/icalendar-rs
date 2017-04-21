@@ -126,10 +126,10 @@ pub trait Component {
     /// Writes `Component` into a `Writer` using `std::fmt`.
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
 
-        writeln!(out, "BEGIN:{}", Self::component_kind())?;
+        write_crlf!(out, "BEGIN:{}", Self::component_kind())?;
         let now = UTC::now().format("%Y%m%dT%H%M%S");
-        writeln!(out, "DTSTAMP:{}", now)?;
-        writeln!(out, "UID:{}", Uuid::new_v4())?;
+        write_crlf!(out, "DTSTAMP:{}", now)?;
+        write_crlf!(out, "UID:{}", Uuid::new_v4())?;
 
         for property in self.properties().values() {
             property.fmt_write(out)?;
@@ -139,7 +139,7 @@ pub trait Component {
             property.fmt_write(out)?;
         }
 
-        writeln!(out, "END:{}", Self::component_kind())?;
+        write_crlf!(out, "END:{}", Self::component_kind())?;
         Ok(())
     }
 
@@ -222,7 +222,7 @@ pub trait Component {
         self
     }
 
-    ///  Defindes the relative priority.
+    ///  Defines the relative priority.
     ///
     ///  Ranges from 0 to 10, larger values will be truncated
     fn priority(&mut self, priority:u32) -> &mut Self {
@@ -235,7 +235,7 @@ pub trait Component {
     fn print(&self) -> Result<(), fmt::Error> {
         let mut out = String::new();
         try!(self.fmt_write(&mut out));
-        println!("{}", out);
+        print_crlf!("{}", out);
         Ok(())
     }
 
