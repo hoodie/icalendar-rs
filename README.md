@@ -1,7 +1,10 @@
 # iCalendar in Rust
 
 [![Travis](https://img.shields.io/travis/hoodie/icalendar-rs.svg)](https://travis-ci.org/hoodie/icalendar-rs/)
+[![license](https://img.shields.io/crates/l/icalendar.svg)](https://crates.io/crates/icalendar/)
 [![Crates.io](https://img.shields.io/crates/d/icalendar.svg)](https://crates.io/crates/icalendar)
+[![version](https://img.shields.io/crates/v/icalendar.svg)](https://crates.io/crates/icalendar/)
+[![documentation](https://docs.rs/icalendar/badge.svg)](https://docs.rs/icalendar/)
 
 A very WIP library to generate rfc5545 calendars.
 This is still just an early idea, there is not much implemented yet.
