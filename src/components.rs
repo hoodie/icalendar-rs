@@ -127,7 +127,7 @@ pub trait Component {
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
 
         write_crlf!(out, "BEGIN:{}", Self::component_kind())?;
-        let now = UTC::now().format("%Y%m%dT%H%M%S");
+        let now = Local::now().format("%Y%m%dT%H%M%S");
         write_crlf!(out, "DTSTAMP:{}", now)?;
         write_crlf!(out, "UID:{}", Uuid::new_v4())?;
 
