@@ -127,7 +127,7 @@ pub trait Component {
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
 
         write_crlf!(out, "BEGIN:{}", Self::component_kind())?;
-        let now = Local::now().format("%Y%m%dT%H%M%S");
+        let now = Utc::now().format("%Y%m%dT%H%M%SZ");
         write_crlf!(out, "DTSTAMP:{}", now)?;
         write_crlf!(out, "UID:{}", Uuid::new_v4())?;
 
@@ -171,19 +171,21 @@ pub trait Component {
 
     /// Set the DTSTART `Property`
     fn starts<TZ:TimeZone>(&mut self, dt: DateTime<TZ>) -> &mut Self
-        where TZ::Offset: fmt::Display
     {
+        let dt_utc = dt.with_timezone(&Utc);
+
         // DTSTART
-        self.add_property("DTSTART", dt.format("%Y%m%dT%H%M%S").to_string().as_ref());
+        self.add_property("DTSTART", dt_utc.format("%Y%m%dT%H%M%SZ").to_string().as_ref());
         self
     }
 
     /// Set the DTEND `Property`
     fn ends<TZ:TimeZone>(&mut self, dt: DateTime<TZ>) -> &mut Self
-        where TZ::Offset: fmt::Display
     {
+        let dt_utc = dt.with_timezone(&Utc);
+
         // TODO don't manually use format but the rfc method, but test timezone behaviour
-        self.add_property("DTEND", dt.format("%Y%m%dT%H%M%S").to_string().as_ref());
+        self.add_property("DTEND", dt_utc.format("%Y%m%dT%H%M%SZ").to_string().as_ref());
         self
     }
 
