@@ -17,6 +17,7 @@ fn main() {
                   .add_parameter("IMPORTANCE", "very")
                   .add_parameter("DUE", "tomorrow")
                   .done())
+        .uid("my.own.id")
         .done();
 
     let bday = Event::new()
