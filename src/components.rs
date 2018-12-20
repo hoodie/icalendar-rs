@@ -130,17 +130,11 @@ pub trait Component {
         let now = Local::now().format("%Y%m%dT%H%M%S");
         write_crlf!(out, "DTSTAMP:{}", now)?;
 
-        let mut has_uid = false;
-
         for property in self.properties().values() {
             property.fmt_write(out)?;
-
-            if property.key() == "UID" {
-                has_uid = true;
-            }
         }
 
-        if !has_uid {
+        if !self.properties().keys().any(|key| key == "UID") {
             write_crlf!(out, "UID:{}", Uuid::new_v4())?;
         }
 
