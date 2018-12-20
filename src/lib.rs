@@ -57,10 +57,6 @@
         missing_debug_implementations
         )]
 
-extern crate chrono;
-extern crate uuid;
-//extern crate vobject;
-
 macro_rules! print_crlf {
     () => (print!("\r\n"));
     ($fmt:expr) => (print!(concat!($fmt, "\r\n")));
@@ -85,11 +81,10 @@ mod properties;
 mod calendar;
 
 //pub mod repeats;
-pub use properties::{Property, Parameter, Class, ValueType};
-pub use properties::{TodoStatus, EventStatus};
-//pub use components::{event, todo};
-pub use components::{Event, Todo, Component};
-pub use calendar::Calendar;
+pub use crate::properties::{Property, Parameter, Class, ValueType};
+pub use crate::properties::{TodoStatus, EventStatus};
+pub use crate::components::{Event, Todo, Component};
+pub use crate::calendar::Calendar;
 
 // TODO Calendar TimeZone VTIMEZONE STANDARD DAYLIGHT (see thunderbird exports)
 

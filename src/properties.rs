@@ -1,7 +1,6 @@
 use std::fmt::{self, Write};
 use std::mem;
 use std::collections::HashMap;
-use std::convert::Into;
 
 #[derive(Debug)]
 /// key-value pairs inside of `Property`s

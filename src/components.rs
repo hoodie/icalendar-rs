@@ -6,7 +6,7 @@ use std::fmt;
 use std::mem;
 use std::collections::HashMap;
 
-use properties::*;
+use crate::properties::*;
 
 /// VEVENT [(RFC 5545, Section 3.6.1 )](https://tools.ietf.org/html/rfc5545#section-3.6.1)
 #[derive(Debug, Default)]
