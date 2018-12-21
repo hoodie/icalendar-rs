@@ -1,7 +1,6 @@
 use std::fmt::{self, Write};
 use std::mem;
 use std::collections::HashMap;
-use std::convert::Into;
 
 #[derive(Debug)]
 /// key-value pairs inside of `Property`s
@@ -75,12 +74,12 @@ impl Property {
         // A nice starting capacity for the majority of content lines
         let mut line = String::with_capacity(150);
 
-        try!(write!(line, "{}", self.key));
+        write!(line, "{}", self.key)?;
         for &Parameter { ref key, ref value } in self.parameters.values() {
-            try!(write!(line, ";{}={}", key, value));
+            write!(line, ";{}={}", key, value)?;
         }
-        try!(write!(line, ":{}", self.value));
-        try!(write_crlf!(out, "{}", fold_line(line)));
+        write!(line, ":{}", self.value)?;
+        write_crlf!(out, "{}", fold_line(&line))?;
         Ok(())
     }
 }
@@ -261,7 +260,7 @@ impl Into<Property> for TodoStatus {
 
 
 // Fold a content line as described in RFC 5545, Section 3.1
-fn fold_line(line: String) -> String {
+fn fold_line(line: &str) -> String {
     let limit = 75;
     let len = line.len();
     let mut ret = String::with_capacity(len + (len / limit * 3));
@@ -270,7 +269,7 @@ fn fold_line(line: String) -> String {
     let mut pos = 0;
     let mut next_pos = limit;
     while bytes_remaining > limit {
-        while line.is_char_boundary(next_pos) == false {
+        while !line.is_char_boundary(next_pos) {
             next_pos -= 1;
         }
         ret.push_str(&line[pos..next_pos]);
@@ -293,7 +292,7 @@ mod tests {
     #[test]
     fn fold_line_short() {
         let line = String::from("This is a short line");
-        assert_eq!(line.clone(), fold_line(line));
+        assert_eq!(line.clone(), fold_line(&line));
     }
 
     #[test]
@@ -302,6 +301,6 @@ mod tests {
         of a UTF-8 character. 老虎.");
         let expected = String::from("Content lines shouldn't be folded in the middle \
         of a UTF-8 character. 老\r\n 虎.");
-        assert_eq!(expected, fold_line(line));
+        assert_eq!(expected, fold_line(&line));
     }
 }

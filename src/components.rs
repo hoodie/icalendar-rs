@@ -6,7 +6,7 @@ use std::fmt;
 use std::mem;
 use std::collections::HashMap;
 
-use properties::*;
+use crate::properties::*;
 
 /// VEVENT [(RFC 5545, Section 3.6.1 )](https://tools.ietf.org/html/rfc5545#section-3.6.1)
 #[derive(Debug, Default)]
@@ -79,7 +79,7 @@ impl Todo {
 
 
     /// Set the COMPLETED `Property`, date only
-    pub fn due<TZ:TimeZone>(&mut self, dt: DateTime<TZ>) -> &mut Self
+    pub fn due<TZ:TimeZone>(&mut self, dt: &DateTime<TZ>) -> &mut Self
         where TZ::Offset: fmt::Display
     {
         self.add_property("DUE", dt.format("%Y%m%dT%H%M%S").to_string().as_ref());
@@ -87,7 +87,7 @@ impl Todo {
     }
 
     /// Set the COMPLETED `Property`, date only
-    pub fn completed<TZ:TimeZone>(&mut self, dt: DateTime<TZ>) -> &mut Self
+    pub fn completed<TZ:TimeZone>(&mut self, dt: &DateTime<TZ>) -> &mut Self
         where TZ::Offset: fmt::Display
     {
         self.add_property("COMPLETED", dt.format("%Y%m%dT%H%M%S").to_string().as_ref());
@@ -237,7 +237,7 @@ pub trait Component {
     /// Prints to stdout
     fn print(&self) -> Result<(), fmt::Error> {
         let mut out = String::new();
-        try!(self.fmt_write(&mut out));
+        self.fmt_write(&mut out)?;
         print_crlf!("{}", out);
         Ok(())
     }
