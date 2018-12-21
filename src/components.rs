@@ -129,10 +129,13 @@ pub trait Component {
         write_crlf!(out, "BEGIN:{}", Self::component_kind())?;
         let now = Local::now().format("%Y%m%dT%H%M%S");
         write_crlf!(out, "DTSTAMP:{}", now)?;
-        write_crlf!(out, "UID:{}", Uuid::new_v4())?;
 
         for property in self.properties().values() {
             property.fmt_write(out)?;
+        }
+
+        if !self.properties().keys().any(|key| key == "UID") {
+            write_crlf!(out, "UID:{}", Uuid::new_v4())?;
         }
 
         for property in self.multi_properties() {
@@ -259,6 +262,12 @@ pub trait Component {
     /// 3.8.1.7.  Location
     fn location(&mut self, location: &str) -> &mut Self {
         self.add_property("LOCATION", location);
+        self
+    }
+
+    /// Set the UID
+    fn uid(&mut self, uid: &str) -> &mut Self {
+        self.add_property("UID", uid);
         self
     }
 
