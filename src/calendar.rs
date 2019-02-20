@@ -59,10 +59,11 @@ impl Calendar {
     }
 
     /// Extends this `Calendar` with the contends of another.
-    pub fn extend<T>(&mut self, other: T)
-        where T: IntoIterator<Item=CalendarElement>
+    pub fn extend<T, U>(&mut self, other: T)
+        where T: IntoIterator<Item=U>,
+        U: Into<CalendarElement>
     {
-        self.components.extend(other);
+        self.components.extend(other.into_iter().map(|x| x.into()));
     }
 
     /// Appends an element to the back of the `Calendar`.
@@ -124,6 +125,17 @@ mod tests {
             CalendarElement::Event(Event::new()),
         ];
         calendar.extend(components);
+        assert_eq!(calendar.components.len(), 2);
+    }
+
+    #[test]
+    fn calendar_extend_events() {
+        let mut calendar = Calendar::new();
+        let events = vec![
+            Event::new(),
+            Event::new(),
+        ];
+        calendar.extend(events);
         assert_eq!(calendar.components.len(), 2);
     }
 }
