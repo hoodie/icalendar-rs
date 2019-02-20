@@ -111,3 +111,19 @@ impl Deref for Calendar {
         self.components.deref()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn calendar_extend_components() {
+        let mut calendar = Calendar::new();
+        let components = vec![
+            CalendarElement::Event(Event::new()),
+            CalendarElement::Event(Event::new()),
+        ];
+        calendar.extend(components);
+        assert_eq!(calendar.components.len(), 2);
+    }
+}
