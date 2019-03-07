@@ -4,7 +4,7 @@ use uuid::Uuid;
 // use std::io;
 use std::fmt;
 use std::mem;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use crate::properties::*;
 
@@ -18,7 +18,7 @@ pub struct Todo { inner: InnerComponent }
 
 #[derive(Debug, Default)]
 struct InnerComponent{
-    properties: HashMap<String,Property>,
+    properties: BTreeMap<String, Property>,
     multi_properties: Vec<Property>
 }
 
@@ -27,7 +27,7 @@ impl InnerComponent {
     /// copies over everything
     pub fn done(&mut self) -> Self {
         InnerComponent{
-            properties: mem::replace(&mut self.properties, HashMap::new()),
+            properties: mem::replace(&mut self.properties, BTreeMap::new()),
             multi_properties: mem::replace(&mut self.multi_properties, Vec::new()),
         }
     }
@@ -116,8 +116,8 @@ pub trait Component {
     /// These are used in the `BEGIN` and `END` line of the component.
     fn component_kind() -> &'static str;
 
-    /// Allows access to the inner properties HashMap.
-    fn properties(&self) -> &HashMap<String,Property>;
+    /// Allows access to the inner properties map.
+    fn properties(&self) -> &BTreeMap<String,Property>;
 
     /// Read-only access to `multi_properties`
     fn multi_properties(&self) -> &Vec<Property> ;
@@ -290,7 +290,7 @@ macro_rules! component_impl {
                 fn component_kind() -> &'static str { $kind }
 
                 /// Read-only access to `properties`
-                fn properties(&self) -> &HashMap<String, Property> {
+                fn properties(&self) -> &BTreeMap<String, Property> {
                     &self.inner.properties
                 }
 
