@@ -127,14 +127,17 @@ pub trait Component {
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
 
         write_crlf!(out, "BEGIN:{}", Self::component_kind())?;
-        let now = Local::now().format("%Y%m%dT%H%M%S");
-        write_crlf!(out, "DTSTAMP:{}", now)?;
+
+        if !self.properties().contains_key("DTSTAMP") {
+            let now = Local::now().format("%Y%m%dT%H%M%S");
+            write_crlf!(out, "DTSTAMP:{}", now)?;
+        }
 
         for property in self.properties().values() {
             property.fmt_write(out)?;
         }
 
-        if !self.properties().keys().any(|key| key == "UID") {
+        if !self.properties().contains_key("UID") {
             write_crlf!(out, "UID:{}", Uuid::new_v4())?;
         }
 
