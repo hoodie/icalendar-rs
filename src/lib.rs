@@ -47,6 +47,18 @@
 //! calendar.add(bday);
 //! # }
 //! ```
+//!
+//! ## Breaking API Changes in version 0.7.0
+//!
+//! - [Todo::due] and [Todo::completed] now take their date-time argument by value rather than by
+//!   reference
+//! - [Todo::completed] now requires its [chrono::DateTime] argument to have exactly [chrono::Utc]
+//!   specified as its time zone as mandated by the RFC.
+//! - [Component::starts], [Component::ends] and [Todo::due] now take newly introduced
+//!   [CalendarDateTime] (through `Into<CalendarDateTime>` indirection). This allows callers to
+//!   define time zone handling. Conversions from [`chrono::NaiveDateTime`] and
+//!   [`chrono::DateTime<Utc>`](chrono::DateTime) are provided for ergonomics, the latter also restoring API
+//!   compatibility in case of UTC date-times.
 
 #![warn(missing_docs,
         missing_copy_implementations,
@@ -83,7 +95,7 @@ mod calendar;
 //pub mod repeats;
 pub use crate::properties::{Property, Parameter, Class, ValueType};
 pub use crate::properties::{TodoStatus, EventStatus};
-pub use crate::components::{Event, Todo, Component};
+pub use crate::components::{CalendarDateTime, Event, Todo, Component};
 pub use crate::calendar::Calendar;
 
 // TODO Calendar TimeZone VTIMEZONE STANDARD DAYLIGHT (see thunderbird exports)

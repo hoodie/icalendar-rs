@@ -10,9 +10,9 @@ CALSCALE:GREGORIAN\r
 BEGIN:VEVENT\r
 CLASS:CONFIDENTIAL\r
 DESCRIPTION:Description\r
-DTEND:20140709T091011\r
+DTEND:20140709T091011Z\r
 DTSTAMP:20190307T181159\r
-DTSTART:20140708T091011\r
+DTSTART:20140708T071011Z\r
 LOCATION:Somewhere\r
 PRIORITY:10\r
 STATUS:TENTATIVE\r
@@ -20,7 +20,7 @@ SUMMARY:summary\r
 UID:euid\r
 END:VEVENT\r
 BEGIN:VTODO\r
-COMPLETED:20140709T091011\r
+COMPLETED:20140709T091011Z\r
 DTSTAMP:20190307T181159\r
 DUE:20140708T091011\r
 PERCENT-COMPLETE:95\r
@@ -39,7 +39,7 @@ fn test_calendar_to_string() {
     let utc_date = Utc.ymd(2014, 7, 9).and_hms(9, 10, 11);
     let event = Event::new()
         .status(EventStatus::Tentative)
-        .starts(cest_date)
+        .starts(cest_date.with_timezone(&Utc))
         .ends(utc_date)
         .priority(11) // converted to 10
         .summary("summary")
@@ -52,8 +52,8 @@ fn test_calendar_to_string() {
     calendar.push(event);
     let todo = Todo::new()
         .percent_complete(95)
-        .due(&cest_date)
-        .completed(&utc_date)
+        .due(cest_date.naive_local())
+        .completed(utc_date)
         .summary("A Todo")
         .uid("todouid")
         .add_property("DTSTAMP", "20190307T181159")
