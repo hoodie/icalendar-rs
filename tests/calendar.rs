@@ -1,5 +1,5 @@
 use chrono::prelude::*;
-use icalendar::{Calendar, Class, Component, Event, EventStatus};
+use icalendar::{Calendar, Class, Component, Event, EventStatus, Todo};
 
 const EXPECTED_CAL_CONTENT: &str = "\
 BEGIN:VCALENDAR\r
@@ -18,16 +18,28 @@ STATUS:TENTATIVE\r
 SUMMARY:summary\r
 UID:euid\r
 END:VEVENT\r
+BEGIN:VTODO\r
+COMPLETED:20140709T091011\r
+DTSTAMP:20190307T181159\r
+DUE:20140708T091011\r
+PERCENT-COMPLETE:95\r
+SUMMARY:A Todo\r
+UID:todouid\r
+END:VTODO\r
 END:VCALENDAR\r
 ";
 
 #[test]
 fn test_calendar_to_string() {
     let mut calendar = Calendar::new();
+    let cest_date = FixedOffset::east(2 * 3600)
+        .ymd(2014, 7, 8)
+        .and_hms(9, 10, 11);
+    let utc_date = Utc.ymd(2014, 7, 9).and_hms(9, 10, 11);
     let event = Event::new()
         .status(EventStatus::Tentative)
-        .starts(Local.ymd(2014, 7, 8).and_hms(9, 10, 11))
-        .ends(Local.ymd(2014, 7, 9).and_hms(9, 10, 11))
+        .starts(cest_date)
+        .ends(utc_date)
         .priority(11) // converted to 10
         .summary("summary")
         .description("Description")
@@ -37,5 +49,14 @@ fn test_calendar_to_string() {
         .add_property("DTSTAMP", "20190307T181159")
         .done();
     calendar.push(event);
+    let todo = Todo::new()
+        .percent_complete(95)
+        .due(&cest_date)
+        .completed(&utc_date)
+        .summary("A Todo")
+        .uid("todouid")
+        .add_property("DTSTAMP", "20190307T181159")
+        .done();
+    calendar.push(todo);
     assert_eq!(calendar.to_string(), EXPECTED_CAL_CONTENT);
 }
