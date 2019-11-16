@@ -1,5 +1,6 @@
 use chrono::prelude::*;
 use icalendar::{Calendar, Class, Component, Event, EventStatus, Todo};
+use pretty_assertions::assert_eq;
 
 const EXPECTED_CAL_CONTENT: &str = "\
 BEGIN:VCALENDAR\r
