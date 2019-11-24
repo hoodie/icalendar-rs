@@ -8,6 +8,52 @@ use std::collections::BTreeMap;
 
 use crate::properties::*;
 
+/// Representation of various forms of `DATE-TIME` per
+/// [RFC 5545, Section 3.3.5](https://tools.ietf.org/html/rfc5545#section-3.3.5)
+///
+/// Conversions from [chrono] types are provided in form of [From] implementations, see
+/// documentation of individual variants.
+///
+/// In addition to readily implemented `FORM #1` and `FORM #2`, the RFC also specifies
+/// `FORM #3: DATE WITH LOCAL TIME AND TIME ZONE REFERENCE`. This variant is not yet implemented.
+/// Adding it will require adding support for `VTIMEZONE` and referencing it using `TZID`.
+#[derive(Clone, Copy, Debug)]
+pub enum CalendarDateTime {
+    /// `FORM #1: DATE WITH LOCAL TIME`: floating, follows current time-zone of the attendee.
+    ///
+    /// Conversion from [`chrono::NaiveDateTime`] results in this variant.
+    Floating(NaiveDateTime),
+    /// `FORM #2: DATE WITH UTC TIME`: rendered with Z suffix character.
+    ///
+    /// Conversion from [`chrono::DateTime<Utc>`](DateTime) results in this variant. Use
+    /// `date_time.with_timezone(&Utc)` to convert `date_time` from arbitrary time zone to UTC.
+    Utc(DateTime<Utc>),
+}
+
+impl fmt::Display for CalendarDateTime {
+    /// Format date-time in RFC 5545 compliant manner.
+    fn fmt(self: &Self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        match self {
+            CalendarDateTime::Floating(naive_dt) => naive_dt.format("%Y%m%dT%H%M%S").fmt(f),
+            CalendarDateTime::Utc(utc_dt) => utc_dt.format("%Y%m%dT%H%M%SZ").fmt(f),
+        }
+    }
+}
+
+/// Converts from time zone-aware UTC date-time to [CalendarDateTime::Utc].
+impl From<DateTime<Utc>> for CalendarDateTime {
+    fn from(dt: DateTime<Utc>) -> Self {
+        Self::Utc(dt)
+    }
+}
+
+/// Converts from time zone-less date-time to [CalendarDateTime::Floating].
+impl From<NaiveDateTime> for CalendarDateTime {
+    fn from(dt: NaiveDateTime) -> Self {
+        Self::Floating(dt)
+    }
+}
+
 /// VEVENT [(RFC 5545, Section 3.6.1 )](https://tools.ietf.org/html/rfc5545#section-3.6.1)
 #[derive(Debug, Default)]
 pub struct Event { inner: InnerComponent }
@@ -77,20 +123,21 @@ impl Todo {
         self
     }
 
-
-    /// Set the COMPLETED `Property`, date only
-    pub fn due<TZ:TimeZone>(&mut self, dt: &DateTime<TZ>) -> &mut Self
-        where TZ::Offset: fmt::Display
-    {
-        self.add_property("DUE", dt.format("%Y%m%dT%H%M%S").to_string().as_ref());
+    /// Set the DUE `Property`
+    ///
+    /// See [CalendarDateTime] for info how are different [chrono] types converted automatically.
+    pub fn due<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
+        let calendar_dt: CalendarDateTime = dt.into();
+        self.add_property("DUE", &calendar_dt.to_string());
         self
     }
 
-    /// Set the COMPLETED `Property`, date only
-    pub fn completed<TZ:TimeZone>(&mut self, dt: &DateTime<TZ>) -> &mut Self
-        where TZ::Offset: fmt::Display
-    {
-        self.add_property("COMPLETED", dt.format("%Y%m%dT%H%M%S").to_string().as_ref());
+    /// Set the COMPLETED `Property`
+    ///
+    /// Per [RFC 5545, Section 3.8.2.1](https://tools.ietf.org/html/rfc5545#section-3.8.2.1), this
+    /// must be a date-time in UTC format.
+    pub fn completed(&mut self, dt: DateTime<Utc>) -> &mut Self {
+        self.add_property("COMPLETED", &CalendarDateTime::Utc(dt).to_string());
         self
     }
 
@@ -129,7 +176,7 @@ pub trait Component {
         write_crlf!(out, "BEGIN:{}", Self::component_kind())?;
 
         if !self.properties().contains_key("DTSTAMP") {
-            let now = Local::now().format("%Y%m%dT%H%M%S");
+            let now = CalendarDateTime::Utc(Utc::now());
             write_crlf!(out, "DTSTAMP:{}", now)?;
         }
 
@@ -174,22 +221,21 @@ pub trait Component {
         self
     }
 
-
     /// Set the DTSTART `Property`
-    fn starts<TZ:TimeZone>(&mut self, dt: DateTime<TZ>) -> &mut Self
-        where TZ::Offset: fmt::Display
-    {
-        // DTSTART
-        self.add_property("DTSTART", dt.format("%Y%m%dT%H%M%S").to_string().as_ref());
+    ///
+    /// See [CalendarDateTime] for info how are different [chrono] types converted automatically.
+    fn starts<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
+        let calendar_dt = dt.into();
+        self.add_property("DTSTART", &calendar_dt.to_string());
         self
     }
 
     /// Set the DTEND `Property`
-    fn ends<TZ:TimeZone>(&mut self, dt: DateTime<TZ>) -> &mut Self
-        where TZ::Offset: fmt::Display
-    {
-        // TODO don't manually use format but the rfc method, but test timezone behaviour
-        self.add_property("DTEND", dt.format("%Y%m%dT%H%M%S").to_string().as_ref());
+    ///
+    /// See [CalendarDateTime] for info how are different [chrono] types converted automatically.
+    fn ends<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
+        let calendar_dt = dt.into();
+        self.add_property("DTEND", &calendar_dt.to_string());
         self
     }
 

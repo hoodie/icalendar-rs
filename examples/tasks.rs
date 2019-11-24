@@ -4,14 +4,13 @@ use chrono::*;
 fn main(){
 
     let todo = Todo::new()
-        .starts(Local::now())
-        .ends(Local::now())
+        .starts(Local::now().naive_local())
+        .ends(Local::now().naive_local())
         .priority(12)
         .percent_complete(28)
         .status(TodoStatus::Completed)
-        .completed(&Local::now())
-        .due(&Local::now())
-        .due(&Local::now())
+        .completed(Utc::now())
+        .due(Local::now().with_timezone(&Utc))
         .done();
 
     println!("{}", todo.to_string());
