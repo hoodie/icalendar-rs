@@ -8,7 +8,7 @@
 [![version](https://img.shields.io/crates/v/icalendar.svg)](https://crates.io/crates/icalendar/)
 [![documentation](https://docs.rs/icalendar/badge.svg)](https://docs.rs/icalendar/)
 ![maintenance](https://img.shields.io/maintenance/yes/2021)
-[![contributors](https://img.shields.io/github/contributors/hoodie/notify-rust)](https://github.com/hoodie/notify-rust/graphs/contributors)
+[![contributors](https://img.shields.io/github/contributors/hoodie/icalendar-rs)](https://github.com/hoodie/icalendar-rs/graphs/contributors)
 </div>
 
 A very simple library to generate [`rfc5545`](http://tools.ietf.org/html/rfc5545) calendars.
