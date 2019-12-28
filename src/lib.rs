@@ -60,14 +60,17 @@
 //!   [`chrono::DateTime<Utc>`](chrono::DateTime) are provided for ergonomics, the latter also restoring API
 //!   compatibility in case of UTC date-times.
 
-#![warn(missing_docs,
-        missing_copy_implementations,
-        trivial_casts, trivial_numeric_casts,
-        unsafe_code,
-        unstable_features,
-        unused_import_braces, unused_qualifications,
-        missing_debug_implementations
-        )]
+#![warn(
+    missing_docs,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unsafe_code,
+    unstable_features,
+    unused_import_braces,
+    unused_qualifications,
+    missing_debug_implementations
+)]
 
 macro_rules! print_crlf {
     () => (print!("\r\n"));
@@ -88,15 +91,14 @@ macro_rules! write_crlf {
 }
 
 //pub mod period;
+mod calendar;
 mod components;
 mod properties;
-mod calendar;
 
 //pub mod repeats;
-pub use crate::properties::{Property, Parameter, Class, ValueType};
-pub use crate::properties::{TodoStatus, EventStatus};
-pub use crate::components::{CalendarDateTime, Event, Todo, Component};
 pub use crate::calendar::Calendar;
+pub use crate::components::{CalendarDateTime, Component, Event, Todo};
+pub use crate::properties::{Class, Parameter, Property, ValueType};
+pub use crate::properties::{EventStatus, TodoStatus};
 
 // TODO Calendar TimeZone VTIMEZONE STANDARD DAYLIGHT (see thunderbird exports)
-

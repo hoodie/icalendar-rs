@@ -1,8 +1,7 @@
-use icalendar::*;
 use chrono::*;
+use icalendar::*;
 
-fn main(){
-
+fn main() {
     let todo = Todo::new()
         .starts(Local::now().naive_local())
         .ends(Local::now().naive_local())

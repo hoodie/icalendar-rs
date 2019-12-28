@@ -1,6 +1,6 @@
+use std::collections::HashMap;
 use std::fmt::{self, Write};
 use std::mem;
-use std::collections::HashMap;
 
 #[derive(Debug)]
 /// key-value pairs inside of `Property`s
@@ -10,7 +10,6 @@ pub struct Parameter {
 }
 
 impl Parameter {
-
     /// Creates a new `Parameter`
     pub fn new(key: &str, val: &str) -> Self {
         Parameter {
@@ -21,7 +20,7 @@ impl Parameter {
 }
 
 //type EntryParameters = Vec<Parameter>;
-type EntryParameters = HashMap<String,Parameter>;
+type EntryParameters = HashMap<String, Parameter>;
 
 #[derive(Debug)]
 /// key-value pairs inside of `Component`s
@@ -32,7 +31,6 @@ pub struct Property {
 }
 
 impl Property {
-
     /// Guess what this does :D
     pub fn new(key: &str, val: &str) -> Self {
         Property {
@@ -48,7 +46,7 @@ impl Property {
     }
 
     /// Appends a new parameter.
-    pub fn append_parameter<I:Into<Parameter>>(&mut self, into_parameter: I) -> &mut Self {
+    pub fn append_parameter<I: Into<Parameter>>(&mut self, into_parameter: I) -> &mut Self {
         let parameter = into_parameter.into();
         self.parameters.insert(parameter.key.to_owned(), parameter);
         self
@@ -85,14 +83,14 @@ impl Property {
 }
 
 /// Defines: `Public`, `Private`, `Confidential`
-#[derive(Copy,Clone,Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum Class {
     /// Public
     Public,
     /// Private
     Private,
     /// Confidential
-    Confidential
+    Confidential,
 }
 
 impl Into<Property> for Class {
@@ -104,14 +102,14 @@ impl Into<Property> for Class {
                 Class::Private => "PRIVATE",
                 Class::Confidential => "CONFIDENTIAL",
             }),
-            parameters: HashMap::new()
+            parameters: HashMap::new(),
         }
     }
 }
 
 /// see 8.3.4. [Value Data Types Registry](https://tools.ietf.org/html/rfc5545#section-8.3.4)
-#[derive(Copy,Clone,Debug)]
-pub enum ValueType{
+#[derive(Copy, Clone, Debug)]
+pub enum ValueType {
     /// Binary
     Binary,
     /// Boolean
@@ -142,33 +140,31 @@ pub enum ValueType{
     UtcOffset,
 }
 
-
 impl Into<Parameter> for ValueType {
     fn into(self) -> Parameter {
         Parameter {
             key: String::from("VALUE"),
             value: String::from(match self {
-                ValueType::Binary     => "BINARY",
-                ValueType::Boolean    => "BOOLEAN",
+                ValueType::Binary => "BINARY",
+                ValueType::Boolean => "BOOLEAN",
                 ValueType::CalAddress => "CAL-ADDRESS",
-                ValueType::Date       => "DATE",
-                ValueType::DateTime   => "DATE-TIME",
-                ValueType::Duration   => "DURATION",
-                ValueType::Float      => "FLOAT",
-                ValueType::Integer    => "INTEGER",
-                ValueType::Period     => "PERIOD",
-                ValueType::Recur      => "RECUR",
-                ValueType::Text       => "TEXT",
-                ValueType::Time       => "TIME",
-                ValueType::Uri        => "URI",
-                ValueType::UtcOffset  => "UTC-OFFSET"
-            })
+                ValueType::Date => "DATE",
+                ValueType::DateTime => "DATE-TIME",
+                ValueType::Duration => "DURATION",
+                ValueType::Float => "FLOAT",
+                ValueType::Integer => "INTEGER",
+                ValueType::Period => "PERIOD",
+                ValueType::Recur => "RECUR",
+                ValueType::Text => "TEXT",
+                ValueType::Time => "TIME",
+                ValueType::Uri => "URI",
+                ValueType::UtcOffset => "UTC-OFFSET",
+            }),
         }
     }
 }
 
-
-#[derive(Copy,Clone,Debug)]
+#[derive(Copy, Clone, Debug)]
 /// Encodes the status of an `Event`
 pub enum EventStatus {
     /// Indicates event is tentative.
@@ -180,7 +176,7 @@ pub enum EventStatus {
     //Custom(&str)
 }
 
-#[derive(Copy,Clone,Debug)]
+#[derive(Copy, Clone, Debug)]
 /// Encodes the status of a `Todo`
 pub enum TodoStatus {
     /// Indicates to-do needs action.
@@ -201,7 +197,6 @@ pub enum TodoStatus {
 //    Custom(&str)
 //}
 
-
 impl Into<Property> for EventStatus {
     fn into(self) -> Property {
         Property {
@@ -211,7 +206,7 @@ impl Into<Property> for EventStatus {
                 EventStatus::Confirmed => "CONFIRMED",
                 EventStatus::Cancelled => "CANCELLED",
             }),
-            parameters: HashMap::new()
+            parameters: HashMap::new(),
         }
     }
 }
@@ -222,12 +217,12 @@ impl Into<Property> for TodoStatus {
             key: String::from("STATUS"),
             value: String::from(match self {
                 TodoStatus::NeedsAction => "NEEDS-ACTION",
-                TodoStatus::Completed   => "COMPLETED",
-                TodoStatus::InProcess   => "IN-PROCESS",
-                TodoStatus::Cancelled   => "CANCELLED",
+                TodoStatus::Completed => "COMPLETED",
+                TodoStatus::InProcess => "IN-PROCESS",
+                TodoStatus::Cancelled => "CANCELLED",
                 //TodoStatus::Custom(s)   => "CU",
             }),
-            parameters: HashMap::new()
+            parameters: HashMap::new(),
         }
     }
 }
@@ -258,7 +253,6 @@ impl Into<Property> for TodoStatus {
 //impl Into<Property> for Attendee {
 //}
 
-
 // Fold a content line as described in RFC 5545, Section 3.1
 fn fold_line(line: &str) -> String {
     let limit = 75;
@@ -286,8 +280,8 @@ fn fold_line(line: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::string::String;
     use super::*;
+    use std::string::String;
 
     #[test]
     fn fold_line_short() {
@@ -297,10 +291,14 @@ mod tests {
 
     #[test]
     fn fold_line_folds_on_char_boundary() {
-        let line = String::from("Content lines shouldn't be folded in the middle \
-        of a UTF-8 character. 老虎.");
-        let expected = String::from("Content lines shouldn't be folded in the middle \
-        of a UTF-8 character. 老\r\n 虎.");
+        let line = String::from(
+            "Content lines shouldn't be folded in the middle \
+             of a UTF-8 character. 老虎.",
+        );
+        let expected = String::from(
+            "Content lines shouldn't be folded in the middle \
+             of a UTF-8 character. 老\r\n 虎.",
+        );
         assert_eq!(expected, fold_line(&line));
     }
 }

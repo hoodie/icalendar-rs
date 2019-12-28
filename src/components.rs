@@ -2,9 +2,9 @@ use chrono::*;
 use uuid::Uuid;
 
 // use std::io;
+use std::collections::BTreeMap;
 use std::fmt;
 use std::mem;
-use std::collections::BTreeMap;
 
 use crate::properties::*;
 
@@ -56,23 +56,27 @@ impl From<NaiveDateTime> for CalendarDateTime {
 
 /// VEVENT [(RFC 5545, Section 3.6.1 )](https://tools.ietf.org/html/rfc5545#section-3.6.1)
 #[derive(Debug, Default)]
-pub struct Event { inner: InnerComponent }
+pub struct Event {
+    inner: InnerComponent,
+}
 
 /// VTODO  [(RFC 5545, Section 3.6.2 )](https://tools.ietf.org/html/rfc5545#section-3.6.2)
 #[derive(Debug, Default)]
-pub struct Todo { inner: InnerComponent }
+pub struct Todo {
+    inner: InnerComponent,
+}
 
 #[derive(Debug, Default)]
-struct InnerComponent{
+struct InnerComponent {
     properties: BTreeMap<String, Property>,
-    multi_properties: Vec<Property>
+    multi_properties: Vec<Property>,
 }
 
 impl InnerComponent {
     /// End of builder pattern.
     /// copies over everything
     pub fn done(&mut self) -> Self {
-        InnerComponent{
+        InnerComponent {
             properties: mem::replace(&mut self.properties, BTreeMap::new()),
             multi_properties: mem::replace(&mut self.multi_properties, Vec::new()),
         }
@@ -88,7 +92,9 @@ impl Event {
     /// End of builder pattern.
     /// copies over everything
     pub fn done(&mut self) -> Self {
-        Event { inner: self.inner.done() }
+        Event {
+            inner: self.inner.done(),
+        }
     }
 
     ///  Defines the overall status or confirmation
@@ -102,7 +108,6 @@ impl Event {
     //}
 }
 
-
 impl Todo {
     /// Creates a new Todo.
     pub fn new() -> Self {
@@ -112,7 +117,9 @@ impl Todo {
     /// End of builder pattern.
     /// copies over everything
     pub fn done(&mut self) -> Self {
-        Todo { inner: self.inner.done() }
+        Todo {
+            inner: self.inner.done(),
+        }
     }
 
     /// Set the PERCENT-COMPLETE `Property`
@@ -147,12 +154,10 @@ impl Todo {
         self
     }
 
-
     //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
     //    unimplemented!()
     //}
 }
-
 
 /// Implemented by everything that goes into a `Calendar`
 pub trait Component {
@@ -164,15 +169,13 @@ pub trait Component {
     fn component_kind() -> &'static str;
 
     /// Allows access to the inner properties map.
-    fn properties(&self) -> &BTreeMap<String,Property>;
+    fn properties(&self) -> &BTreeMap<String, Property>;
 
     /// Read-only access to `multi_properties`
-    fn multi_properties(&self) -> &Vec<Property> ;
-
+    fn multi_properties(&self) -> &Vec<Property>;
 
     /// Writes `Component` into a `Writer` using `std::fmt`.
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
-
         write_crlf!(out, "BEGIN:{}", Self::component_kind())?;
 
         if !self.properties().contains_key("DTSTAMP") {
@@ -211,13 +214,13 @@ pub trait Component {
 
     /// Construct and append a `Property`
     fn add_property(&mut self, key: &str, val: &str) -> &mut Self {
-        self.append_property( Property::new(key, val));
+        self.append_property(Property::new(key, val));
         self
     }
 
     /// Construct and append a `Property`
     fn add_multi_property(&mut self, key: &str, val: &str) -> &mut Self {
-        self.append_multi_property( Property::new(key, val));
+        self.append_multi_property(Property::new(key, val));
         self
     }
 
@@ -240,44 +243,56 @@ pub trait Component {
     }
 
     /// Set the DTSTART `Property`, date only
-    fn start_date<TZ:TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
-        where TZ::Offset: fmt::Display
+    fn start_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+    where
+        TZ::Offset: fmt::Display,
     {
         // DTSTART
         self.append_property(
             Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
-            .append_parameter(ValueType::Date)
-            .done());
+                .append_parameter(ValueType::Date)
+                .done(),
+        );
         self
     }
 
     /// Set the DTEND `Property`, date only
-    fn end_date<TZ:TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
-        where TZ::Offset: fmt::Display
+    fn end_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+    where
+        TZ::Offset: fmt::Display,
     {
         // DTSTART
         self.append_property(
             Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
-            .append_parameter(ValueType::Date)
-            .done());
+                .append_parameter(ValueType::Date)
+                .done(),
+        );
         self
     }
 
     /// Set the DTSTART `Property`, date only
-    fn all_day<TZ:TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
-        where TZ::Offset: fmt::Display
+    fn all_day<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+    where
+        TZ::Offset: fmt::Display,
     {
         // DTSTART
-        self.append_property( Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref()).append_parameter(ValueType::Date).done() )
-            .append_property( Property::new("DTEND",   date.format("%Y%m%d").to_string().as_ref()).append_parameter(ValueType::Date).done() )
-            ;
+        self.append_property(
+            Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
+                .append_parameter(ValueType::Date)
+                .done(),
+        )
+        .append_property(
+            Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
+                .append_parameter(ValueType::Date)
+                .done(),
+        );
         self
     }
 
     ///  Defines the relative priority.
     ///
     ///  Ranges from 0 to 10, larger values will be truncated
-    fn priority(&mut self, priority:u32) -> &mut Self {
+    fn priority(&mut self, priority: u32) -> &mut Self {
         let priority = ::std::cmp::min(priority, 10);
         self.add_property("PRIORITY", &priority.to_string());
         self
@@ -326,42 +341,40 @@ pub trait Component {
     }
 }
 
-
 macro_rules! component_impl {
     ($t:ty, $kind:expr) => {
-            impl Component for $t {
-                /// Tells you what kind of `Component` this is
-                ///
-                /// Might be `VEVENT`, `VTODO`, `VALARM` etc
-                fn component_kind() -> &'static str { $kind }
-
-                /// Read-only access to `properties`
-                fn properties(&self) -> &BTreeMap<String, Property> {
-                    &self.inner.properties
-                }
-
-                /// Read-only access to `multi_properties`
-                fn multi_properties(&self) -> &Vec<Property> {
-                    &self.inner.multi_properties
-                }
-
-                /// Adds a `Property`
-                fn append_property(&mut self, property: Property) -> &mut Self {
-                    self.inner.properties.insert(property.key(), property);
-                    self
-                }
-
-                /// Adds a `Property` of which there may be many
-                fn append_multi_property(&mut self, property: Property) -> &mut Self {
-                    self.inner
-                        .multi_properties
-                        .push(property);
-                    self
-                }
+        impl Component for $t {
+            /// Tells you what kind of `Component` this is
+            ///
+            /// Might be `VEVENT`, `VTODO`, `VALARM` etc
+            fn component_kind() -> &'static str {
+                $kind
             }
-    }
+
+            /// Read-only access to `properties`
+            fn properties(&self) -> &BTreeMap<String, Property> {
+                &self.inner.properties
+            }
+
+            /// Read-only access to `multi_properties`
+            fn multi_properties(&self) -> &Vec<Property> {
+                &self.inner.multi_properties
+            }
+
+            /// Adds a `Property`
+            fn append_property(&mut self, property: Property) -> &mut Self {
+                self.inner.properties.insert(property.key(), property);
+                self
+            }
+
+            /// Adds a `Property` of which there may be many
+            fn append_multi_property(&mut self, property: Property) -> &mut Self {
+                self.inner.multi_properties.push(property);
+                self
+            }
+        }
+    };
 }
 
 component_impl! { Event, "VEVENT" }
 component_impl! { Todo , "VTODO"}
-

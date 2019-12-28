@@ -1,15 +1,14 @@
 use crate::components::*;
 
+use std::convert::Into;
 use std::fmt;
 use std::iter::FromIterator;
 use std::ops::Deref;
-use std::convert::Into;
-
 
 #[derive(Debug)]
-pub enum CalendarElement{
+pub enum CalendarElement {
     Todo(Todo),
-    Event(Event)
+    Event(Event),
 }
 
 impl Into<CalendarElement> for Event {
@@ -27,8 +26,8 @@ impl Into<CalendarElement> for Todo {
 impl CalendarElement {
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         match *self {
-            CalendarElement::Todo(ref todo)   => todo.fmt_write(out),
-            CalendarElement::Event(ref event) => event.fmt_write(out)
+            CalendarElement::Todo(ref todo) => todo.fmt_write(out),
+            CalendarElement::Event(ref event) => event.fmt_write(out),
         }
     }
 }
@@ -36,21 +35,20 @@ impl CalendarElement {
 /// Represents a calendar
 ///
 /// You can `.add()` `Component`s to this.
-#[derive(Default,Debug)]
+#[derive(Default, Debug)]
 pub struct Calendar {
-    components: Vec<CalendarElement>
+    components: Vec<CalendarElement>,
 }
 
 impl Calendar {
-
     /// Creates a new Calendar.
     pub fn new() -> Self {
         Default::default()
     }
 
-    #[deprecated(note="Use .push() instead")]
+    #[deprecated(note = "Use .push() instead")]
     #[doc(hidden)]
-    pub fn add<T:Into<CalendarElement>>(&mut self, component:T) -> &mut Self {
+    pub fn add<T: Into<CalendarElement>>(&mut self, component: T) -> &mut Self {
         self.push(component)
     }
 
@@ -61,14 +59,15 @@ impl Calendar {
 
     /// Extends this `Calendar` with the contends of another.
     pub fn extend<T, U>(&mut self, other: T)
-        where T: IntoIterator<Item=U>,
-        U: Into<CalendarElement>
+    where
+        T: IntoIterator<Item = U>,
+        U: Into<CalendarElement>,
     {
         self.components.extend(other.into_iter().map(|x| x.into()));
     }
 
     /// Appends an element to the back of the `Calendar`.
-    pub fn push<T:Into<CalendarElement>>(&mut self, component:T) -> &mut Self {
+    pub fn push<T: Into<CalendarElement>>(&mut self, component: T) -> &mut Self {
         self.components.push(component.into());
         self
     }
@@ -109,7 +108,7 @@ impl ToString for Calendar {
 impl Deref for Calendar {
     type Target = [CalendarElement];
 
-    fn deref(&self) -> &[CalendarElement]{
+    fn deref(&self) -> &[CalendarElement] {
         self.components.deref()
     }
 }
@@ -140,10 +139,7 @@ mod tests {
     #[test]
     fn calendar_extend_events() {
         let mut calendar = Calendar::new();
-        let events = vec![
-            Event::new(),
-            Event::new(),
-        ];
+        let events = vec![Event::new(), Event::new()];
         calendar.extend(events);
         assert_eq!(calendar.components.len(), 2);
     }
