@@ -1,6 +1,7 @@
 use crate::components::*;
 
 use std::fmt;
+use std::iter::FromIterator;
 use std::ops::Deref;
 use std::convert::Into;
 
@@ -110,6 +111,14 @@ impl Deref for Calendar {
 
     fn deref(&self) -> &[CalendarElement]{
         self.components.deref()
+    }
+}
+
+impl<C: Into<CalendarElement>> FromIterator<C> for Calendar {
+    fn from_iter<T: IntoIterator<Item = C>>(iter: T) -> Self {
+        Calendar {
+            components: iter.into_iter().map(Into::into).collect(),
+        }
     }
 }
 
