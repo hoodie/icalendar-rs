@@ -96,12 +96,9 @@ impl Calendar {
     }
 }
 
-impl ToString for Calendar {
-    /// # panics
-    fn to_string(&self) -> String {
-        let mut out_string = String::new();
-        self.fmt_write(&mut out_string).unwrap();
-        out_string
+impl fmt::Display for Calendar {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.fmt_write(f)
     }
 }
 
