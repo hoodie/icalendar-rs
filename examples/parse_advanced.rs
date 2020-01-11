@@ -1,6 +1,4 @@
 #![cfg(feature = "parser")]
-use std::{env, fs, io};
-
 use icalendar::parser::unfold;
 
 mod example_utils;
