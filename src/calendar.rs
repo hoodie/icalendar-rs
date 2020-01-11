@@ -87,11 +87,8 @@ impl Calendar {
     }
 
     /// Prints to stdout
-    /// FIXME code repetition
     pub fn print(&self) -> Result<(), fmt::Error> {
-        let mut out = String::new();
-        self.fmt_write(&mut out)?;
-        print_crlf!("{}", out);
+        print_crlf!("{}", self);
         Ok(())
     }
 }
