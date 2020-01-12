@@ -87,21 +87,15 @@ impl Calendar {
     }
 
     /// Prints to stdout
-    /// FIXME code repetition
     pub fn print(&self) -> Result<(), fmt::Error> {
-        let mut out = String::new();
-        self.fmt_write(&mut out)?;
-        print_crlf!("{}", out);
+        print_crlf!("{}", self);
         Ok(())
     }
 }
 
-impl ToString for Calendar {
-    /// # panics
-    fn to_string(&self) -> String {
-        let mut out_string = String::new();
-        self.fmt_write(&mut out_string).unwrap();
-        out_string
+impl fmt::Display for Calendar {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.fmt_write(f)
     }
 }
 
