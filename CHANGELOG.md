@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased](///compare/v0.7.0...HEAD) (2020-01-12)
+## [v0.8.0](///compare/v0.7.0...v0.8.0) (2020-01-12)
 
 ### Features
 
