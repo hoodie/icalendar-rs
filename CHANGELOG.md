@@ -1,5 +1,11 @@
 # Changelog
 
+## [uncommitted](///compare/v0.8.0...feat/venue) (2020-02-23)
+
+### Features
+
+* implement [iCalendar venue draft](https://tools.ietf.org/html/draft-norris-ical-venue-01)
+
 ## [v0.8.0](///compare/v0.7.0...v0.8.0) (2020-01-12)
 
 ### Features
