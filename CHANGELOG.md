@@ -1,6 +1,6 @@
 # Changelog
 
-## [uncommitted](///compare/v0.8.0...feat/venue) (2020-02-23)
+## [v0.9.0](///compare/v0.8.0...v0.9.0) (2020-02-23)
 
 ### Features
 
