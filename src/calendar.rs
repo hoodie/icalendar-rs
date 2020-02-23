@@ -9,6 +9,7 @@ use std::ops::Deref;
 pub enum CalendarElement {
     Todo(Todo),
     Event(Event),
+    Venue(Venue),
 }
 
 impl Into<CalendarElement> for Event {
@@ -28,6 +29,7 @@ impl CalendarElement {
         match *self {
             CalendarElement::Todo(ref todo) => todo.fmt_write(out),
             CalendarElement::Event(ref event) => event.fmt_write(out),
+            CalendarElement::Venue(ref venue) => venue.fmt_write(out),
         }
     }
 }
