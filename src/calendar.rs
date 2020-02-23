@@ -24,6 +24,12 @@ impl Into<CalendarElement> for Todo {
     }
 }
 
+impl Into<CalendarElement> for Venue {
+    fn into(self) -> CalendarElement {
+        CalendarElement::Venue(self)
+    }
+}
+
 impl CalendarElement {
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         match *self {
