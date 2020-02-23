@@ -97,7 +97,7 @@ mod properties;
 
 //pub mod repeats;
 pub use crate::calendar::Calendar;
-pub use crate::components::{CalendarDateTime, Component, Event, Todo};
+pub use crate::components::{CalendarDateTime, Component, Event, Todo, Venue};
 pub use crate::properties::{Class, Parameter, Property, ValueType};
 pub use crate::properties::{EventStatus, TodoStatus};
 
