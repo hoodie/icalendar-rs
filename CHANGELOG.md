@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.9.0](///compare/v0.8.0...v0.9.0) (2020-02-25)
+
+### Features
+
+* Support calendar properties 1c1ed6b
+* Implement iCalendar Venue Draft 198911b
+
+
 ## [v0.8.0](///compare/v0.7.0...v0.8.0) (2020-01-12)
 
 ### Features
