@@ -41,13 +41,13 @@ impl Property {
     }
 
     /// Clones the key field.
-    pub fn key(&self) -> String {
-        self.key.clone()
+    pub fn key(&self) -> &str {
+        &self.key
     }
 
     /// Clones the value field.
-    pub fn value(&self) -> String {
-        self.value.clone()
+    pub fn value(&self) -> &str {
+        &self.value
     }
 
     /// Appends a new parameter.
