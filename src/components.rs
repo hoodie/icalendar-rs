@@ -32,7 +32,7 @@ pub enum CalendarDateTime {
 
 impl fmt::Display for CalendarDateTime {
     /// Format date-time in RFC 5545 compliant manner.
-    fn fmt(self: &Self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         match self {
             CalendarDateTime::Floating(naive_dt) => naive_dt.format("%Y%m%dT%H%M%S").fmt(f),
             CalendarDateTime::Utc(utc_dt) => utc_dt.format("%Y%m%dT%H%M%SZ").fmt(f),

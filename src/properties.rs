@@ -44,7 +44,7 @@ impl Property {
     pub fn key(&self) -> String {
         self.key.clone()
     }
-    
+
     /// Clones the value field.
     pub fn value(&self) -> String {
         self.value.clone()
