@@ -44,6 +44,11 @@ impl Property {
     pub fn key(&self) -> String {
         self.key.clone()
     }
+    
+    /// Clones the value field.
+    pub fn value(&self) -> String {
+        self.value.clone()
+    }
 
     /// Appends a new parameter.
     pub fn append_parameter<I: Into<Parameter>>(&mut self, into_parameter: I) -> &mut Self {
