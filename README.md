@@ -2,12 +2,15 @@
 
 # iCalendar in Rust
 
-[![Travis](https://img.shields.io/travis/hoodie/icalendar-rs.svg)](https://travis-ci.org/hoodie/icalendar-rs/)
-[![license](https://img.shields.io/crates/l/icalendar.svg)](https://crates.io/crates/icalendar/)
-[![Crates.io](https://img.shields.io/crates/d/icalendar.svg)](https://crates.io/crates/icalendar)
-[![version](https://img.shields.io/crates/v/icalendar.svg)](https://crates.io/crates/icalendar/)
-[![documentation](https://docs.rs/icalendar/badge.svg)](https://docs.rs/icalendar/)
+[![build](https://img.shields.io/github/workflow/status/hoodie/icalendar/Continuous%20Integration)](https://github.com/hoodie/icalendar/actions?query=workflow%3A"Continuous+Integration")
+[![Crates.io](https://img.shields.io/crates/d/icalendar)](https://crates.io/crates/icalendar)
+[![contributors](https://img.shields.io/github/contributors/hoodie/icalendar)](https://github.com/hoodie/icalendar/graphs/contributors)
 ![maintenance](https://img.shields.io/maintenance/yes/2021)
+
+[![version](https://img.shields.io/crates/v/icalendar)](https://crates.io/crates/icalendar/)
+[![documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://docs.rs/icalendar/)
+[![license](https://img.shields.io/crates/l/icalendar.svg?style=flat)](https://crates.io/crates/icalendar/)
+
 [![contributors](https://img.shields.io/github/contributors/hoodie/icalendar-rs)](https://github.com/hoodie/icalendar-rs/graphs/contributors)
 </div>
 
