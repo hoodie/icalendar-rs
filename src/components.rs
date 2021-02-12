@@ -441,7 +441,9 @@ macro_rules! component_impl {
 
             /// Adds a `Property`
             fn append_property(&mut self, property: Property) -> &mut Self {
-                self.inner.properties.insert(property.key().to_owned(), property);
+                self.inner
+                    .properties
+                    .insert(property.key().to_owned(), property);
                 self
             }
 
