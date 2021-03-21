@@ -74,6 +74,8 @@ macro_rules! print_crlf {
     ($fmt:expr, $($arg:tt)*) => (print!(concat!($fmt, "\r\n"), $($arg)*));
 }
 
+
+
 macro_rules! write_crlf {
     ($dst:expr) => (
         write!($dst, "\r\n")
@@ -85,6 +87,11 @@ macro_rules! write_crlf {
         write!($dst, concat!($fmt, "\r\n"), $($arg)*)
     );
 }
+
+
+#[cfg(test)]
+#[macro_use]
+mod assert;
 
 //pub mod period;
 mod calendar;
