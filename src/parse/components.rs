@@ -2,9 +2,9 @@ use nom::{
     branch::alt,
     bytes::complete::tag,
     character::complete::alpha0,
-    combinator::{complete, map},
+    combinator::{all_consuming, complete, cut, map},
+    error::{context, VerboseError},
     multi::{many0, many_till},
-    sequence::preceded,
     IResult,
 };
 
@@ -83,16 +83,19 @@ enum ComponentChild<'a> {
     Component(Component<'a>),
 }
 
-pub fn component(input: &str) -> IResult<&str, Component> {
+pub fn component(input: &str) -> IResult<&str, Component, VerboseError<&str>> {
     let (input, name) = line("BEGIN:", alpha0)(input)?;
 
     let (input, (properties, components)) = map(
         many_till(
-            alt((
-                map(line_separated(component), ComponentChild::Component),
-                map(line_separated(property), ComponentChild::Property),
+            cut(context(
+                "component",
+                alt((
+                    map(line_separated(component), ComponentChild::Component),
+                    map(line_separated(property), ComponentChild::Property),
+                )),
             )),
-            preceded(many0(tag("\n")), line("END:", tag(name))),
+            line("END:", cut(context("MISMATCHING END", tag(name)))),
         ),
         |(body_elements, _)| {
             let mut properties = Vec::new();
@@ -120,7 +123,7 @@ pub fn component(input: &str) -> IResult<&str, Component> {
 }
 
 #[test]
-fn test_component() {
+fn test_components() {
     assert_parser!(
         component("BEGIN:FOO\nEND:FOO"),
         Component {
@@ -184,6 +187,25 @@ fn test_component() {
     );
 }
 
-pub fn components(input: &str) -> IResult<&str, Vec<Component>> {
-    complete(many0(component))(input)
+#[test]
+#[ignore]
+fn test_faulty_component() {
+    assert_parser!(
+        component("BEGIN:FOO\nEND:F0O"),
+        Component {
+            name: "FOO",
+            properties: vec![],
+            components: vec![]
+        }
+    );
 }
+
+pub fn components(input: &str) -> IResult<&str, Vec<Component>, VerboseError<&str>> {
+    complete(many0(all_consuming(component)))(input)
+}
+
+// pub fn components<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+//     input: &'a str,
+// ) -> IResult<&'a str, Vec<Component>, E> {
+//     complete(many0(component))(input)
+// }
