@@ -1,6 +1,12 @@
-
 use aho_corasick::AhoCorasick;
-use nom::{IResult, bytes::complete::take_while};
+use nom::{
+    bytes::complete::{tag, take_while},
+    combinator::complete,
+    error::ParseError,
+    multi::many0,
+    sequence::{delimited, preceded},
+    IResult, Parser,
+};
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 
@@ -10,6 +16,19 @@ pub fn alpha_or_dash(i: &str) -> IResult<&str, &str> {
 
 pub fn ical_line(input: &str) -> IResult<&str, &str> {
     ical_line_check(input, |_| true)
+}
+
+pub fn line<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
+    prefix: &'a str,
+    f: F,
+) -> impl FnMut(&'a str) -> IResult<&'a str, O, E> {
+    line_separated(complete(preceded(tag(prefix), f)))
+}
+
+pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
+    f: F,
+) -> impl FnMut(&'a str) -> IResult<&'a str, O, E> {
+    delimited(many0(tag("\n")), f, many0(tag("\n")))
 }
 
 // TODO: this is unneccessary, but I haven't found a better parser yet that just eats everything
