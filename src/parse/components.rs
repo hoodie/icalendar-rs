@@ -1,17 +1,21 @@
-#[cfg(test)]
-use super::parameters::Parameter;
-// use super::*;
-use super::{properties::property, Property};
 use nom::{
     branch::alt,
     bytes::complete::tag,
     character::complete::alpha0,
-    combinator::map,
-    error::context,
+    combinator::{complete, map},
     multi::{many0, many_till},
     sequence::preceded,
     IResult,
 };
+
+#[cfg(test)]
+use super::parameters::Parameter;
+use super::{
+    properties::property,
+    utils::{line, line_separated},
+    Property,
+};
+
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 
@@ -34,7 +38,6 @@ fn parse_empty_component1() {
 
 #[test]
 #[rustfmt::skip]
-#[ignore]
 fn parse_empty_component2() {
     assert_eq!(
         component("BEGIN:VEVENT\n\nEND:VEVENT\n"),
@@ -72,55 +75,39 @@ END:VEVENT
         expectation.clone());
 }
 
-pub fn calendar(raw: &str) -> Vec<Component> {
-    let parsed = components(raw);
-    println!("{:?}", parsed);
-    if let Ok((_, components)) = parsed {
-        components
-    } else {
-        vec![]
-    }
-}
-
-enum ComponentBody<'a> {
+enum ComponentChild<'a> {
     Property(Property<'a>),
     Component(Component<'a>),
 }
 
-pub fn component(i: &str) -> IResult<&str, Component> {
-    let (i, _) = preceded(many0(tag("\n")), tag("BEGIN:"))(i)?;
-    let (i, name) = alpha0(i)?;
+pub fn component(input: &str) -> IResult<&str, Component> {
+    let (input, name) = line("BEGIN:", alpha0)(input)?;
 
-    let (i, (body_elements, _)) = many_till(
-        alt((
-            map(
-                context("component", preceded(many0(tag("\n")), component)),
-                ComponentBody::Component,
-            ),
-            map(
-                context("property", preceded(many0(tag("\n")), property)),
-                ComponentBody::Property,
-            ),
-        )),
-        context(
-            "preceded",
-            preceded(many0(tag("\n")), preceded(tag("END:"), tag(name))),
+    let (input, (properties, components)) = map(
+        many_till(
+            alt((
+                map(line_separated(component), ComponentChild::Component),
+                map(line_separated(property), ComponentChild::Property),
+            )),
+            preceded(many0(tag("\n")), line("END:", tag(name))),
         ),
-    )(i)?;
-    let (i, _) = many0(tag("\n"))(i)?;
+        |(body_elements, _)| {
+            let mut properties = Vec::new();
+            let mut components = Vec::new();
+            for el in body_elements {
+                match el {
+                    ComponentChild::Component(c) => components.push(c),
+                    ComponentChild::Property(p) => properties.push(p),
+                }
+            }
+            (properties, components)
+        },
+    )(input)?;
 
-    let mut properties = Vec::new();
-    let mut components = Vec::new();
-    for el in body_elements {
-        match el {
-            ComponentBody::Component(c) => components.push(c),
-            ComponentBody::Property(p) => properties.push(p),
-        }
-    }
+    let (input, _) = many0(tag("\n"))(input)?;
 
-    // Ok((i, Component { name, properties, components }))
     Ok((
-        i,
+        input,
         Component {
             name,
             properties,
@@ -174,5 +161,5 @@ fn test_component() {
 }
 
 pub fn components(input: &str) -> IResult<&str, Vec<Component>> {
-    many0(component)(input)
+    complete(many0(component))(input)
 }
