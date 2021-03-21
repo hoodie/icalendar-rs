@@ -24,33 +24,74 @@ pub struct Property<'a> {
 }
 
 #[test]
-#[rustfmt::skip]
 fn test_property() {
-    assert_eq!(property("KEY:VALUE\n"), Ok(("", Property{key: "KEY", val: "VALUE", params: vec![]} )));
+    assert_eq!(
+        property("KEY:VALUE\n"),
+        Ok((
+            "",
+            Property {
+                key: "KEY",
+                val: "VALUE",
+                params: vec![]
+            }
+        ))
+    );
 
-    assert_eq!(
+    assert_parser!(
         property("KEY1;foo=bar:VALUE\n"),
-        Ok(("", Property{key: "KEY1", val: "VALUE", params: vec![
-            Parameter{key:"foo", val: "bar"}
-            ]})));
-    assert_eq!(
+        Property {
+            key: "KEY1",
+            val: "VALUE",
+            params: vec![Parameter {
+                key: "foo",
+                val: "bar"
+            }]
+        }
+    );
+
+    assert_parser!(
         property("KEY2;foo=bar:VALUE space separated\n"),
-        Ok(("", Property{key: "KEY2", val: "VALUE space separated", params: vec![
-            Parameter{key:"foo", val: "bar"}
-            ]})));
+        Property {
+            key: "KEY2",
+            val: "VALUE space separated",
+            params: vec![Parameter {
+                key: "foo",
+                val: "bar"
+            }]
+        }
+    );
+
+    assert_parser!(
+        property("KEY2;foo=bar:important:VALUE\n"),
+        Property {
+            key: "KEY2",
+            val: "important:VALUE",
+            params: vec![Parameter {
+                key: "foo",
+                val: "bar"
+            }]
+        }
+    );
+
     // TODO: newlines followed by spaces must be ignored
-    assert_eq!(
+    assert_parser!(
         property("KEY3;foo=bar:VALUE\\n newline separated\n"),
-        Ok(("", Property{key: "KEY3", val: "VALUE\\n newline separated", params: vec![
-            Parameter{key:"foo", val: "bar"}
-            ]})));
+        Property {
+            key: "KEY3",
+            val: "VALUE\\n newline separated",
+            params: vec![Parameter {
+                key: "foo",
+                val: "bar"
+            }]
+        }
+    );
 }
 
 #[test]
 #[rustfmt::skip]
 fn parse_property_with_breaks() {
 
-    let sample_0 = "DESCRIPTION:Hey, I'm gonna have a party\\n BYOB: Bring your own beer.\\n Hendrik\\n";
+    let sample_0 = "DESCRIPTION:Hey, I'm gonna have a party\\n BYOB: Bring your own beer.\\n Hendrik\\n\n";
 
     let expectation = Property {
         key: "DESCRIPTION",

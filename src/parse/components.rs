@@ -19,6 +19,9 @@ use super::{
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 
+#[cfg(test)]
+use crate::assert_parser;
+
 #[derive(PartialEq, Debug, Clone)]
 pub struct Component<'a> {
     pub name: &'a str,
@@ -117,46 +120,67 @@ pub fn component(input: &str) -> IResult<&str, Component> {
 }
 
 #[test]
-#[rustfmt::skip]
 fn test_component() {
-    assert_eq!(
-        component("BEGIN:FOO\nEND:FOO").unwrap(),
-        ("", Component {
+    assert_parser!(
+        component("BEGIN:FOO\nEND:FOO"),
+        Component {
             name: "FOO",
             properties: vec![],
             components: vec![]
-        })
+        }
     );
-    assert_eq!(
-        component("BEGIN:FOO\nFOO-PROP:spam\nEND:FOO").unwrap(),
-        ("", Component {
+
+    assert_parser!(
+        component("BEGIN:FOO\nFOO-PROP:important: spam €\nEND:FOO"),
+        Component {
             name: "FOO",
-            properties: vec![Property {key :"FOO-PROP", val: "spam", params: vec![]}],
+            properties: vec![Property {
+                key: "FOO-PROP",
+                val: "important: spam €",
+                params: vec![]
+            }],
             components: vec![]
-        })
+        }
     );
-    assert_eq!(
-        component("BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:FOO").unwrap(),
-        (
-            "",
-            Component {
-                name: "FOO",
-                properties: vec![Property {
+
+    assert_parser!(
+        component("BEGIN:FOO\nUID:e1c97b31-38bb-4b72-b94f-463a12ef5239\nFOO-PROP:sp.am\nEND:FOO"),
+        Component {
+            name: "FOO",
+            properties: vec![
+                Property {
+                    key: "UID",
+                    val: "e1c97b31-38bb-4b72-b94f-463a12ef5239",
+                    params: vec![]
+                },
+                Property {
                     key: "FOO-PROP",
+                    val: "sp.am",
+                    params: vec![]
+                },
+            ],
+            components: vec![]
+        }
+    );
+    assert_parser!(
+        component("BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:FOO"),
+        Component {
+            name: "FOO",
+            properties: vec![Property {
+                key: "FOO-PROP",
+                val: "spam",
+                params: vec![]
+            }],
+            components: vec![Component {
+                name: "BAR",
+                properties: vec![Property {
+                    key: "BAR-PROP",
                     val: "spam",
                     params: vec![]
                 }],
-                components: vec![Component {
-                    name: "BAR",
-                    properties: vec![Property {
-                        key: "BAR-PROP",
-                        val: "spam",
-                        params: vec![]
-                    }],
-                    components: vec![]
-                }]
-            }
-        )
+                components: vec![]
+            }]
+        }
     );
 }
 

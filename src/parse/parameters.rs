@@ -1,7 +1,8 @@
-use super::*;
 use nom::{
-    bytes::complete::tag,
+    branch::alt,
+    bytes::complete::{tag, take_till1},
     character::complete::{alpha0, space0},
+    combinator::eof,
     multi::many0,
     IResult,
 };
@@ -53,7 +54,7 @@ fn read_parameter(i: &str) -> IResult<&str, Parameter> {
     let (i, _) = space0(i)?;
     let (i, key) = alpha0(i)?;
     let (i, _) = tag("=")(i)?;
-    let (i, val) = utils::ical_line_check(i, |x| x != b';' && x != b':')?;
+    let (i, val) = alt((eof, take_till1(|x| x == ';' || x == ':')))(i)?;
     Ok((i, Parameter { key, val }))
 }
 

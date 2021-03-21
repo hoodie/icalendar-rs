@@ -1,6 +1,6 @@
 use aho_corasick::AhoCorasick;
 use nom::{
-    bytes::complete::{tag, take_while},
+    bytes::complete::{tag, take_until, take_while},
     combinator::complete,
     error::ParseError,
     multi::many0,
@@ -15,7 +15,7 @@ pub fn alpha_or_dash(i: &str) -> IResult<&str, &str> {
 }
 
 pub fn ical_line(input: &str) -> IResult<&str, &str> {
-    ical_line_check(input, |_| true)
+    take_until("\n")(input)
 }
 
 pub fn line<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
@@ -29,38 +29,6 @@ pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
     f: F,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, O, E> {
     delimited(many0(tag("\n")), f, many0(tag("\n")))
-}
-
-// TODO: this is unneccessary, but I haven't found a better parser yet that just eats everything
-pub fn ical_line_check<F>(input: &str, check: F) -> IResult<&str, &str>
-where
-    F: Fn(u8) -> bool,
-{
-    for (i, c) in input.as_bytes().windows(2).enumerate() {
-        // println!("{:?}", (i, c, input.len()));
-        let remainder = &input[i..];
-        let output = &input[..i];
-        if let Some(&x) = c.get(0) {
-            if !(check(x) || (x as char).is_whitespace() || x == b'\n') {
-                // println!("check failed {:?}", c);
-                return Ok((remainder, output));
-            }
-        }
-        if c.get(0) == Some(&b'\n') && c.get(1) != Some(&b' ') {
-            // println!("no space after break {:?}", c);
-            let remainder = &input[i..];
-            let output = &input[..i];
-            return Ok((remainder, output));
-        }
-    }
-    // literally a corner case
-    if input.as_bytes().last() == Some(&b'\n') {
-        // TODO: cut off `'\r'` as well
-        let remainder = &input[input.len() - 1..];
-        let output = &input[..input.len() - 1];
-        return Ok((remainder, output));
-    }
-    Ok(("", input))
 }
 
 pub fn unfold(input: &str) -> String {
