@@ -1,21 +1,44 @@
+use std::fmt;
+
 use aho_corasick::AhoCorasick;
 use nom::{
-    bytes::complete::{tag, take_until, take_while},
+    bytes::complete::{tag, take_while},
+    character::complete::line_ending,
     combinator::complete,
-    error::ParseError,
+    error::{ParseError, VerboseError},
     multi::many0,
     sequence::{delimited, preceded},
-    IResult, Parser,
+    Err, IResult, Parser,
 };
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 
-pub fn alpha_or_dash(i: &str) -> IResult<&str, &str> {
-    take_while(|c: char| (c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()))(i)
+#[derive(Debug)]
+struct UnexpectedBeginOrEnd;
+
+impl fmt::Display for UnexpectedBeginOrEnd {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "unexpected BEGIN or END")
+    }
 }
 
-pub fn ical_line(input: &str) -> IResult<&str, &str> {
-    take_until("\n")(input)
+impl std::error::Error for UnexpectedBeginOrEnd {
+    fn description(&self) -> &str {
+        "description() is deprecated; use Display"
+    }
+}
+// TODO: how do I express <<alpha_or_dash, but not "END">>
+pub fn property_key(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
+    if &input[0..=2] == "END" || &input[0..=4] == "BEGIN" {
+        IResult::Err(Err::Error(nom::error::make_error(
+            input,
+            nom::error::ErrorKind::Satisfy,
+        )))
+    } else {
+        take_while(|c: char| (c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()))(
+            input,
+        )
+    }
 }
 
 pub fn line<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
@@ -28,14 +51,14 @@ pub fn line<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
 pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
     f: F,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, O, E> {
-    delimited(many0(tag("\n")), f, many0(tag("\n")))
+    delimited(many0(line_ending), f, many0(line_ending))
 }
 
 pub fn unfold(input: &str) -> String {
     let mut output = Vec::<u8>::new();
 
     // unfold
-    AhoCorasick::new(&["\r\n "])
+    AhoCorasick::new(&["\n "])
         .stream_replace_all(input.as_bytes(), &mut output, &[""])
         .unwrap();
 
@@ -62,5 +85,5 @@ fn test_unfold() {
 3 hello world
 4 hello world"#;
 
-    assert_eq!(simplify_line_endings(&unfold(&input)), expected);
+    assert_eq!(unfold(&simplify_line_endings(&input)), expected);
 }

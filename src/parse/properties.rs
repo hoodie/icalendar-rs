@@ -1,19 +1,17 @@
 use super::{
-    parameters::{read_parameters, Parameter},
-    utils,
-    utils::alpha_or_dash,
+    parameters::{parameters, Parameter},
+    utils::property_key,
 };
 use nom::{
-    bytes::complete::tag,
+    bytes::complete::{tag, take_until},
     character::complete::{line_ending, multispace0},
-    combinator::{map, opt},
-    error::context,
+    combinator::{cut, map, opt},
+    error::{context, VerboseError},
     sequence::{preceded, separated_pair, tuple},
     IResult,
 };
 #[cfg(test)]
 use pretty_assertions::assert_eq;
-use utils::ical_line;
 
 /// Zero-copy version of `properties::Property`
 #[derive(PartialEq, Debug, Clone)]
@@ -102,19 +100,26 @@ fn parse_property_with_breaks() {
     assert_eq!(property(sample_0), Ok(("", expectation)));
 }
 
-pub fn property(input: &str) -> IResult<&str, Property> {
-    map(
-        tuple((
-            separated_pair(
-                tuple((
-                    preceded(multispace0, alpha_or_dash), // key
-                    read_parameters,                      // params
-                )),
-                context("fun", tag(":")), // separator
-                ical_line,                // val TODO: replace this with something simpler!
-            ),
-            opt(line_ending),
+pub fn property(input: &str) -> IResult<&str, Property, VerboseError<&str>> {
+    context(
+        "property",
+        cut(map(
+            tuple((
+                separated_pair(
+                    tuple((
+                        // preceded(multispace0, alpha_or_dash), // key
+                        cut(context(
+                            "property can't be END or BEGIN",
+                            preceded(multispace0, property_key),
+                        )), // key
+                        parameters, // params
+                    )),
+                    context("property sparator", tag(":")), // separator
+                    context("property value", take_until("\n")), // val TODO: replace this with something simpler!
+                ),
+                opt(line_ending),
+            )),
+            |(((key, params), val), _)| Property { key, val, params },
         )),
-        |(((key, params), val), _)| Property { key, val, params },
     )(input)
 }

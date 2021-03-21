@@ -84,7 +84,6 @@ struct InnerComponent {
 //    }
 //}
 
-
 impl InnerComponent {
     /// End of builder pattern.
     /// copies over everything

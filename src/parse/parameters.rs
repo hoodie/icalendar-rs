@@ -1,11 +1,4 @@
-use nom::{
-    branch::alt,
-    bytes::complete::{tag, take_till1},
-    character::complete::{alpha0, space0},
-    combinator::eof,
-    multi::many0,
-    IResult,
-};
+use nom::{IResult, branch::alt, bytes::complete::{tag, take_till1}, character::complete::{alpha0, space0}, combinator::eof, error::VerboseError, multi::many0};
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 
@@ -23,33 +16,51 @@ impl<'a> Into<crate::properties::Parameter> for Parameter<'a> {
 }
 
 #[test]
-#[rustfmt::skip]
 fn test_parameter() {
-    let dbg = |x| {println!("{:?}", x); x};
-    assert_eq!(
-        dbg(read_parameter(";KEY=VALUE")),
-        Ok(("", Parameter{key: "KEY", val: "VALUE"})));
-    assert_eq!(
-        dbg(read_parameter("; KEY=VALUE")),
-        Ok(("", Parameter{key: "KEY", val: "VALUE"})));
-    assert_eq!(
-        dbg(read_parameter("; KEY=VAL UE")),
-        Ok(("", Parameter{key: "KEY", val: "VAL UE"})));
-    assert_eq!(
-        dbg(read_parameter("; KEY=")),
-        Ok(("", Parameter{key: "KEY", val: ""})));
-    assert_eq!(
-        dbg(read_parameter(";KEY=VAL-UE")),
-        Ok(("", Parameter{key: "KEY", val: "VAL-UE"})));
+    assert_parser!(
+        parameter(";KEY=VALUE"),
+        Parameter {
+            key: "KEY",
+            val: "VALUE"
+        }
+    );
+    assert_parser!(
+        parameter("; KEY=VALUE"),
+        Parameter {
+            key: "KEY",
+            val: "VALUE"
+        }
+    );
+    assert_parser!(
+        parameter("; KEY=VAL UE"),
+        Parameter {
+            key: "KEY",
+            val: "VAL UE"
+        }
+    );
+    assert_parser!(
+        parameter("; KEY="),
+        Parameter {
+            key: "KEY",
+            val: ""
+        }
+    );
+    assert_parser!(
+        parameter(";KEY=VAL-UE"),
+        Parameter {
+            key: "KEY",
+            val: "VAL-UE"
+        }
+    );
 }
 
 #[test]
 #[rustfmt::skip]
 fn test_parameter_error() {
-    assert!(read_parameter(";KEY").is_err());
+    assert!(parameter(";KEY").is_err());
 }
 
-fn read_parameter(i: &str) -> IResult<&str, Parameter> {
+fn parameter(i: &str) -> IResult<&str, Parameter, VerboseError<&str>> {
     let (i, _) = tag(";")(i)?;
     let (i, _) = space0(i)?;
     let (i, key) = alpha0(i)?;
@@ -60,27 +71,44 @@ fn read_parameter(i: &str) -> IResult<&str, Parameter> {
 
 // parameter list
 #[test]
-#[rustfmt::skip]
 pub fn parse_parameter_list() {
-    assert_eq!(
-        read_parameters(";KEY=VALUE"),
-        Ok( ("", vec![Parameter{key: "KEY", val: "VALUE"}])));
+    assert_parser!(
+        parameters(";KEY=VALUE"),
+        vec![Parameter {
+            key: "KEY",
+            val: "VALUE"
+        }]
+    );
 
-    assert_eq!(
-        read_parameters(";KEY=VALUE;DATE=TODAY"),
-        Ok( ("", vec![
-            Parameter{key: "KEY", val: "VALUE"},
-            Parameter{key: "DATE", val:"TODAY"}
-        ])));
+    assert_parser!(
+        parameters(";KEY=VALUE;DATE=TODAY"),
+        vec![
+            Parameter {
+                key: "KEY",
+                val: "VALUE"
+            },
+            Parameter {
+                key: "DATE",
+                val: "TODAY"
+            }
+        ]
+    );
 
-    assert_eq!(
-        read_parameters(";KEY=VALUE;DATE=20170218"),
-        Ok( ("", vec![
-            Parameter{key: "KEY", val: "VALUE"},
-            Parameter{key: "DATE", val:"20170218"}
-        ])));
+    assert_parser!(
+        parameters(";KEY=VALUE;DATE=20170218"),
+        vec![
+            Parameter {
+                key: "KEY",
+                val: "VALUE"
+            },
+            Parameter {
+                key: "DATE",
+                val: "20170218"
+            }
+        ]
+    );
 }
 
-pub fn read_parameters(i: &str) -> IResult<&str, Vec<Parameter>> {
-    many0(read_parameter)(i)
+pub fn parameters(i: &str) -> IResult<&str, Vec<Parameter>, VerboseError<&str>> {
+    many0(parameter)(i)
 }
