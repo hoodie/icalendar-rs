@@ -6,10 +6,14 @@ use nom::{
     bytes::complete::{tag, take_until},
     character::complete::{line_ending, multispace0},
     combinator::{cut, map, opt},
-    error::{context, VerboseError},
+    error::{context, ContextError, ParseError},
     sequence::{preceded, separated_pair, tuple},
     IResult,
 };
+
+#[cfg(test)]
+use nom::error::ErrorKind;
+
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 
@@ -24,7 +28,7 @@ pub struct Property<'a> {
 #[test]
 fn test_property() {
     assert_eq!(
-        property("KEY:VALUE\n"),
+        property::<(_, ErrorKind)>("KEY:VALUE\n"),
         Ok((
             "",
             Property {
@@ -36,7 +40,7 @@ fn test_property() {
     );
 
     assert_parser!(
-        property("KEY1;foo=bar:VALUE\n"),
+        property::<(_, ErrorKind)>("KEY1;foo=bar:VALUE\n"),
         Property {
             key: "KEY1",
             val: "VALUE",
@@ -48,7 +52,7 @@ fn test_property() {
     );
 
     assert_parser!(
-        property("KEY2;foo=bar:VALUE space separated\n"),
+        property::<(_, ErrorKind)>("KEY2;foo=bar:VALUE space separated\n"),
         Property {
             key: "KEY2",
             val: "VALUE space separated",
@@ -60,7 +64,7 @@ fn test_property() {
     );
 
     assert_parser!(
-        property("KEY2;foo=bar:important:VALUE\n"),
+        property::<(_, ErrorKind)>("KEY2;foo=bar:important:VALUE\n"),
         Property {
             key: "KEY2",
             val: "important:VALUE",
@@ -73,7 +77,7 @@ fn test_property() {
 
     // TODO: newlines followed by spaces must be ignored
     assert_parser!(
-        property("KEY3;foo=bar:VALUE\\n newline separated\n"),
+        property::<(_, ErrorKind)>("KEY3;foo=bar:VALUE\\n newline separated\n"),
         Property {
             key: "KEY3",
             val: "VALUE\\n newline separated",
@@ -97,10 +101,12 @@ fn parse_property_with_breaks() {
         params: vec![]
     };
 
-    assert_eq!(property(sample_0), Ok(("", expectation)));
+    assert_eq!(property::<(_, ErrorKind)>(sample_0), Ok(("", expectation)));
 }
 
-pub fn property(input: &str) -> IResult<&str, Property, VerboseError<&str>> {
+pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    input: &'a str,
+) -> IResult<&'a str, Property, E> {
     context(
         "property",
         cut(map(

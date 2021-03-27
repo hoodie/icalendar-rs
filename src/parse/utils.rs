@@ -3,7 +3,7 @@ use nom::{
     bytes::complete::{tag, take_while},
     character::complete::line_ending,
     combinator::complete,
-    error::{ParseError, VerboseError},
+    error::{ContextError, ParseError},
     multi::many0,
     sequence::{delimited, preceded},
     Err, IResult, Parser,
@@ -12,7 +12,9 @@ use nom::{
 use pretty_assertions::assert_eq;
 
 // TODO: how do I express <<alpha_or_dash, but not "END">>
-pub fn property_key(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
+pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    input: &'a str,
+) -> IResult<&'a str, &str, E> {
     if &input[0..=2] == "END" || &input[0..=4] == "BEGIN" {
         IResult::Err(Err::Error(nom::error::make_error(
             input,

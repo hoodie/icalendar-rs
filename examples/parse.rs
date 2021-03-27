@@ -4,6 +4,7 @@ use icalendar::parse::calendar;
 
 fn main() {
     if let Some(sample) = args().nth(1).map(read_to_string) {
-        calendar(&sample.unwrap());
+        let verbose = true;
+        calendar(&sample.unwrap(), verbose);
     }
 }

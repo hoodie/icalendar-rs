@@ -3,10 +3,13 @@ use nom::{
     bytes::complete::tag,
     character::complete::alpha0,
     combinator::{all_consuming, complete, cut, map},
-    error::{context, VerboseError},
+    error::{context, ContextError, ParseError},
     multi::{many0, many_till},
     IResult,
 };
+
+#[cfg(test)]
+use nom::error::ErrorKind;
 
 #[cfg(test)]
 use super::parameters::Parameter;
@@ -33,7 +36,7 @@ pub struct Component<'a> {
 #[rustfmt::skip]
 fn parse_empty_component1() {
     assert_eq!(
-        component("BEGIN:VEVENT\nEND:VEVENT\n"),
+        component::<(_, ErrorKind)>("BEGIN:VEVENT\nEND:VEVENT\n"),
         Ok(("", Component{name: "VEVENT", properties: vec![], components: vec![] }))
     );
 
@@ -43,7 +46,7 @@ fn parse_empty_component1() {
 #[rustfmt::skip]
 fn parse_empty_component2() {
     assert_eq!(
-        component("BEGIN:VEVENT\n\nEND:VEVENT\n"),
+        component::<(_, ErrorKind)>("BEGIN:VEVENT\n\nEND:VEVENT\n"),
         Ok(("", Component{name: "VEVENT", properties: vec![], components: vec![]})),
         "empty component with empty line");
 }
@@ -71,10 +74,10 @@ END:VEVENT
             ], components: vec![]};
 
     println!("expectation: {:#?}", expectation);
-    println!("vs reality : {:#?}", component(sample_1));
+    println!("vs reality : {:#?}", component::<(_, ErrorKind)>(sample_1));
 
     assert_eq!(
-        component(sample_1).unwrap().1,
+        component::<(_, ErrorKind)>(sample_1).unwrap().1,
         expectation.clone());
 }
 
@@ -83,7 +86,9 @@ enum ComponentChild<'a> {
     Component(Component<'a>),
 }
 
-pub fn component(input: &str) -> IResult<&str, Component, VerboseError<&str>> {
+pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    input: &'a str,
+) -> IResult<&'a str, Component, E> {
     let (input, name) = line("BEGIN:", alpha0)(input)?;
 
     let (input, (properties, components)) = map(
@@ -125,7 +130,7 @@ pub fn component(input: &str) -> IResult<&str, Component, VerboseError<&str>> {
 #[test]
 fn test_components() {
     assert_parser!(
-        component("BEGIN:FOO\nEND:FOO"),
+        component::<(_, ErrorKind)>("BEGIN:FOO\nEND:FOO"),
         Component {
             name: "FOO",
             properties: vec![],
@@ -134,7 +139,7 @@ fn test_components() {
     );
 
     assert_parser!(
-        component("BEGIN:FOO\nFOO-PROP:important: spam €\nEND:FOO"),
+        component::<(_, ErrorKind)>("BEGIN:FOO\nFOO-PROP:important: spam €\nEND:FOO"),
         Component {
             name: "FOO",
             properties: vec![Property {
@@ -147,7 +152,7 @@ fn test_components() {
     );
 
     assert_parser!(
-        component("BEGIN:FOO\nUID:e1c97b31-38bb-4b72-b94f-463a12ef5239\nFOO-PROP:sp.am\nEND:FOO"),
+        component::<(_, ErrorKind)>("BEGIN:FOO\nUID:e1c97b31-38bb-4b72-b94f-463a12ef5239\nFOO-PROP:sp.am\nEND:FOO"),
         Component {
             name: "FOO",
             properties: vec![
@@ -166,7 +171,7 @@ fn test_components() {
         }
     );
     assert_parser!(
-        component("BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:FOO"),
+        component::<(_, ErrorKind)>("BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:FOO"),
         Component {
             name: "FOO",
             properties: vec![Property {
@@ -191,7 +196,7 @@ fn test_components() {
 #[ignore]
 fn test_faulty_component() {
     assert_parser!(
-        component("BEGIN:FOO\nEND:F0O"),
+        component::<(_, ErrorKind)>("BEGIN:FOO\nEND:F0O"),
         Component {
             name: "FOO",
             properties: vec![],
@@ -200,7 +205,9 @@ fn test_faulty_component() {
     );
 }
 
-pub fn components(input: &str) -> IResult<&str, Vec<Component>, VerboseError<&str>> {
+pub fn components<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    input: &'a str,
+) -> IResult<&'a str, Vec<Component>, E> {
     complete(many0(all_consuming(component)))(input)
 }
 

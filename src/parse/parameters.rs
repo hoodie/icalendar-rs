@@ -3,12 +3,15 @@ use nom::{
     bytes::complete::{tag, take_till1},
     character::complete::{alpha0, space0},
     combinator::eof,
-    error::VerboseError,
+    error::{ContextError, ParseError},
     multi::many0,
     IResult,
 };
 #[cfg(test)]
 use pretty_assertions::assert_eq;
+
+#[cfg(test)]
+use nom::error::ErrorKind;
 
 /// Zero-copy version of `properties::Parameter`
 #[derive(PartialEq, Debug, Clone)]
@@ -26,35 +29,35 @@ impl<'a> From<Parameter<'a>> for crate::properties::Parameter {
 #[test]
 fn test_parameter() {
     assert_parser!(
-        parameter(";KEY=VALUE"),
+        parameter::<(_, ErrorKind)>(";KEY=VALUE"),
         Parameter {
             key: "KEY",
             val: "VALUE"
         }
     );
     assert_parser!(
-        parameter("; KEY=VALUE"),
+        parameter::<(_, ErrorKind)>("; KEY=VALUE"),
         Parameter {
             key: "KEY",
             val: "VALUE"
         }
     );
     assert_parser!(
-        parameter("; KEY=VAL UE"),
+        parameter::<(_, ErrorKind)>("; KEY=VAL UE"),
         Parameter {
             key: "KEY",
             val: "VAL UE"
         }
     );
     assert_parser!(
-        parameter("; KEY="),
+        parameter::<(_, ErrorKind)>("; KEY="),
         Parameter {
             key: "KEY",
             val: ""
         }
     );
     assert_parser!(
-        parameter(";KEY=VAL-UE"),
+        parameter::<(_, ErrorKind)>(";KEY=VAL-UE"),
         Parameter {
             key: "KEY",
             val: "VAL-UE"
@@ -65,10 +68,12 @@ fn test_parameter() {
 #[test]
 #[rustfmt::skip]
 fn test_parameter_error() {
-    assert!(parameter(";KEY").is_err());
+    assert!(parameter::<(_, ErrorKind)>(";KEY").is_err());
 }
 
-fn parameter(i: &str) -> IResult<&str, Parameter, VerboseError<&str>> {
+fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    i: &'a str,
+) -> IResult<&'a str, Parameter, E> {
     let (i, _) = tag(";")(i)?;
     let (i, _) = space0(i)?;
     let (i, key) = alpha0(i)?;
@@ -81,7 +86,7 @@ fn parameter(i: &str) -> IResult<&str, Parameter, VerboseError<&str>> {
 #[test]
 pub fn parse_parameter_list() {
     assert_parser!(
-        parameters(";KEY=VALUE"),
+        parameters::<(_, ErrorKind)>(";KEY=VALUE"),
         vec![Parameter {
             key: "KEY",
             val: "VALUE"
@@ -89,7 +94,7 @@ pub fn parse_parameter_list() {
     );
 
     assert_parser!(
-        parameters(";KEY=VALUE;DATE=TODAY"),
+        parameters::<(_, ErrorKind)>(";KEY=VALUE;DATE=TODAY"),
         vec![
             Parameter {
                 key: "KEY",
@@ -103,7 +108,7 @@ pub fn parse_parameter_list() {
     );
 
     assert_parser!(
-        parameters(";KEY=VALUE;DATE=20170218"),
+        parameters::<(_, ErrorKind)>(";KEY=VALUE;DATE=20170218"),
         vec![
             Parameter {
                 key: "KEY",
@@ -117,6 +122,8 @@ pub fn parse_parameter_list() {
     );
 }
 
-pub fn parameters(i: &str) -> IResult<&str, Vec<Parameter>, VerboseError<&str>> {
-    many0(parameter)(i)
+pub fn parameters<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    input: &'a str,
+) -> IResult<&'a str, Vec<Parameter>, E> {
+    many0(parameter)(input)
 }
