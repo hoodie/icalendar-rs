@@ -16,32 +16,31 @@ use properties::*;
 pub mod components;
 use components::*;
 
-pub use utils::{simplify_line_endings, unfold};
+pub use utils::normalize;
 
 fn read_calendar(input: &str) -> IResult<&str, Vec<Component<'_>>, VerboseError<&str>> {
     components::components(input)
 }
 
 pub fn calendar(sample: &str) {
-    let normalized = simplify_line_endings(&sample);
-    let unfolded = unfold(&normalized);
+    let normalized = normalize(&sample);
     println!(
         "{}",
-        unfolded
+        normalized
             .lines()
             .enumerate()
-            .map(|(num, content)| format!("{}. {}\n", num+1, content))
+            .map(|(num, content)| format!("{}. {}\n", num + 1, content))
             .collect::<String>()
     );
-    match read_calendar(&unfolded) {
+    match read_calendar(&normalized) {
         Ok((_, read)) => {
             println!("{:#?}", read)
         }
         Err(Err::Failure(e)) => {
-            println!("error: {}", convert_error(unfolded.as_str(), e.clone()))
+            println!("error: {}", convert_error(normalized.as_str(), e.clone()))
         }
         Err(Err::Error(e)) => {
-            println!("error: {}", convert_error(unfolded.as_str(), e.clone()))
+            println!("error: {}", convert_error(normalized.as_str(), e.clone()))
         }
         Err(Err::Incomplete(e)) => println!("error: {:?}", e),
     };
