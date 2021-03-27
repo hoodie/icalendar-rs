@@ -1,5 +1,3 @@
-use std::fmt;
-
 use aho_corasick::AhoCorasick;
 use nom::{
     bytes::complete::{tag, take_while},
@@ -13,20 +11,6 @@ use nom::{
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 
-#[derive(Debug)]
-struct UnexpectedBeginOrEnd;
-
-impl fmt::Display for UnexpectedBeginOrEnd {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "unexpected BEGIN or END")
-    }
-}
-
-impl std::error::Error for UnexpectedBeginOrEnd {
-    fn description(&self) -> &str {
-        "description() is deprecated; use Display"
-    }
-}
 // TODO: how do I express <<alpha_or_dash, but not "END">>
 pub fn property_key(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
     if &input[0..=2] == "END" || &input[0..=4] == "BEGIN" {
@@ -54,7 +38,11 @@ pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
     delimited(many0(line_ending), f, many0(line_ending))
 }
 
-pub fn unfold(input: &str) -> String {
+pub fn normalize(input: &str) -> String {
+    unfold(&simplify_line_endings(&input))
+}
+
+fn unfold(input: &str) -> String {
     let mut output = Vec::<u8>::new();
 
     // unfold
@@ -65,7 +53,7 @@ pub fn unfold(input: &str) -> String {
     String::from_utf8(output).unwrap()
 }
 
-pub fn simplify_line_endings(input: &str) -> String {
+fn simplify_line_endings(input: &str) -> String {
     let mut output = Vec::<u8>::new();
 
     // unfold
@@ -85,5 +73,5 @@ fn test_unfold() {
 3 hello world
 4 hello world"#;
 
-    assert_eq!(unfold(&simplify_line_endings(&input)), expected);
+    assert_eq!(normalize(&input), expected);
 }
