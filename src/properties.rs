@@ -1,6 +1,8 @@
-use std::collections::HashMap;
-use std::fmt::{self, Write};
-use std::mem;
+use std::{
+    collections::HashMap,
+    fmt::{self, Write},
+    mem,
+};
 
 #[derive(Debug)]
 /// key-value pairs inside of `Property`s

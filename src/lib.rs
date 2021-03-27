@@ -98,10 +98,10 @@ mod components;
 pub mod parse;
 mod properties;
 
-//pub mod repeats;
-pub use crate::calendar::Calendar;
-pub use crate::components::{CalendarDateTime, Component, Event, Todo, Venue};
-pub use crate::properties::{Class, Parameter, Property, ValueType};
-pub use crate::properties::{EventStatus, TodoStatus};
+pub use crate::{
+    calendar::Calendar,
+    components::{CalendarDateTime, Component, Event, Todo, Venue},
+    properties::{Class, EventStatus, Parameter, Property, TodoStatus, ValueType},
+};
 
 // TODO Calendar TimeZone VTIMEZONE STANDARD DAYLIGHT (see thunderbird exports)

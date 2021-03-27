@@ -1,11 +1,7 @@
-use crate::components::*;
-
-use crate::{Parameter, Property};
 use chrono::Duration;
-use std::convert::Into;
-use std::fmt;
-use std::iter::FromIterator;
-use std::ops::Deref;
+use std::{convert::Into, fmt, iter::FromIterator, ops::Deref};
+
+use crate::{components::*, Parameter, Property};
 
 #[derive(Debug)]
 pub enum CalendarElement {

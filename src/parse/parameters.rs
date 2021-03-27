@@ -1,4 +1,12 @@
-use nom::{IResult, branch::alt, bytes::complete::{tag, take_till1}, character::complete::{alpha0, space0}, combinator::eof, error::VerboseError, multi::many0};
+use nom::{
+    branch::alt,
+    bytes::complete::{tag, take_till1},
+    character::complete::{alpha0, space0},
+    combinator::eof,
+    error::VerboseError,
+    multi::many0,
+    IResult,
+};
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 
@@ -9,9 +17,9 @@ pub struct Parameter<'a> {
     pub val: &'a str,
 }
 
-impl<'a> Into<crate::properties::Parameter> for Parameter<'a> {
-    fn into(self) -> crate::properties::Parameter {
-        crate::properties::Parameter::new(self.key, self.val)
+impl<'a> From<Parameter<'a>> for crate::properties::Parameter {
+    fn from(parameter: Parameter<'_>) -> crate::properties::Parameter {
+        crate::properties::Parameter::new(parameter.key, parameter.val)
     }
 }
 
