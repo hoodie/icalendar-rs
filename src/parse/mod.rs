@@ -1,22 +1,14 @@
 #![allow(missing_docs)]
-// #![allow(dead_code, unused_variables, unused_imports)]
+use nom::{error::convert_error, error::VerboseError, Finish, IResult};
 
-mod utils;
-//mod lines;
-
-////////// Parameters
+mod components;
 mod parameters;
+mod properties;
+mod utils;
 
-////////// Properties
-pub mod properties;
-use nom::{error::convert_error, error::VerboseError, Err, IResult};
-use properties::*;
-
-////////// Components
-pub mod components;
 use components::*;
-
-pub use utils::normalize;
+use properties::*;
+use utils::normalize;
 
 fn read_calendar(input: &str) -> IResult<&str, Vec<Component<'_>>, VerboseError<&str>> {
     components::components(input)
@@ -32,16 +24,8 @@ pub fn calendar(sample: &str) {
             .map(|(num, content)| format!("{}. {}\n", num + 1, content))
             .collect::<String>()
     );
-    match read_calendar(&normalized) {
-        Ok((_, read)) => {
-            println!("{:#?}", read)
-        }
-        Err(Err::Failure(e)) => {
-            println!("error: {}", convert_error(normalized.as_str(), e.clone()))
-        }
-        Err(Err::Error(e)) => {
-            println!("error: {}", convert_error(normalized.as_str(), e.clone()))
-        }
-        Err(Err::Incomplete(e)) => println!("error: {:?}", e),
+    match read_calendar(&normalized).finish() {
+        Ok((_, read)) => println!("{:#?}", read),
+        Err(e) => println!("error: {}", convert_error(normalized.as_str(), e.clone())),
     };
 }
