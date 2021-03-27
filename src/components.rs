@@ -1,10 +1,7 @@
 use chrono::*;
 use uuid::Uuid;
 
-// use std::io;
-use std::collections::BTreeMap;
-use std::fmt;
-use std::mem;
+use std::{collections::BTreeMap, fmt, mem};
 
 use crate::properties::*;
 

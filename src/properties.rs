@@ -1,6 +1,8 @@
-use std::collections::HashMap;
-use std::fmt::{self, Write};
-use std::mem;
+use std::{
+    collections::HashMap,
+    fmt::{self, Write},
+    mem,
+};
 
 #[derive(Debug)]
 /// key-value pairs inside of `Property`s
@@ -98,11 +100,11 @@ pub enum Class {
     Confidential,
 }
 
-impl Into<Property> for Class {
-    fn into(self) -> Property {
+impl From<Class> for Property {
+    fn from(class: Class) -> Property {
         Property {
             key: String::from("CLASS"),
-            value: String::from(match self {
+            value: String::from(match class {
                 Class::Public => "PUBLIC",
                 Class::Private => "PRIVATE",
                 Class::Confidential => "CONFIDENTIAL",
@@ -145,11 +147,11 @@ pub enum ValueType {
     UtcOffset,
 }
 
-impl Into<Parameter> for ValueType {
-    fn into(self) -> Parameter {
+impl From<ValueType> for Parameter {
+    fn from(value_type: ValueType) -> Parameter {
         Parameter {
             key: String::from("VALUE"),
-            value: String::from(match self {
+            value: String::from(match value_type {
                 ValueType::Binary => "BINARY",
                 ValueType::Boolean => "BOOLEAN",
                 ValueType::CalAddress => "CAL-ADDRESS",
@@ -202,11 +204,11 @@ pub enum TodoStatus {
 //    Custom(&str)
 //}
 
-impl Into<Property> for EventStatus {
-    fn into(self) -> Property {
+impl From<EventStatus> for Property {
+    fn from(status: EventStatus) -> Property {
         Property {
             key: String::from("STATUS"),
-            value: String::from(match self {
+            value: String::from(match status {
                 EventStatus::Tentative => "TENTATIVE",
                 EventStatus::Confirmed => "CONFIRMED",
                 EventStatus::Cancelled => "CANCELLED",
@@ -216,11 +218,11 @@ impl Into<Property> for EventStatus {
     }
 }
 
-impl Into<Property> for TodoStatus {
-    fn into(self) -> Property {
+impl From<TodoStatus> for Property {
+    fn from(todo_status: TodoStatus) -> Property {
         Property {
             key: String::from("STATUS"),
-            value: String::from(match self {
+            value: String::from(match todo_status {
                 TodoStatus::NeedsAction => "NEEDS-ACTION",
                 TodoStatus::Completed => "COMPLETED",
                 TodoStatus::InProcess => "IN-PROCESS",

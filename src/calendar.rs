@@ -1,11 +1,7 @@
-use crate::components::*;
-
-use crate::{Parameter, Property};
 use chrono::Duration;
-use std::convert::Into;
-use std::fmt;
-use std::iter::FromIterator;
-use std::ops::Deref;
+use std::{convert::Into, fmt, iter::FromIterator, ops::Deref};
+
+use crate::{components::*, Parameter, Property};
 
 #[derive(Debug)]
 pub enum CalendarElement {
@@ -14,21 +10,21 @@ pub enum CalendarElement {
     Venue(Venue),
 }
 
-impl Into<CalendarElement> for Event {
-    fn into(self) -> CalendarElement {
-        CalendarElement::Event(self)
+impl From<Event> for CalendarElement {
+    fn from(event: Event) -> CalendarElement {
+        CalendarElement::Event(event)
     }
 }
 
-impl Into<CalendarElement> for Todo {
-    fn into(self) -> CalendarElement {
-        CalendarElement::Todo(self)
+impl From<Todo> for CalendarElement {
+    fn from(todo: Todo) -> CalendarElement {
+        CalendarElement::Todo(todo)
     }
 }
 
-impl Into<CalendarElement> for Venue {
-    fn into(self) -> CalendarElement {
-        CalendarElement::Venue(self)
+impl From<Venue> for CalendarElement {
+    fn from(venue: Venue) -> CalendarElement {
+        CalendarElement::Venue(venue)
     }
 }
 
