@@ -92,6 +92,18 @@ impl InnerComponent {
     }
 }
 
+impl From<crate::parse::components::Component<'_>> for InnerComponent {
+    fn from(component: crate::parse::components::Component) -> Self {
+        Self {
+            properties: component
+            .properties
+            .into_iter()
+            .map(|p| (p.key.into(), p.into())).collect(),
+            multi_properties : Default::default()
+        }
+    }
+}
+
 impl Event {
     /// Creates a new Event.
     pub fn new() -> Self {

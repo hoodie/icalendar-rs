@@ -2,9 +2,10 @@ use nom::{
     branch::alt,
     bytes::complete::{tag, take_till1},
     character::complete::{alpha0, space0},
-    combinator::eof,
+    combinator::{eof, opt},
     error::{ContextError, ParseError},
     multi::many0,
+    sequence::preceded,
     IResult,
 };
 #[cfg(test)]
@@ -17,12 +18,12 @@ use nom::error::ErrorKind;
 #[derive(PartialEq, Debug, Clone)]
 pub struct Parameter<'a> {
     pub key: &'a str,
-    pub val: &'a str,
+    pub val: Option<&'a str>,
 }
 
 impl<'a> From<Parameter<'a>> for crate::properties::Parameter {
     fn from(parameter: Parameter<'_>) -> crate::properties::Parameter {
-        crate::properties::Parameter::new(parameter.key, parameter.val)
+        crate::properties::Parameter::new(parameter.key, parameter.val.unwrap_or(""))
     }
 }
 
@@ -32,43 +33,52 @@ fn test_parameter() {
         parameter::<(_, ErrorKind)>(";KEY=VALUE"),
         Parameter {
             key: "KEY",
-            val: "VALUE"
+            val: Some("VALUE")
         }
     );
     assert_parser!(
         parameter::<(_, ErrorKind)>("; KEY=VALUE"),
         Parameter {
             key: "KEY",
-            val: "VALUE"
+            val: Some("VALUE")
         }
     );
     assert_parser!(
         parameter::<(_, ErrorKind)>("; KEY=VAL UE"),
         Parameter {
             key: "KEY",
-            val: "VAL UE"
+            val: Some("VAL UE")
         }
     );
     assert_parser!(
         parameter::<(_, ErrorKind)>("; KEY="),
         Parameter {
             key: "KEY",
-            val: ""
+            val: Some("")
         }
     );
     assert_parser!(
         parameter::<(_, ErrorKind)>(";KEY=VAL-UE"),
         Parameter {
             key: "KEY",
-            val: "VAL-UE"
+            val: Some("VAL-UE")
         }
     );
-}
+    assert_parser!(
+        parameter::<(_, ErrorKind)>(";KEY"),
+        Parameter {
+            key: "KEY",
+            val: None,
+        }
+    );
 
-#[test]
-#[rustfmt::skip]
-fn test_parameter_error() {
-    assert!(parameter::<(_, ErrorKind)>(";KEY").is_err());
+    assert_parser!(
+        parameter::<(_, ErrorKind)>(";email=rust@hoodie.de"),
+        Parameter {
+            key: "email",
+            val: Some("rust@hoodie.de")
+        }
+    );
 }
 
 fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -77,8 +87,10 @@ fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     let (i, _) = tag(";")(i)?;
     let (i, _) = space0(i)?;
     let (i, key) = alpha0(i)?;
-    let (i, _) = tag("=")(i)?;
-    let (i, val) = alt((eof, take_till1(|x| x == ';' || x == ':')))(i)?;
+    let (i, val) = opt(preceded(
+        tag("="),
+        alt((eof, take_till1(|x| x == ';' || x == ':'))),
+    ))(i)?;
     Ok((i, Parameter { key, val }))
 }
 
@@ -89,7 +101,7 @@ pub fn parse_parameter_list() {
         parameters::<(_, ErrorKind)>(";KEY=VALUE"),
         vec![Parameter {
             key: "KEY",
-            val: "VALUE"
+            val: Some("VALUE")
         }]
     );
 
@@ -98,11 +110,11 @@ pub fn parse_parameter_list() {
         vec![
             Parameter {
                 key: "KEY",
-                val: "VALUE"
+                val: Some("VALUE")
             },
             Parameter {
                 key: "DATE",
-                val: "TODAY"
+                val: Some("TODAY")
             }
         ]
     );
@@ -112,11 +124,11 @@ pub fn parse_parameter_list() {
         vec![
             Parameter {
                 key: "KEY",
-                val: "VALUE"
+                val: Some("VALUE")
             },
             Parameter {
                 key: "DATE",
-                val: "20170218"
+                val: Some("20170218")
             }
         ]
     );

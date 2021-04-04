@@ -1,6 +1,6 @@
 use aho_corasick::AhoCorasick;
 use nom::{
-    bytes::complete::{tag, take_while},
+    bytes::complete::{tag_no_case, take_while},
     character::complete::line_ending,
     combinator::complete,
     error::{ContextError, ParseError},
@@ -31,7 +31,7 @@ pub fn line<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
     prefix: &'a str,
     f: F,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, O, E> {
-    line_separated(complete(preceded(tag(prefix), f)))
+    line_separated(complete(preceded(tag_no_case(prefix), f)))
 }
 
 pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(

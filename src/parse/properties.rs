@@ -25,6 +25,12 @@ pub struct Property<'a> {
     pub params: Vec<Parameter<'a>>,
 }
 
+impl From<Property<'_>> for crate::Property {
+    fn from(parsed: Property<'_>) -> Self {
+        Self::new(parsed.key, parsed.val)
+    }
+}
+
 #[test]
 fn test_property() {
     assert_eq!(
@@ -46,7 +52,7 @@ fn test_property() {
             val: "VALUE",
             params: vec![Parameter {
                 key: "foo",
-                val: "bar"
+                val: Some("bar")
             }]
         }
     );
@@ -58,7 +64,7 @@ fn test_property() {
             val: "VALUE space separated",
             params: vec![Parameter {
                 key: "foo",
-                val: "bar"
+                val: Some("bar")
             }]
         }
     );
@@ -70,7 +76,7 @@ fn test_property() {
             val: "important:VALUE",
             params: vec![Parameter {
                 key: "foo",
-                val: "bar"
+                val: Some("bar")
             }]
         }
     );
@@ -83,7 +89,24 @@ fn test_property() {
             val: "VALUE\\n newline separated",
             params: vec![Parameter {
                 key: "foo",
-                val: "bar"
+                val: Some("bar")
+            }]
+        }
+    );
+}
+
+#[test]
+#[rustfmt::skip]
+fn parse_properties_from_rfc() {
+    // TODO: newlines followed by spaces must be ignored
+    assert_parser!(
+        property::<(_, ErrorKind)>("email;internet:mb@goerlitz.de\n"),
+        Property {
+            key: "email",
+            val: "mb@goerlitz.de",
+            params: vec![Parameter {
+                key: "internet",
+                val: None,
             }]
         }
     );

@@ -1,10 +1,12 @@
 #![allow(missing_docs)]
 use nom::{error::convert_error, error::VerboseError, Finish, IResult};
 
-mod components;
+pub(crate) mod components;
 mod parameters;
 mod properties;
 mod utils;
+#[cfg(test)]
+mod tests;
 
 use components::*;
 use properties::*;

@@ -65,11 +65,11 @@ END:VEVENT
 
     let expectation = Component{name: "VEVENT", properties: vec![
             Property{key: "KEY", val: "VALUE", params: vec![
-                Parameter{key:"foo", val: "bar"},
+                Parameter{key:"foo", val: Some("bar")},
             ]},
             Property{key: "KEY", val: "VALUE", params: vec![
-                Parameter{key:"foo", val: "bar"},
-                Parameter{key:"DATE", val: "20170218"},
+                Parameter{key:"foo", val: Some("bar")},
+                Parameter{key:"DATE", val: Some("20170218")},
             ]},
             ], components: vec![]};
 
