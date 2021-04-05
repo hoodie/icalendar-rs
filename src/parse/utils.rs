@@ -21,9 +21,9 @@ pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
             nom::error::ErrorKind::Satisfy,
         )))
     } else {
-        take_while(|c: char| (c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()))(
-            input,
-        )
+        take_while(|c: char| {
+           c == '.' || c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()
+        })(input)
     }
 }
 
