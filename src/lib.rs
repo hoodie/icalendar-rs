@@ -70,7 +70,8 @@
     unused_import_braces,
     unused_qualifications,
     missing_debug_implementations,
-    clippy::doc_markdown
+    clippy::doc_markdown,
+    clippy::redundant_closure_for_method_calls
 )]
 
 macro_rules! print_crlf {

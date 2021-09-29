@@ -53,7 +53,7 @@ impl Property {
     /// Appends a new parameter.
     pub fn append_parameter<I: Into<Parameter>>(&mut self, into_parameter: I) -> &mut Self {
         let parameter = into_parameter.into();
-        self.parameters.insert(parameter.key.to_owned(), parameter);
+        self.parameters.insert(parameter.key.clone(), parameter);
         self
     }
 

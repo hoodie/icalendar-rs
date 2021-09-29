@@ -80,7 +80,7 @@ impl Calendar {
         T: IntoIterator<Item = U>,
         U: Into<CalendarElement>,
     {
-        self.components.extend(other.into_iter().map(|x| x.into()));
+        self.components.extend(other.into_iter().map(Into::into));
     }
 
     /// Appends an element to the back of the `Calendar`.
