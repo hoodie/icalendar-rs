@@ -83,8 +83,8 @@ impl InnerComponent {
     /// copies over everything
     pub fn done(&mut self) -> Self {
         InnerComponent {
-            properties: mem::replace(&mut self.properties, BTreeMap::new()),
-            multi_properties: mem::replace(&mut self.multi_properties, Vec::new()),
+            properties: mem::take(&mut self.properties),
+            multi_properties: mem::take(&mut self.multi_properties),
         }
     }
 }

@@ -14,21 +14,21 @@ pub enum CalendarElement {
     Venue(Venue),
 }
 
-impl Into<CalendarElement> for Event {
-    fn into(self) -> CalendarElement {
-        CalendarElement::Event(self)
+impl From<Event> for CalendarElement {
+    fn from(val: Event) -> Self {
+        CalendarElement::Event(val)
     }
 }
 
-impl Into<CalendarElement> for Todo {
-    fn into(self) -> CalendarElement {
-        CalendarElement::Todo(self)
+impl From<Todo> for CalendarElement {
+    fn from(val: Todo) -> Self {
+        CalendarElement::Todo(val)
     }
 }
 
-impl Into<CalendarElement> for Venue {
-    fn into(self) -> CalendarElement {
-        CalendarElement::Venue(self)
+impl From<Venue> for CalendarElement {
+    fn from(val: Venue) -> Self {
+        CalendarElement::Venue(val)
     }
 }
 

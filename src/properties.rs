@@ -66,9 +66,9 @@ impl Property {
     /// End of Builder Pattern.
     pub fn done(&mut self) -> Self {
         Property {
-            key: mem::replace(&mut self.key, String::new()),
-            value: mem::replace(&mut self.value, String::new()),
-            parameters: mem::replace(&mut self.parameters, HashMap::new()),
+            key: mem::take(&mut self.key),
+            value: mem::take(&mut self.value),
+            parameters: mem::take(&mut self.parameters),
         }
     }
 
@@ -98,11 +98,11 @@ pub enum Class {
     Confidential,
 }
 
-impl Into<Property> for Class {
-    fn into(self) -> Property {
+impl From<Class> for Property {
+    fn from(val: Class) -> Self {
         Property {
             key: String::from("CLASS"),
-            value: String::from(match self {
+            value: String::from(match val {
                 Class::Public => "PUBLIC",
                 Class::Private => "PRIVATE",
                 Class::Confidential => "CONFIDENTIAL",
@@ -145,11 +145,11 @@ pub enum ValueType {
     UtcOffset,
 }
 
-impl Into<Parameter> for ValueType {
-    fn into(self) -> Parameter {
+impl From<ValueType> for Parameter {
+    fn from(val: ValueType) -> Self {
         Parameter {
             key: String::from("VALUE"),
-            value: String::from(match self {
+            value: String::from(match val {
                 ValueType::Binary => "BINARY",
                 ValueType::Boolean => "BOOLEAN",
                 ValueType::CalAddress => "CAL-ADDRESS",
@@ -202,11 +202,11 @@ pub enum TodoStatus {
 //    Custom(&str)
 //}
 
-impl Into<Property> for EventStatus {
-    fn into(self) -> Property {
+impl From<EventStatus> for Property {
+    fn from(val: EventStatus) -> Self {
         Property {
             key: String::from("STATUS"),
-            value: String::from(match self {
+            value: String::from(match val {
                 EventStatus::Tentative => "TENTATIVE",
                 EventStatus::Confirmed => "CONFIRMED",
                 EventStatus::Cancelled => "CANCELLED",
@@ -216,11 +216,11 @@ impl Into<Property> for EventStatus {
     }
 }
 
-impl Into<Property> for TodoStatus {
-    fn into(self) -> Property {
+impl From<TodoStatus> for Property {
+    fn from(val: TodoStatus) -> Self {
         Property {
             key: String::from("STATUS"),
-            value: String::from(match self {
+            value: String::from(match val {
                 TodoStatus::NeedsAction => "NEEDS-ACTION",
                 TodoStatus::Completed => "COMPLETED",
                 TodoStatus::InProcess => "IN-PROCESS",
@@ -291,7 +291,7 @@ mod tests {
     #[test]
     fn fold_line_short() {
         let line = String::from("This is a short line");
-        assert_eq!(line.clone(), fold_line(&line));
+        assert_eq!(line, fold_line(&line));
     }
 
     #[test]
