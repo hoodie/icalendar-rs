@@ -40,14 +40,14 @@ impl fmt::Display for CalendarDateTime {
     }
 }
 
-/// Converts from time zone-aware UTC date-time to [CalendarDateTime::Utc].
+/// Converts from time zone-aware UTC date-time to [`CalendarDateTime::Utc`].
 impl From<DateTime<Utc>> for CalendarDateTime {
     fn from(dt: DateTime<Utc>) -> Self {
         Self::Utc(dt)
     }
 }
 
-/// Converts from time zone-less date-time to [CalendarDateTime::Floating].
+/// Converts from time zone-less date-time to [`CalendarDateTime::Floating`].
 impl From<NaiveDateTime> for CalendarDateTime {
     fn from(dt: NaiveDateTime) -> Self {
         Self::Floating(dt)
@@ -128,7 +128,7 @@ impl Todo {
         }
     }
 
-    /// Set the PERCENT-COMPLETE `Property`
+    /// Set the `PERCENT-COMPLETE` property
     ///
     /// Ranges between 0 - 100
     pub fn percent_complete(&mut self, percent: u8) -> &mut Self {
@@ -136,16 +136,16 @@ impl Todo {
         self
     }
 
-    /// Set the DUE `Property`
+    /// Set the `DUE` property
     ///
-    /// See [CalendarDateTime] for info how are different [chrono] types converted automatically.
+    /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     pub fn due<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
         let calendar_dt: CalendarDateTime = dt.into();
         self.add_property("DUE", &calendar_dt.to_string());
         self
     }
 
-    /// Set the COMPLETED `Property`
+    /// Set the `COMPLETED` property
     ///
     /// Per [RFC 5545, Section 3.8.2.1](https://tools.ietf.org/html/rfc5545#section-3.8.2.1), this
     /// must be a date-time in UTC format.
@@ -293,7 +293,7 @@ pub trait Component {
 
     /// Set the DTSTART `Property`
     ///
-    /// See [CalendarDateTime] for info how are different [chrono] types converted automatically.
+    /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     fn starts<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
         let calendar_dt = dt.into();
         self.add_property("DTSTART", &calendar_dt.to_string());
@@ -302,7 +302,7 @@ pub trait Component {
 
     /// Set the DTEND `Property`
     ///
-    /// See [CalendarDateTime] for info how are different [chrono] types converted automatically.
+    /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     fn ends<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
         let calendar_dt = dt.into();
         self.add_property("DTEND", &calendar_dt.to_string());
@@ -323,7 +323,7 @@ pub trait Component {
         self
     }
 
-    /// Set the DTEND `Property`, date only
+    /// Set the `DTEND` property, date only
     fn end_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
     where
         TZ::Offset: fmt::Display,

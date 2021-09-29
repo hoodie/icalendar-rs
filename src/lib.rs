@@ -5,10 +5,10 @@
 //!
 //!
 //! ## Structure
-//! * `Calendar`s consist of `Components`
-//! * `Component`s are e.g. `Event` or `Todo`
-//! * `Component`s consist of `Property`s
-//! * `Property`s may have `Parameter`s
+//! * [`Calendar`]s consist of [`Component`]s
+//! * [`Component`]s are e.g. [`Event`] or [`Todo`]
+//! * [`Component`]s consist of [`Property`]s
+//! * [`Property`]s may have [`Parameter`]s
 //!
 //! ```rust
 //! # extern crate chrono;
@@ -50,12 +50,12 @@
 //!
 //! ## Breaking API Changes in version 0.7.0
 //!
-//! - [Todo::due] and [Todo::completed] now take their date-time argument by value rather than by
+//! - [`Todo::due`] and [`Todo::completed`] now take their date-time argument by value rather than by
 //!   reference
-//! - [Todo::completed] now requires its [chrono::DateTime] argument to have exactly [chrono::Utc]
+//! - [`Todo::completed`] now requires its [`chrono::DateTime`] argument to have exactly [`chrono::Utc`]
 //!   specified as its time zone as mandated by the RFC.
-//! - [Component::starts], [Component::ends] and [Todo::due] now take newly introduced
-//!   [CalendarDateTime] (through `Into<CalendarDateTime>` indirection). This allows callers to
+//! - [`Component::starts`], [`Component::ends`] and [`Todo::due`] now take newly introduced
+//!   [`CalendarDateTime`] (through [`Into<CalendarDateTime>`] indirection). This allows callers to
 //!   define time zone handling. Conversions from [`chrono::NaiveDateTime`] and
 //!   [`chrono::DateTime<Utc>`](chrono::DateTime) are provided for ergonomics, the latter also restoring API
 //!   compatibility in case of UTC date-times.
@@ -69,7 +69,8 @@
     unstable_features,
     unused_import_braces,
     unused_qualifications,
-    missing_debug_implementations
+    missing_debug_implementations,
+    clippy::doc_markdown
 )]
 
 macro_rules! print_crlf {
