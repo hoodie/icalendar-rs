@@ -28,4 +28,4 @@ features = ["v4"]
 version = "0.8"
 
 [dev-dependencies]
-pretty_assertions = "0.6"
+pretty_assertions = "1.0"
