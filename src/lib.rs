@@ -95,6 +95,7 @@ mod assert;
 //pub mod period;
 mod calendar;
 mod components;
+#[cfg(feature = "parser")]
 pub mod parse;
 mod properties;
 

@@ -92,6 +92,7 @@ impl InnerComponent {
     }
 }
 
+#[cfg(feature = "parser")]
 impl From<crate::parse::components::Component<'_>> for InnerComponent {
     fn from(component: crate::parse::components::Component) -> Self {
         Self {
