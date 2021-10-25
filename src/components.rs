@@ -4,7 +4,6 @@ use uuid::Uuid;
 // use std::io;
 use std::collections::BTreeMap;
 use std::fmt;
-use std::mem;
 
 use crate::properties::*;
 
@@ -78,38 +77,18 @@ struct InnerComponent {
     multi_properties: Vec<Property>,
 }
 
-impl InnerComponent {
-    /// End of builder pattern.
-    /// copies over everything
-    pub fn done(&mut self) -> Self {
-        InnerComponent {
-            properties: mem::take(&mut self.properties),
-            multi_properties: mem::take(&mut self.multi_properties),
-        }
-    }
-}
-
 impl Event {
     /// Creates a new Event.
     pub fn new() -> Self {
         Default::default()
     }
 
-    /// End of builder pattern.
-    /// copies over everything
-    pub fn done(&mut self) -> Self {
-        Event {
-            inner: self.inner.done(),
-        }
-    }
-
     ///  Defines the overall status or confirmation
-    pub fn status(&mut self, status: EventStatus) -> &mut Self {
-        self.append_property(status.into());
-        self
+    pub fn status(self, status: EventStatus) -> Self {
+        self.append_property(status.into())
     }
 
-    //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
+    //pub fn repeats<R:Repeater+?Sized>(self, repeat: R) -> Self {
     //    unimplemented!()
     //}
 }
@@ -120,47 +99,35 @@ impl Todo {
         Default::default()
     }
 
-    /// End of builder pattern.
-    /// copies over everything
-    pub fn done(&mut self) -> Self {
-        Todo {
-            inner: self.inner.done(),
-        }
-    }
-
     /// Set the `PERCENT-COMPLETE` property
     ///
     /// Ranges between 0 - 100
-    pub fn percent_complete(&mut self, percent: u8) -> &mut Self {
-        self.add_property("PERCENT-COMPLETE", &percent.to_string());
-        self
+    pub fn percent_complete(self, percent: u8) -> Self {
+        self.property("PERCENT-COMPLETE", &percent.to_string())
     }
 
     /// Set the `DUE` property
     ///
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
-    pub fn due<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
+    pub fn due<T: Into<CalendarDateTime>>(self, dt: T) -> Self {
         let calendar_dt: CalendarDateTime = dt.into();
-        self.add_property("DUE", &calendar_dt.to_string());
-        self
+        self.property("DUE", &calendar_dt.to_string())
     }
 
     /// Set the `COMPLETED` property
     ///
     /// Per [RFC 5545, Section 3.8.2.1](https://tools.ietf.org/html/rfc5545#section-3.8.2.1), this
     /// must be a date-time in UTC format.
-    pub fn completed(&mut self, dt: DateTime<Utc>) -> &mut Self {
-        self.add_property("COMPLETED", &CalendarDateTime::Utc(dt).to_string());
-        self
+    pub fn completed(self, dt: DateTime<Utc>) -> Self {
+        self.property("COMPLETED", &CalendarDateTime::Utc(dt).to_string())
     }
 
     ///  Defines the overall status or confirmation
-    pub fn status(&mut self, status: TodoStatus) -> &mut Self {
-        self.append_property(status.into());
-        self
+    pub fn status(self, status: TodoStatus) -> Self {
+        self.append_property(status.into())
     }
 
-    //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
+    //pub fn repeats<R:Repeater+?Sized>(self, repeat: R) -> Self {
     //    unimplemented!()
     //}
 }
@@ -171,20 +138,12 @@ impl Venue {
         Default::default()
     }
 
-    /// End of builder pattern.
-    /// copies over everything
-    pub fn done(&mut self) -> Self {
-        Venue {
-            inner: self.inner.done(),
-        }
-    }
-
     /// Set the STREET-ADDRESS `Property`
     ///
     /// This specifies the street address of a location. If the location requires a multiple-line
     /// address, they may be separated by an encoded newline "\n".
-    pub fn street_address(&mut self, address: &str) -> &mut Self {
-        self.add_property("STREET-ADDRESS", address)
+    pub fn street_address(self, address: &str) -> Self {
+        self.property("STREET-ADDRESS", address)
     }
 
     /// Set the EXTENDED-ADDRESS `Property`
@@ -193,41 +152,41 @@ impl Venue {
     /// location. This property may be used to give additional information about an address that is
     /// not usually considered part of the street address. If the location requires a multiple-line
     /// address, they may be separated by an encoded newline "\n".
-    pub fn extended_address(&mut self, address: &str) -> &mut Self {
-        self.add_property("EXTENDED-ADDRESS", address)
+    pub fn extended_address(self, address: &str) -> Self {
+        self.property("EXTENDED-ADDRESS", address)
     }
 
     /// Set the LOCALITY `Property`
     ///
     /// This specifies the city or locality of a venue.
-    pub fn locality(&mut self, locality: &str) -> &mut Self {
-        self.add_property("LOCALITY", locality)
+    pub fn locality(self, locality: &str) -> Self {
+        self.property("LOCALITY", locality)
     }
 
     /// Set the REGION `Property`
     ///
     /// This specifies the region (state, province, canton, etc.) of a location.
-    pub fn region(&mut self, region: &str) -> &mut Self {
-        self.add_property("REGION", region)
+    pub fn region(self, region: &str) -> Self {
+        self.property("REGION", region)
     }
 
     /// Set the COUNTRY `Property`
     ///
     /// This specifies the country of a location.
-    pub fn country(&mut self, country: &str) -> &mut Self {
-        self.add_property("COUNTRY", country)
+    pub fn country(self, country: &str) -> Self {
+        self.property("COUNTRY", country)
     }
 
     /// Set the POSTAL-CODE `Property`
     ///
     /// This specifies the postal code of a location.
-    pub fn postal_code(&mut self, postal_code: &str) -> &mut Self {
-        self.add_property("POSTAL-CODE", postal_code)
+    pub fn postal_code(self, postal_code: &str) -> Self {
+        self.property("POSTAL-CODE", postal_code)
     }
 }
 
 /// Implemented by everything that goes into a `Calendar`
-pub trait Component {
+pub trait Component: Sized {
     /// Returns kind of component.
     ///
     ///
@@ -274,95 +233,83 @@ pub trait Component {
     }
 
     /// Append a given `Property`
-    fn append_property(&mut self, property: Property) -> &mut Self;
+    fn append_property(self, property: Property) -> Self;
 
     /// Adds a `Property` of which there may be many
-    fn append_multi_property(&mut self, property: Property) -> &mut Self;
+    fn append_multi_property(self, property: Property) -> Self;
 
     /// Construct and append a `Property`
-    fn add_property(&mut self, key: &str, val: &str) -> &mut Self {
-        self.append_property(Property::new(key, val));
-        self
+    fn property(self, key: &str, val: &str) -> Self {
+        self.append_property(Property::new(key, val))
     }
 
     /// Construct and append a `Property`
-    fn add_multi_property(&mut self, key: &str, val: &str) -> &mut Self {
-        self.append_multi_property(Property::new(key, val));
-        self
+    fn add_multi_property(self, key: &str, val: &str) -> Self {
+        self.append_multi_property(Property::new(key, val))
     }
 
     /// Set the DTSTART `Property`
     ///
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
-    fn starts<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
+    fn starts<T: Into<CalendarDateTime>>(self, dt: T) -> Self {
         let calendar_dt = dt.into();
-        self.add_property("DTSTART", &calendar_dt.to_string());
-        self
+        self.property("DTSTART", &calendar_dt.to_string())
     }
 
     /// Set the DTEND `Property`
     ///
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
-    fn ends<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
+    fn ends<T: Into<CalendarDateTime>>(self, dt: T) -> Self {
         let calendar_dt = dt.into();
-        self.add_property("DTEND", &calendar_dt.to_string());
-        self
+        self.property("DTEND", &calendar_dt.to_string())
     }
 
     /// Set the DTSTART `Property`, date only
-    fn start_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+    fn start_date<TZ: TimeZone>(self, date: Date<TZ>) -> Self
     where
         TZ::Offset: fmt::Display,
     {
         // DTSTART
         self.append_property(
             Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
-        );
-        self
+                .append_parameter(ValueType::Date),
+        )
     }
 
     /// Set the `DTEND` property, date only
-    fn end_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+    fn end_date<TZ: TimeZone>(self, date: Date<TZ>) -> Self
     where
         TZ::Offset: fmt::Display,
     {
         // DTSTART
         self.append_property(
             Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
-        );
-        self
+                .append_parameter(ValueType::Date),
+        )
     }
 
     /// Set the DTSTART `Property`, date only
-    fn all_day<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+    fn all_day<TZ: TimeZone>(self, date: Date<TZ>) -> Self
     where
         TZ::Offset: fmt::Display,
     {
         // DTSTART
         self.append_property(
             Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
+                .append_parameter(ValueType::Date),
         )
         .append_property(
             Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
-        );
-        self
+                .append_parameter(ValueType::Date),
+        )
     }
 
     ///  Defines the relative priority.
     ///
     ///  Ranges from 0 to 10, larger values will be truncated
-    fn priority(&mut self, priority: u32) -> &mut Self {
-        let priority = ::std::cmp::min(priority, 10);
-        self.add_property("PRIORITY", &priority.to_string());
-        self
+    fn priority(self, priority: u32) -> Self {
+        let priority = std::cmp::min(priority, 10);
+        self.property("PRIORITY", &priority.to_string())
     }
 
     /// Prints to stdout
@@ -374,47 +321,43 @@ pub trait Component {
     }
 
     /// Set the summary
-    fn summary(&mut self, desc: &str) -> &mut Self {
-        self.add_property("SUMMARY", desc)
+    fn summary(self, desc: &str) -> Self {
+        self.property("SUMMARY", desc)
     }
 
     /// Set the description
-    fn description(&mut self, desc: &str) -> &mut Self {
-        self.add_property("DESCRIPTION", desc)
+    fn description(self, desc: &str) -> Self {
+        self.property("DESCRIPTION", desc)
     }
 
     ///// Set the description
     ///// TODO `Attendee` needs to be its own type
-    //fn attendee(&mut self, desc: &str) -> &mut Self {
+    //fn attendee( self, desc: &str) ->  Self {
     //    self.add_multi_property("ATTENDEE", desc) // multi_properties should be a multimap
     //}
 
     /// Set the LOCATION
     /// 3.8.1.7.  Location
-    fn location(&mut self, location: &str) -> &mut Self {
-        self.add_property("LOCATION", location);
-        self
+    fn location(self, location: &str) -> Self {
+        self.property("LOCATION", location)
     }
 
     /// Set the LOCATION with a VVENUE UID
     /// iCalender venue draft
-    fn venue(&mut self, location: &str, venue_uid: &str) -> &mut Self {
+    fn venue(self, location: &str, venue_uid: &str) -> Self {
         self.append_property(
             Property::new("LOCATION", location)
-                .append_parameter(Parameter::new("VVENUE", venue_uid))
-                .done(),
-        );
-        self
+                .append_parameter(Parameter::new("VVENUE", venue_uid)),
+        )
     }
 
     /// Set the UID
-    fn uid(&mut self, uid: &str) -> &mut Self {
-        self.add_property("UID", uid);
-        self
+    fn uid(self, uid: &str) -> Self {
+        self.property("UID", uid)
     }
 
     /// Set the visibility class
-    fn class(&mut self, class: Class) -> &mut Self {
+    fn class(self, class: Class) -> Self {
         self.append_property(class.into())
     }
 }
@@ -440,7 +383,7 @@ macro_rules! component_impl {
             }
 
             /// Adds a `Property`
-            fn append_property(&mut self, property: Property) -> &mut Self {
+            fn append_property(mut self, property: Property) -> Self {
                 self.inner
                     .properties
                     .insert(property.key().to_owned(), property);
@@ -448,7 +391,7 @@ macro_rules! component_impl {
             }
 
             /// Adds a `Property` of which there may be many
-            fn append_multi_property(&mut self, property: Property) -> &mut Self {
+            fn append_multi_property(mut self, property: Property) -> Self {
                 self.inner.multi_properties.push(property);
                 self
             }

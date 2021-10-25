@@ -9,8 +9,7 @@ fn main() {
         .percent_complete(28)
         .status(TodoStatus::Completed)
         .completed(Utc::now())
-        .due(Local::now().with_timezone(&Utc))
-        .done();
+        .due(Local::now().with_timezone(&Utc));
 
     println!("{}", todo.to_string());
 }

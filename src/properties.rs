@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::fmt::{self, Write};
-use std::mem;
 
 #[derive(Debug)]
 /// key-value pairs inside of `Property`s
@@ -51,25 +50,15 @@ impl Property {
     }
 
     /// Appends a new parameter.
-    pub fn append_parameter<I: Into<Parameter>>(&mut self, into_parameter: I) -> &mut Self {
+    pub fn append_parameter<I: Into<Parameter>>(mut self, into_parameter: I) -> Self {
         let parameter = into_parameter.into();
         self.parameters.insert(parameter.key.clone(), parameter);
         self
     }
 
     /// Creates and appends a parameter.
-    pub fn add_parameter(&mut self, key: &str, val: &str) -> &mut Self {
-        self.append_parameter(Parameter::new(key, val));
-        self
-    }
-
-    /// End of Builder Pattern.
-    pub fn done(&mut self) -> Self {
-        Property {
-            key: mem::take(&mut self.key),
-            value: mem::take(&mut self.value),
-            parameters: mem::take(&mut self.parameters),
-        }
+    pub fn parameter(self, key: &str, val: &str) -> Self {
+        self.append_parameter(Parameter::new(key, val))
     }
 
     /// Writes this Property to `out`

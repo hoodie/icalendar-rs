@@ -47,8 +47,7 @@ fn test_calendar_to_string() {
         .location("Somewhere")
         .uid("euid")
         .class(Class::Confidential)
-        .add_property("DTSTAMP", "20190307T181159")
-        .done();
+        .property("DTSTAMP", "20190307T181159");
     calendar.push(event);
     let todo = Todo::new()
         .percent_complete(95)
@@ -56,8 +55,7 @@ fn test_calendar_to_string() {
         .completed(utc_date)
         .summary("A Todo")
         .uid("todouid")
-        .add_property("DTSTAMP", "20190307T181159")
-        .done();
+        .property("DTSTAMP", "20190307T181159");
     calendar.push(todo);
     assert_eq!(calendar.to_string(), EXPECTED_CAL_CONTENT);
 }

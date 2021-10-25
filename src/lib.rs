@@ -23,10 +23,8 @@
 //!     .class(Class::Confidential)
 //!     .ends(Utc::now() + Duration::days(1))
 //!     .append_property(Property::new("TEST", "FOOBAR")
-//!               .add_parameter("IMPORTANCE", "very")
-//!               .add_parameter("DUE", "tomorrow")
-//!               .done())
-//!     .done();
+//!               .parameter("IMPORTANCE", "very")
+//!               .parameter("DUE", "tomorrow"));
 //!
 //! let bday = Event::new()
 //!     .all_day(Utc.ymd(2016, 3, 15))
@@ -35,10 +33,9 @@
 //! r#"Hey, I'm gonna have a party
 //! BYOB: Bring your own beer.
 //! Hendrik"#
-//! )
-//!     .done();
+//! );
 //!
-//! let todo = Todo::new().summary("Buy some milk").done();
+//! let todo = Todo::new().summary("Buy some milk");
 //!
 //!
 //! let mut calendar = Calendar::new();

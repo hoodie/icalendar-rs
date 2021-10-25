@@ -115,8 +115,7 @@ impl Calendar {
         let duration_string = duration.to_string();
         self.append_property(
             Property::new("REFRESH-INTERVAL", duration_string.as_str())
-                .append_parameter(Parameter::new("VALUE", "DURATION"))
-                .done(),
+                .append_parameter(Parameter::new("VALUE", "DURATION")),
         );
         self.append_property(Property::new("X-PUBLISHED-TTL", duration_string.as_str()));
         self
