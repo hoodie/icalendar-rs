@@ -41,7 +41,7 @@ pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
 }
 
 pub fn normalize(input: &str) -> String {
-    unfold(&simplify_line_endings(&input))
+    unfold(&simplify_line_endings(input))
 }
 
 fn unfold(input: &str) -> String {

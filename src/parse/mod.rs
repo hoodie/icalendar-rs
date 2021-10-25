@@ -13,18 +13,18 @@ use properties::*;
 use utils::normalize;
 
 fn read_calendar(input: &str) -> IResult<&str, Vec<Component<'_>>> {
-    components::components(input)
+    components(input)
 }
 
 pub fn read_calendar_verbose(input: &str) -> Result<Vec<Component<'_>>, String> {
-    components::components(input)
+    components(input)
         .finish()
         .map(|(_, components)| components)
         .map_err(|e: VerboseError<&str>| format!("error: {}", convert_error(input, e.clone())))
 }
 
 pub fn calendar(sample: &str, verbose: bool) {
-    let normalized = normalize(&sample);
+    let normalized = normalize(sample);
     println!(
         "{}",
         normalized
