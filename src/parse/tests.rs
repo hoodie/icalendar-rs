@@ -2,7 +2,7 @@ use super::utils::normalize;
 
 #[test]
 fn rfc_2425_8_3_3() {
-let example = r#"begin:vcard
+    let example = r#"begin:vcard
 source:ldap://cn=Meister%20Berger,o=Universitaet%20Goerlitz,c=DE
 name:Meister Berger
 fn:Meister Berger
@@ -36,5 +36,4 @@ end:vcard"#;
     crate::parse::calendar(&example, true);
 
     crate::parse::read_calendar(&normalize(&example)).unwrap();
-
 }

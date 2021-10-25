@@ -4,9 +4,9 @@ use nom::{error::convert_error, error::VerboseError, Finish, IResult};
 pub(crate) mod components;
 mod parameters;
 mod properties;
-mod utils;
 #[cfg(test)]
 mod tests;
+mod utils;
 
 use components::*;
 use properties::*;

@@ -152,7 +152,9 @@ fn test_components() {
     );
 
     assert_parser!(
-        component::<(_, ErrorKind)>("BEGIN:FOO\nUID:e1c97b31-38bb-4b72-b94f-463a12ef5239\nFOO-PROP:sp.am\nEND:FOO"),
+        component::<(_, ErrorKind)>(
+            "BEGIN:FOO\nUID:e1c97b31-38bb-4b72-b94f-463a12ef5239\nFOO-PROP:sp.am\nEND:FOO"
+        ),
         Component {
             name: "FOO",
             properties: vec![
@@ -171,7 +173,9 @@ fn test_components() {
         }
     );
     assert_parser!(
-        component::<(_, ErrorKind)>("BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:FOO"),
+        component::<(_, ErrorKind)>(
+            "BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:FOO"
+        ),
         Component {
             name: "FOO",
             properties: vec![Property {

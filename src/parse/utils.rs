@@ -22,7 +22,7 @@ pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         )))
     } else {
         take_while(|c: char| {
-           c == '.' || c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()
+            c == '.' || c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()
         })(input)
     }
 }
