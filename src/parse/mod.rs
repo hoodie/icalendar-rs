@@ -16,10 +16,12 @@
 //!
 //!
 //! [rfc5545 3.1]: https://datatracker.ietf.org/doc/html/rfc5545#section-3.1
-//! 
-//! A Calendar is always a [`Vec`] of [`Component`]. Each [`Component`] has a [`Vec`] of [`Property`] and those have of [`Parameter`]s.
 //!
-//! 
+//! A Calendar is always a tree of [`Component`]s.
+//! It may contain multiple root elements so we have a `Vec<Component>` and each `Component` may more child `Component`s.
+//! Each [`Component`] has properties, so a [`Vec`] of [`Property`] and those have of [`Parameter`]s.
+//!
+//!
 #![allow(missing_docs)]
 use nom::{error::convert_error, error::VerboseError, Finish};
 
@@ -39,17 +41,19 @@ use components::*;
 pub use utils::normalize;
 
 /// Parse iCalendar file content into an array of [`Component`]s
-/// 
+///
 /// This version produces very simple Errors for simplicity's sake.
-pub fn read_calendar_simple<'a>(input: &'a str) -> Result<Vec<Component<'_>>, nom::error::Error<&'a str>> {
+pub fn read_calendar_simple<'a>(
+    input: &'a str,
+) -> Result<Vec<Component<'_>>, nom::error::Error<&'a str>> {
     components(input).finish().map(|(_, components)| components)
 }
 
 /// Parse iCalendar file content into an array of [`Component`]s
-/// 
+///
 /// This version produces nice and readable errors with line numbers thanks the the awesomeness of [`nom`].
 /// Line numbers are in regard to the normalized/unfolded version of the input, so better keep those around for reference.
-/// 
+///
 pub fn read_calendar(input: &str) -> Result<Vec<Component<'_>>, String> {
     components(input)
         .finish()

@@ -70,9 +70,9 @@ pub struct Venue {
 }
 
 #[derive(Debug, Default)]
-struct InnerComponent {
-    properties: BTreeMap<String, Property>,
-    multi_properties: Vec<Property>,
+pub(crate) struct InnerComponent {
+    pub properties: BTreeMap<String, Property>,
+    pub multi_properties: Vec<Property>,
 }
 
 //impl<'a> Into<InnerComponent> for parse::Component<'a> {
@@ -88,20 +88,6 @@ impl InnerComponent {
         InnerComponent {
             properties: mem::take(&mut self.properties),
             multi_properties: mem::take(&mut self.multi_properties),
-        }
-    }
-}
-
-#[cfg(feature = "parser")]
-impl From<crate::parse::components::Component<'_>> for InnerComponent {
-    fn from(component: crate::parse::components::Component) -> Self {
-        Self {
-            properties: component
-                .properties
-                .into_iter()
-                .map(|p| (p.key.into(), p.into()))
-                .collect(),
-            multi_properties: Default::default(),
         }
     }
 }
@@ -468,6 +454,12 @@ macro_rules! component_impl {
             fn append_multi_property(&mut self, property: Property) -> &mut Self {
                 self.inner.multi_properties.push(property);
                 self
+            }
+        }
+
+        impl From<InnerComponent> for $t {
+            fn from(inner: InnerComponent) -> $t {
+                Self { inner }
             }
         }
     };

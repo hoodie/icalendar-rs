@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use nom::{
     branch::alt,
     bytes::complete::tag,
@@ -22,6 +24,8 @@ use super::{
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 
+use crate::components::InnerComponent;
+
 #[cfg(test)]
 use crate::assert_parser;
 
@@ -31,6 +35,33 @@ pub struct Component<'a> {
     pub name: &'a str,
     pub properties: Vec<Property<'a>>,
     pub components: Vec<Component<'a>>,
+}
+
+impl From<Component<'_>> for InnerComponent {
+    fn from(component: Component) -> Self {
+        Self {
+            properties: component
+                .properties
+                .into_iter()
+                .map(|p| (p.key.into(), p.into()))
+                .collect(),
+            multi_properties: Default::default(),
+        }
+    }
+}
+
+impl TryFrom<Component<'_>> for crate::calendar::CalendarElement {
+    type Error = ();
+
+    fn try_from(component: Component<'_>) -> Result<Self, Self::Error> {
+        use crate::{Event, Todo, Venue};
+        match component.name {
+            "VEVENT" => Ok(Event::from(InnerComponent::from(component)).into()),
+            "VTODO" => Ok(Todo::from(InnerComponent::from(component)).into()),
+            "VVENUE" => Ok(Venue::from(InnerComponent::from(component)).into()),
+            _ => Err(()),
+        }
+    }
 }
 
 #[test]
