@@ -40,6 +40,27 @@ pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
     delimited(many0(line_ending), f, many0(line_ending))
 }
 
+/// Normalize content lines.
+///
+/// This simplifies line endings and unfolds breaks to simplify parsing.
+/// iCal specifies that content may be folded and to fit into a certain
+/// length, which must be undone before parsing.
+///
+/// This is a copying operation.
+///
+/// # Example
+///
+/// ```
+/// # use icalendar::parse::normalize;
+/// let line = r#"this
+///   gets
+///   wrapped
+///   in
+///   a weird
+///   way"#;
+///
+/// assert_eq!(normalize(line), "this gets wrapped in a weird way")
+/// ```
 pub fn normalize(input: &str) -> String {
     unfold(&simplify_line_endings(input))
 }
@@ -74,6 +95,18 @@ fn test_unfold() {
 2 hello world
 3 hello world
 4 hello world"#;
+    assert_eq!(normalize(input), expected);
+}
 
-    assert_eq!(normalize(&input), expected);
+/// this is actually also allowed by the spec
+#[test]
+#[ignore]
+fn test_unfold2() {
+    let input = "1 hello world\r\n2 hello\r\n  world\r\n3 hello world\r\n4 hello world";
+
+    let expected = r#"1 hello world
+2 hello world
+ 3 hello world
+  4 hello world"#;
+    assert_eq!(normalize(input), expected);
 }

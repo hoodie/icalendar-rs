@@ -25,6 +25,7 @@ use pretty_assertions::assert_eq;
 #[cfg(test)]
 use crate::assert_parser;
 
+/// The parsing equivalent of [`crate::components::Component`]
 #[derive(PartialEq, Debug, Clone)]
 pub struct Component<'a> {
     pub name: &'a str,

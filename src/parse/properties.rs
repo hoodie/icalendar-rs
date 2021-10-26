@@ -17,7 +17,7 @@ use nom::error::ErrorKind;
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 
-/// Zero-copy version of `properties::Property`
+/// Zero-copy version of [`crate::properties::Property`]
 #[derive(PartialEq, Debug, Clone)]
 pub struct Property<'a> {
     pub key: &'a str,
