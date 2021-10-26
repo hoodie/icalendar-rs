@@ -21,10 +21,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let normalized = normalize(&sample.unwrap());
         print_with_lines(&normalized);
 
-        let components = dbg!(read_calendar(&normalized))?;
+        let components = read_calendar(&normalized)?;
 
         let calendar = Calendar::try_from(components).unwrap();
-        calendar.print()?;
+        
+        print_with_lines(&calendar.to_string());
     }
     Ok(())
 }

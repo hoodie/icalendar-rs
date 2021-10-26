@@ -13,6 +13,7 @@ pub enum CalendarElement {
     Todo(Todo),
     Event(Event),
     Venue(Venue),
+    Other(Other),
 }
 
 impl From<Event> for CalendarElement {
@@ -39,6 +40,7 @@ impl CalendarElement {
             CalendarElement::Todo(ref todo) => todo.fmt_write(out),
             CalendarElement::Event(ref event) => event.fmt_write(out),
             CalendarElement::Venue(ref venue) => venue.fmt_write(out),
+            CalendarElement::Other(ref other) => other.fmt_write(out),
         }
     }
 }
@@ -172,24 +174,24 @@ impl<C: Into<CalendarElement>> FromIterator<C> for Calendar {
 }
 
 #[cfg(feature = "parser")]
-impl TryFrom<Vec<crate::parse::Component<'_>>> for Calendar {
+impl<'a> TryFrom<Vec<crate::parse::Component<'a>>> for Calendar {
     // TODO: make this a proper error
     type Error = String;
 
-    fn try_from(mut components: Vec<crate::parse::Component<'_>>) -> Result<Self, Self::Error> {
+    fn try_from(mut components: Vec<crate::parse::Component<'a>>) -> Result<Self, Self::Error> {
         let root_is_calendar = components
             .get(0)
             .map(|first_root| first_root.name == "VCALENDAR")
             .unwrap_or(false);
 
-        let components = if root_is_calendar {
+        let components: Vec<crate::parse::Component<'a>> = if root_is_calendar {
             components.swap_remove(0).components
         } else {
             components
         };
         components
             .into_iter()
-            .map(|c| {
+            .map(|c: crate::parse::Component<'a>| {
                 let elem: Result<CalendarElement, Self::Error> = TryInto::try_into(c);
                 elem
             })

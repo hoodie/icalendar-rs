@@ -24,7 +24,10 @@ use super::{
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 
-use crate::components::InnerComponent;
+use crate::{
+    calendar::CalendarElement,
+    components::{InnerComponent, Other},
+};
 
 #[cfg(test)]
 use crate::assert_parser;
@@ -50,7 +53,7 @@ impl From<Component<'_>> for InnerComponent {
     }
 }
 
-impl TryFrom<Component<'_>> for crate::calendar::CalendarElement {
+impl<'a> TryFrom<Component<'a>> for CalendarElement {
     type Error = String;
 
     fn try_from(component: Component<'_>) -> Result<Self, Self::Error> {
@@ -59,7 +62,10 @@ impl TryFrom<Component<'_>> for crate::calendar::CalendarElement {
             "VEVENT" => Ok(Event::from(InnerComponent::from(component)).into()),
             "VTODO" => Ok(Todo::from(InnerComponent::from(component)).into()),
             "VVENUE" => Ok(Venue::from(InnerComponent::from(component)).into()),
-            _ => Err(format!("unhandled component type {}", component.name)),
+            _ => Ok(CalendarElement::Other(Other::from((
+                component.name.into(),
+                InnerComponent::from(component),
+            )))), // _ => Err(format!("unhandled component type {}", component.name)),
         }
     }
 }
