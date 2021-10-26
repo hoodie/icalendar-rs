@@ -51,7 +51,7 @@ impl From<Component<'_>> for InnerComponent {
 }
 
 impl TryFrom<Component<'_>> for crate::calendar::CalendarElement {
-    type Error = ();
+    type Error = String;
 
     fn try_from(component: Component<'_>) -> Result<Self, Self::Error> {
         use crate::{Event, Todo, Venue};
@@ -59,7 +59,7 @@ impl TryFrom<Component<'_>> for crate::calendar::CalendarElement {
             "VEVENT" => Ok(Event::from(InnerComponent::from(component)).into()),
             "VTODO" => Ok(Todo::from(InnerComponent::from(component)).into()),
             "VVENUE" => Ok(Venue::from(InnerComponent::from(component)).into()),
-            _ => Err(()),
+            _ => Err(format!("unhandled component type {}", component.name)),
         }
     }
 }

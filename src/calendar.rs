@@ -1,5 +1,10 @@
 use chrono::Duration;
-use std::{convert::Into, fmt, iter::FromIterator, ops::Deref};
+use std::{
+    convert::{Into, TryFrom, TryInto},
+    fmt,
+    iter::FromIterator,
+    ops::Deref,
+};
 
 use crate::{components::*, Parameter, Property};
 
@@ -163,6 +168,32 @@ impl<C: Into<CalendarElement>> FromIterator<C> for Calendar {
             components: iter.into_iter().map(Into::into).collect(),
             ..Default::default()
         }
+    }
+}
+
+#[cfg(feature = "parser")]
+impl TryFrom<Vec<crate::parse::Component<'_>>> for Calendar {
+    // TODO: make this a proper error
+    type Error = String;
+
+    fn try_from(mut components: Vec<crate::parse::Component<'_>>) -> Result<Self, Self::Error> {
+        let root_is_calendar = components
+            .get(0)
+            .map(|first_root| first_root.name == "VCALENDAR")
+            .unwrap_or(false);
+
+        let components = if root_is_calendar {
+            components.swap_remove(0).components
+        } else {
+            components
+        };
+        components
+            .into_iter()
+            .map(|c| {
+                let elem: Result<CalendarElement, Self::Error> = TryInto::try_into(c);
+                elem
+            })
+            .collect()
     }
 }
 
