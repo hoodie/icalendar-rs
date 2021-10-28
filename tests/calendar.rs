@@ -17,6 +17,9 @@ LOCATION:Somewhere\r
 PRIORITY:10\r
 STATUS:TENTATIVE\r
 SUMMARY:summary\r
+TEST:A\r
+TEST:C\r
+TEST:D\r
 UID:euid\r
 END:VEVENT\r
 BEGIN:VTODO\r
@@ -25,6 +28,8 @@ DTSTAMP:20190307T181159\r
 DUE:20140708T091011\r
 PERCENT-COMPLETE:95\r
 SUMMARY:A Todo\r
+TEST:B\r
+TEST:C\r
 UID:todouid\r
 END:VTODO\r
 END:VCALENDAR\r
@@ -47,7 +52,10 @@ fn test_calendar_to_string() {
         .location("Somewhere")
         .uid("euid")
         .class(Class::Confidential)
-        .property("DTSTAMP", "20190307T181159");
+        .property("DTSTAMP", "20190307T181159")
+        .multi_property("TEST", ["A", "B"])
+        .multi_property("TEST", ["A", "C"])
+        .multi_property_appended("TEST", ["D"]);
     calendar.push(event);
     let todo = Todo::new()
         .percent_complete(95)
@@ -55,7 +63,10 @@ fn test_calendar_to_string() {
         .completed(utc_date)
         .summary("A Todo")
         .uid("todouid")
-        .property("DTSTAMP", "20190307T181159");
+        .property("DTSTAMP", "20190307T181159")
+        .property("TEST", "A")
+        .property("TEST", "B")
+        .property_appended("TEST", "C");
     calendar.push(todo);
     assert_eq!(calendar.to_string(), EXPECTED_CAL_CONTENT);
 }

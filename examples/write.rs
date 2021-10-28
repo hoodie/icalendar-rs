@@ -11,8 +11,9 @@ fn main() {
         //.repeats(Every::second().wednesday())
         .ends(Utc::now() + Duration::days(1))
         //.all_day()
-        .append_property(
-            Property::new("TEST", "FOOBAR")
+        .property(
+            "TEST",
+            Property::from("FOOBAR")
                 .parameter("IMPORTANCE", "very")
                 .parameter("DUE", "tomorrow"),
         )

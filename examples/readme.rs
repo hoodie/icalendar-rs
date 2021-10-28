@@ -8,8 +8,9 @@ fn main() {
         .starts(Utc::now())
         .class(Class::Confidential)
         .ends(Utc::now() + Duration::days(1))
-        .append_property(
-            Property::new("TEST", "FOOBAR")
+        .property(
+            "TEST",
+            Property::from("FOOBAR")
                 .parameter("IMPORTANCE", "very")
                 .parameter("DUE", "tomorrow"),
         );

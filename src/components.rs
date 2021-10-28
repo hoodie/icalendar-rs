@@ -3,6 +3,7 @@ use uuid::Uuid;
 
 // use std::io;
 use std::collections::BTreeMap;
+use std::convert::Into;
 use std::fmt;
 
 use crate::properties::*;
@@ -73,8 +74,7 @@ pub struct Venue {
 
 #[derive(Debug, Default)]
 struct InnerComponent {
-    properties: BTreeMap<String, Property>,
-    multi_properties: Vec<Property>,
+    properties: BTreeMap<String, Vec<Property>>,
 }
 
 impl Event {
@@ -85,7 +85,7 @@ impl Event {
 
     ///  Defines the overall status or confirmation
     pub fn status(self, status: EventStatus) -> Self {
-        self.append_property(status.into())
+        self.with_property_set(status.into())
     }
 
     //pub fn repeats<R:Repeater+?Sized>(self, repeat: R) -> Self {
@@ -124,7 +124,7 @@ impl Todo {
 
     ///  Defines the overall status or confirmation
     pub fn status(self, status: TodoStatus) -> Self {
-        self.append_property(status.into())
+        self.with_property_set(status.into())
     }
 
     //pub fn repeats<R:Repeater+?Sized>(self, repeat: R) -> Self {
@@ -194,11 +194,46 @@ pub trait Component: Sized {
     /// These are used in the `BEGIN` and `END` line of the component.
     fn component_kind() -> &'static str;
 
-    /// Allows access to the inner properties map.
-    fn properties(&self) -> &BTreeMap<String, Property>;
+    /// Set a property with a key to a value
+    fn property<K, V>(self, key: K, val: V) -> Self
+    where
+        K: ToString,
+        V: Into<Property>,
+    {
+        self.with_property_set((key.to_string(), val.into().into_iter()))
+    }
 
-    /// Read-only access to `multi_properties`
-    fn multi_properties(&self) -> &Vec<Property>;
+    /// Appends a value to the property with the key
+    fn property_appended<K, V>(self, key: K, val: V) -> Self
+    where
+        K: ToString,
+        V: Into<Property>,
+    {
+        self.with_property_appended((key.to_string(), val.into().into_iter()))
+    }
+
+    /// Set a property with a key to multiple values
+    fn multi_property<K, I, V>(self, key: K, values: I) -> Self
+    where
+        K: ToString,
+        I: IntoIterator<Item = V>,
+        V: Into<Property>,
+    {
+        self.with_property_set((key.to_string(), values.into_iter().map(Into::into)))
+    }
+
+    /// Appends multiple values to the property with the key
+    fn multi_property_appended<K, I, V>(self, key: K, values: I) -> Self
+    where
+        K: ToString,
+        I: IntoIterator<Item = V>,
+        V: Into<Property>,
+    {
+        self.with_property_appended((key.to_string(), values.into_iter().map(Into::into)))
+    }
+
+    /// Allows access to the inner properties map.
+    fn properties(&self) -> &BTreeMap<String, Vec<Property>>;
 
     /// Writes `Component` into a `Writer` using `std::fmt`.
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
@@ -209,16 +244,14 @@ pub trait Component: Sized {
             write_crlf!(out, "DTSTAMP:{}", now)?;
         }
 
-        for property in self.properties().values() {
-            property.fmt_write(out)?;
+        for (key, properties) in self.properties() {
+            for property in properties {
+                property.fmt_write(key, out)?;
+            }
         }
 
         if !self.properties().contains_key("UID") {
             write_crlf!(out, "UID:{}", Uuid::new_v4())?;
-        }
-
-        for property in self.multi_properties() {
-            property.fmt_write(out)?;
         }
 
         write_crlf!(out, "END:{}", Self::component_kind())?;
@@ -232,28 +265,22 @@ pub trait Component: Sized {
         out_string
     }
 
-    /// Append a given `Property`
-    fn append_property(self, property: Property) -> Self;
+    /// Sets a `Property` through `(Key, Value)` tuple
+    fn with_property_set<I>(self, property: (String, I)) -> Self
+    where
+        I: IntoIterator<Item = Property>;
 
-    /// Adds a `Property` of which there may be many
-    fn append_multi_property(self, property: Property) -> Self;
-
-    /// Construct and append a `Property`
-    fn property(self, key: &str, val: &str) -> Self {
-        self.append_property(Property::new(key, val))
-    }
-
-    /// Construct and append a `Property`
-    fn add_multi_property(self, key: &str, val: &str) -> Self {
-        self.append_multi_property(Property::new(key, val))
-    }
+    /// Appends a `Property` through `(Key, Value)` tuple
+    fn with_property_appended<I>(self, property: (String, I)) -> Self
+    where
+        I: IntoIterator<Item = Property>;
 
     /// Set the DTSTART `Property`
     ///
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     fn starts<T: Into<CalendarDateTime>>(self, dt: T) -> Self {
         let calendar_dt = dt.into();
-        self.property("DTSTART", &calendar_dt.to_string())
+        self.property("DTSTART", calendar_dt)
     }
 
     /// Set the DTEND `Property`
@@ -261,7 +288,7 @@ pub trait Component: Sized {
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     fn ends<T: Into<CalendarDateTime>>(self, dt: T) -> Self {
         let calendar_dt = dt.into();
-        self.property("DTEND", &calendar_dt.to_string())
+        self.property("DTEND", calendar_dt)
     }
 
     /// Set the DTSTART `Property`, date only
@@ -270,9 +297,9 @@ pub trait Component: Sized {
         TZ::Offset: fmt::Display,
     {
         // DTSTART
-        self.append_property(
-            Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date),
+        self.property(
+            "DTSTART",
+            Property::from(date.format("%Y%m%d")).with_parameter_set(ValueType::Date),
         )
     }
 
@@ -282,9 +309,9 @@ pub trait Component: Sized {
         TZ::Offset: fmt::Display,
     {
         // DTSTART
-        self.append_property(
-            Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date),
+        self.property(
+            "DTEND",
+            Property::from(date.format("%Y%m%d")).with_parameter_set(ValueType::Date),
         )
     }
 
@@ -294,13 +321,13 @@ pub trait Component: Sized {
         TZ::Offset: fmt::Display,
     {
         // DTSTART
-        self.append_property(
-            Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date),
+        self.property(
+            "DTSTART",
+            Property::from(date.format("%Y%m%d")).with_parameter_set(ValueType::Date),
         )
-        .append_property(
-            Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date),
+        .property(
+            "DTEND",
+            Property::from(date.format("%Y%m%d")).with_parameter_set(ValueType::Date),
         )
     }
 
@@ -345,9 +372,9 @@ pub trait Component: Sized {
     /// Set the LOCATION with a VVENUE UID
     /// iCalender venue draft
     fn venue(self, location: &str, venue_uid: &str) -> Self {
-        self.append_property(
-            Property::new("LOCATION", location)
-                .append_parameter(Parameter::new("VVENUE", venue_uid)),
+        self.property(
+            "LOCATION",
+            Property::from(location).parameter("VVENUE", venue_uid),
         )
     }
 
@@ -358,7 +385,7 @@ pub trait Component: Sized {
 
     /// Set the visibility class
     fn class(self, class: Class) -> Self {
-        self.append_property(class.into())
+        self.with_property_set(class.into())
     }
 }
 
@@ -373,27 +400,32 @@ macro_rules! component_impl {
             }
 
             /// Read-only access to `properties`
-            fn properties(&self) -> &BTreeMap<String, Property> {
+            fn properties(&self) -> &BTreeMap<String, Vec<Property>> {
                 &self.inner.properties
             }
 
-            /// Read-only access to `multi_properties`
-            fn multi_properties(&self) -> &Vec<Property> {
-                &self.inner.multi_properties
-            }
-
-            /// Adds a `Property`
-            fn append_property(mut self, property: Property) -> Self {
+            /// Sets a given `Property`
+            fn with_property_set<I>(mut self, property: (String, I)) -> Self
+            where
+                I: IntoIterator<Item = Property>,
+            {
                 self.inner
                     .properties
-                    .insert(property.key().to_owned(), property);
+                    .insert(property.0, property.1.into_iter().collect());
                 self
             }
 
-            /// Adds a `Property` of which there may be many
-            fn append_multi_property(mut self, property: Property) -> Self {
-                self.inner.multi_properties.push(property);
-                self
+            /// Appends a given `Property`
+            fn with_property_appended<I>(mut self, property: (String, I)) -> Self
+            where
+                I: IntoIterator<Item = Property>,
+            {
+                if let Some(v) = self.inner.properties.get_mut(&property.0) {
+                    v.extend(property.1.into_iter());
+                    self
+                } else {
+                    self.with_property_set(property)
+                }
             }
         }
     };

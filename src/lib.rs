@@ -22,9 +22,10 @@
 //!     .starts(Utc::now())
 //!     .class(Class::Confidential)
 //!     .ends(Utc::now() + Duration::days(1))
-//!     .append_property(Property::new("TEST", "FOOBAR")
-//!               .parameter("IMPORTANCE", "very")
-//!               .parameter("DUE", "tomorrow"));
+//!     .property("TEST",
+//!         Property::from("FOOBAR")
+//!            .parameter("IMPORTANCE", "very")
+//!            .parameter("DUE", "tomorrow"));
 //!
 //! let bday = Event::new()
 //!     .all_day(Utc.ymd(2016, 3, 15))
@@ -39,9 +40,9 @@
 //!
 //!
 //! let mut calendar = Calendar::new();
-//! calendar.add(event);
-//! calendar.add(todo);
-//! calendar.add(bday);
+//! calendar.push(event);
+//! calendar.push(todo);
+//! calendar.push(bday);
 //! # }
 //! ```
 //!

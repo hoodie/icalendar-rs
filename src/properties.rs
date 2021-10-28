@@ -1,20 +1,17 @@
 use std::collections::HashMap;
 use std::fmt::{self, Write};
+use std::iter::{self, Once};
 
 #[derive(Debug)]
 /// key-value pairs inside of `Property`s
-pub struct Parameter {
-    key: String,
-    value: String,
-}
+pub struct Parameter(String);
 
-impl Parameter {
-    /// Creates a new `Parameter`
-    pub fn new(key: &str, val: &str) -> Self {
-        Parameter {
-            key: key.to_owned(),
-            value: val.to_owned(),
-        }
+impl<S> From<S> for Parameter
+where
+    S: ToString,
+{
+    fn from(value: S) -> Self {
+        Parameter(value.to_string())
     }
 }
 
@@ -24,53 +21,71 @@ type EntryParameters = HashMap<String, Parameter>;
 #[derive(Debug)]
 /// key-value pairs inside of `Component`s
 pub struct Property {
-    key: String,
     value: String,
     parameters: EntryParameters,
 }
 
-impl Property {
-    /// Guess what this does :D
-    pub fn new(key: &str, val: &str) -> Self {
+impl IntoIterator for Property {
+    type Item = Self;
+
+    type IntoIter = Once<Self>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        iter::once(self)
+    }
+}
+
+impl<S> From<S> for Property
+where
+    S: ToString,
+{
+    fn from(value: S) -> Self {
         Property {
-            key: key.to_owned(),
-            value: val.replace('\n', "\\n"),
+            value: value.to_string().replace('\n', "\\n"),
             parameters: HashMap::new(),
         }
     }
+}
 
-    /// Clones the key field.
-    pub fn key(&self) -> &str {
-        &self.key
-    }
-
-    /// Clones the key field.
+impl Property {
+    /// The value of the Property
     pub fn value(&self) -> &str {
-        &self.value
-    }
-
-    /// Appends a new parameter.
-    pub fn append_parameter<I: Into<Parameter>>(mut self, into_parameter: I) -> Self {
-        let parameter = into_parameter.into();
-        self.parameters.insert(parameter.key.clone(), parameter);
-        self
+        let Property { value, .. } = self;
+        value
     }
 
     /// Creates and appends a parameter.
-    pub fn parameter(self, key: &str, val: &str) -> Self {
-        self.append_parameter(Parameter::new(key, val))
+    pub fn parameter<K, V>(self, key: K, val: V) -> Self
+    where
+        K: ToString,
+        V: Into<Parameter>,
+    {
+        self.with_parameter_set((key.to_string(), val.into()))
+    }
+
+    /// Sets parameter from a tuple of (Key, Value)
+    pub fn with_parameter_set<T>(mut self, parameter: T) -> Self
+    where
+        T: Into<(String, Parameter)>,
+    {
+        let Property { parameters, .. } = &mut self;
+        let (key, value) = parameter.into();
+        parameters.insert(key, value);
+        self
     }
 
     /// Writes this Property to `out`
-    pub fn fmt_write<W: Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
+    pub fn fmt_write<W: Write>(&self, key: &str, out: &mut W) -> Result<(), fmt::Error> {
         // A nice starting capacity for the majority of content lines
         let mut line = String::with_capacity(150);
 
-        write!(line, "{}", self.key)?;
-        for &Parameter { ref key, ref value } in self.parameters.values() {
+        let Property { value, parameters } = self;
+
+        write!(line, "{}", key)?;
+        for (key, Parameter(value)) in parameters {
             write!(line, ";{}={}", key, value)?;
         }
-        write!(line, ":{}", self.value)?;
+        write!(line, ":{}", value)?;
         write_crlf!(out, "{}", fold_line(&line))?;
         Ok(())
     }
@@ -87,17 +102,17 @@ pub enum Class {
     Confidential,
 }
 
-impl From<Class> for Property {
+impl From<Class> for (String, Property) {
     fn from(val: Class) -> Self {
-        Property {
-            key: String::from("CLASS"),
-            value: String::from(match val {
+        (
+            String::from("CLASS"),
+            match val {
                 Class::Public => "PUBLIC",
                 Class::Private => "PRIVATE",
                 Class::Confidential => "CONFIDENTIAL",
-            }),
-            parameters: HashMap::new(),
-        }
+            }
+            .into(),
+        )
     }
 }
 
@@ -134,11 +149,11 @@ pub enum ValueType {
     UtcOffset,
 }
 
-impl From<ValueType> for Parameter {
+impl From<ValueType> for (String, Parameter) {
     fn from(val: ValueType) -> Self {
-        Parameter {
-            key: String::from("VALUE"),
-            value: String::from(match val {
+        (
+            String::from("VALUE"),
+            match val {
                 ValueType::Binary => "BINARY",
                 ValueType::Boolean => "BOOLEAN",
                 ValueType::CalAddress => "CAL-ADDRESS",
@@ -153,8 +168,9 @@ impl From<ValueType> for Parameter {
                 ValueType::Time => "TIME",
                 ValueType::Uri => "URI",
                 ValueType::UtcOffset => "UTC-OFFSET",
-            }),
-        }
+            }
+            .into(),
+        )
     }
 }
 
@@ -191,33 +207,35 @@ pub enum TodoStatus {
 //    Custom(&str)
 //}
 
-impl From<EventStatus> for Property {
+impl From<EventStatus> for (String, Property) {
     fn from(val: EventStatus) -> Self {
-        Property {
-            key: String::from("STATUS"),
-            value: String::from(match val {
-                EventStatus::Tentative => "TENTATIVE",
-                EventStatus::Confirmed => "CONFIRMED",
-                EventStatus::Cancelled => "CANCELLED",
-            }),
-            parameters: HashMap::new(),
-        }
+        (
+            String::from("STATUS"),
+            Property {
+                value: String::from(match val {
+                    EventStatus::Tentative => "TENTATIVE",
+                    EventStatus::Confirmed => "CONFIRMED",
+                    EventStatus::Cancelled => "CANCELLED",
+                }),
+                parameters: HashMap::new(),
+            },
+        )
     }
 }
 
-impl From<TodoStatus> for Property {
+impl From<TodoStatus> for (String, Property) {
     fn from(val: TodoStatus) -> Self {
-        Property {
-            key: String::from("STATUS"),
-            value: String::from(match val {
+        (
+            String::from("STATUS"),
+            match val {
                 TodoStatus::NeedsAction => "NEEDS-ACTION",
                 TodoStatus::Completed => "COMPLETED",
                 TodoStatus::InProcess => "IN-PROCESS",
                 TodoStatus::Cancelled => "CANCELLED",
                 //TodoStatus::Custom(s)   => "CU",
-            }),
-            parameters: HashMap::new(),
-        }
+            }
+            .into(),
+        )
     }
 }
 

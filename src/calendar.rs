@@ -1,6 +1,6 @@
 use crate::components::*;
 
-use crate::{Parameter, Property};
+use crate::Property;
 use chrono::Duration;
 use std::convert::Into;
 use std::fmt;
@@ -47,7 +47,7 @@ impl CalendarElement {
 /// You can `.add()` `Component`s to this.
 #[derive(Default, Debug)]
 pub struct Calendar {
-    properties: Vec<Property>,
+    properties: Vec<(String, Property)>,
     components: Vec<CalendarElement>,
 }
 
@@ -69,8 +69,18 @@ impl Calendar {
     }
 
     /// Append a given `Property` to the `Calendar`
-    pub fn append_property(&mut self, property: Property) -> &mut Self {
+    pub fn append_property(&mut self, property: (String, Property)) -> &mut Self {
         self.properties.push(property);
+        self
+    }
+
+    /// Append a given `Property` to the `Calendar`
+    pub fn property<K, V>(&mut self, key: K, value: V) -> &mut Self
+    where
+        K: ToString,
+        V: Into<Property>,
+    {
+        self.properties.push((key.to_string(), value.into()));
         self
     }
 
@@ -91,33 +101,32 @@ impl Calendar {
 
     /// Set the NAME and X-WR-CALNAME `Property`s
     pub fn name(&mut self, name: &str) -> &mut Self {
-        self.append_property(Property::new("NAME", name));
-        self.append_property(Property::new("X-WR-CALNAME", name));
+        self.property("NAME", name);
+        self.property("X-WR-CALNAME", name);
         self
     }
 
     /// Set the DESCRIPTION and X-WR-CALDESC `Property`s
     pub fn description(&mut self, description: &str) -> &mut Self {
-        self.append_property(Property::new("DESCRIPTION", description));
-        self.append_property(Property::new("X-WR-CALDESC", description));
+        self.property("DESCRIPTION", description);
+        self.property("X-WR-CALDESC", description);
         self
     }
 
     /// Set the TIMEZONE-ID and X-WR-TIMEZONE `Property`s
     pub fn timezone(&mut self, timezone: &str) -> &mut Self {
-        self.append_property(Property::new("TIMEZONE-ID", timezone));
-        self.append_property(Property::new("X-WR-TIMEZONE", timezone));
+        self.property("TIMEZONE-ID", timezone);
+        self.property("X-WR-TIMEZONE", timezone);
         self
     }
 
     /// Set the REFRESH-INTERVAL and X-PUBLISHED-TTL `Property`s
     pub fn ttl(&mut self, duration: &Duration) -> &mut Self {
-        let duration_string = duration.to_string();
-        self.append_property(
-            Property::new("REFRESH-INTERVAL", duration_string.as_str())
-                .append_parameter(Parameter::new("VALUE", "DURATION")),
+        self.property(
+            "REFRESH-INTERVAL",
+            Property::from(duration).parameter("VALUE", "DURATION"),
         );
-        self.append_property(Property::new("X-PUBLISHED-TTL", duration_string.as_str()));
+        self.property("X-PUBLISHED-TTL", duration);
         self
     }
 
@@ -128,8 +137,8 @@ impl Calendar {
         write_crlf!(out, "PRODID:ICALENDAR-RS")?;
         write_crlf!(out, "CALSCALE:GREGORIAN")?;
 
-        for property in &self.properties {
-            property.fmt_write(out)?;
+        for (key, property) in &self.properties {
+            property.fmt_write(key, out)?;
         }
 
         for component in &self.components {
