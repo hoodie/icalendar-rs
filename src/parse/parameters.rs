@@ -8,8 +8,6 @@ use nom::{
     sequence::preceded,
     IResult,
 };
-#[cfg(test)]
-use pretty_assertions::assert_eq;
 
 #[cfg(test)]
 use nom::error::ErrorKind;
@@ -30,42 +28,48 @@ impl<'a> From<Parameter<'a>> for crate::properties::Parameter {
 #[test]
 fn test_parameter() {
     assert_parser!(
-        parameter::<(_, ErrorKind)>(";KEY=VALUE"),
+        parameter,
+        ";KEY=VALUE",
         Parameter {
             key: "KEY",
             val: Some("VALUE")
         }
     );
     assert_parser!(
-        parameter::<(_, ErrorKind)>("; KEY=VALUE"),
+        parameter,
+        "; KEY=VALUE",
         Parameter {
             key: "KEY",
             val: Some("VALUE")
         }
     );
     assert_parser!(
-        parameter::<(_, ErrorKind)>("; KEY=VAL UE"),
+        parameter,
+        "; KEY=VAL UE",
         Parameter {
             key: "KEY",
             val: Some("VAL UE")
         }
     );
     assert_parser!(
-        parameter::<(_, ErrorKind)>("; KEY="),
+        parameter,
+        "; KEY=",
         Parameter {
             key: "KEY",
             val: Some("")
         }
     );
     assert_parser!(
-        parameter::<(_, ErrorKind)>(";KEY=VAL-UE"),
+        parameter,
+        ";KEY=VAL-UE",
         Parameter {
             key: "KEY",
             val: Some("VAL-UE")
         }
     );
     assert_parser!(
-        parameter::<(_, ErrorKind)>(";KEY"),
+        parameter,
+        ";KEY",
         Parameter {
             key: "KEY",
             val: None,
@@ -73,7 +77,8 @@ fn test_parameter() {
     );
 
     assert_parser!(
-        parameter::<(_, ErrorKind)>(";email=rust@hoodie.de"),
+        parameter,
+        ";email=rust@hoodie.de",
         Parameter {
             key: "email",
             val: Some("rust@hoodie.de")
@@ -98,7 +103,8 @@ fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 #[test]
 pub fn parse_parameter_list() {
     assert_parser!(
-        parameters::<(_, ErrorKind)>(";KEY=VALUE"),
+        parameters,
+        ";KEY=VALUE",
         vec![Parameter {
             key: "KEY",
             val: Some("VALUE")
@@ -106,7 +112,8 @@ pub fn parse_parameter_list() {
     );
 
     assert_parser!(
-        parameters::<(_, ErrorKind)>(";KEY=VALUE;DATE=TODAY"),
+        parameters,
+        ";KEY=VALUE;DATE=TODAY",
         vec![
             Parameter {
                 key: "KEY",
@@ -120,7 +127,8 @@ pub fn parse_parameter_list() {
     );
 
     assert_parser!(
-        parameters::<(_, ErrorKind)>(";KEY=VALUE;DATE=20170218"),
+        parameters,
+        ";KEY=VALUE;DATE=20170218",
         vec![
             Parameter {
                 key: "KEY",

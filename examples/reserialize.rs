@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let components = read_calendar(&normalized)?;
 
         let calendar = Calendar::try_from(components).unwrap();
-        
+
         print_with_lines(&calendar.to_string());
     }
     Ok(())

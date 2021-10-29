@@ -33,20 +33,19 @@ impl From<Property<'_>> for crate::Property {
 
 #[test]
 fn test_property() {
-    assert_eq!(
-        property::<(_, ErrorKind)>("KEY:VALUE\n"),
-        Ok((
-            "",
-            Property {
-                key: "KEY",
-                val: "VALUE",
-                params: vec![]
-            }
-        ))
+    assert_parser!(
+        property,
+        "KEY:VALUE\n",
+        Property {
+            key: "KEY",
+            val: "VALUE",
+            params: vec![]
+        }
     );
 
     assert_parser!(
-        property::<(_, ErrorKind)>("KEY1;foo=bar:VALUE\n"),
+        property,
+        "KEY1;foo=bar:VALUE\n",
         Property {
             key: "KEY1",
             val: "VALUE",
@@ -58,7 +57,8 @@ fn test_property() {
     );
 
     assert_parser!(
-        property::<(_, ErrorKind)>("KEY2;foo=bar:VALUE space separated\n"),
+        property,
+        "KEY2;foo=bar:VALUE space separated\n",
         Property {
             key: "KEY2",
             val: "VALUE space separated",
@@ -70,7 +70,8 @@ fn test_property() {
     );
 
     assert_parser!(
-        property::<(_, ErrorKind)>("KEY2;foo=bar:important:VALUE\n"),
+        property,
+        "KEY2;foo=bar:important:VALUE\n",
         Property {
             key: "KEY2",
             val: "important:VALUE",
@@ -83,7 +84,8 @@ fn test_property() {
 
     // TODO: newlines followed by spaces must be ignored
     assert_parser!(
-        property::<(_, ErrorKind)>("KEY3;foo=bar:VALUE\\n newline separated\n"),
+        property,
+        "KEY3;foo=bar:VALUE\\n newline separated\n",
         Property {
             key: "KEY3",
             val: "VALUE\\n newline separated",
@@ -100,8 +102,8 @@ fn test_property() {
 fn parse_properties_from_rfc() {
     // TODO: newlines followed by spaces must be ignored
     assert_parser!(
-        property::<(_, ErrorKind)>("home.tel;type=fax,voice,msg:+49 3581 123456\n"),
-
+        property,
+        "home.tel;type=fax,voice,msg:+49 3581 123456\n",
         Property {
             key: "home.tel",
             val: "+49 3581 123456",
@@ -113,7 +115,8 @@ fn parse_properties_from_rfc() {
     );
     // TODO: newlines followed by spaces must be ignored
     assert_parser!(
-        property::<(_, ErrorKind)>("email;internet:mb@goerlitz.de\n"),
+        property,
+        "email;internet:mb@goerlitz.de\n",
         Property {
             key: "email",
             val: "mb@goerlitz.de",
