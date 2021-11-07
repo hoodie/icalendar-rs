@@ -1,6 +1,10 @@
+use std::fmt::{self, Write};
+
+use crate::properties::fold_line;
+
 use super::{
     parameters::{parameters, Parameter},
-    utils::property_key,
+    utils::property_key_cow,
 };
 use nom::{
     bytes::complete::{tag, take_until},
@@ -14,15 +18,31 @@ use nom::{
 #[cfg(test)]
 use nom::error::ErrorKind;
 
-#[cfg(test)]
-use pretty_assertions::assert_eq;
-
 /// Zero-copy version of [`crate::properties::Property`]
 #[derive(PartialEq, Debug, Clone)]
 pub struct Property<'a> {
     pub key: &'a str,
     pub val: &'a str,
     pub params: Vec<Parameter<'a>>,
+}
+
+impl Property<'_> {
+    pub fn fmt_write<W: Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
+        // A nice starting capacity for the majority of content lines
+        let mut line = String::with_capacity(150);
+
+        write!(line, "{}", self.key)?;
+        for &Parameter { ref key, ref val } in &self.params {
+            if let Some(val) = val {
+                write!(line, ";{}={}", key, val)?;
+            } else {
+                write!(line, ";{}", key)?;
+            }
+        }
+        write!(line, ":{}", self.val)?;
+        write_crlf!(out, "{}", fold_line(&line))?;
+        Ok(())
+    }
 }
 
 impl From<Property<'_>> for crate::Property {
@@ -121,7 +141,7 @@ fn parse_properties_from_rfc() {
             key: "email",
             val: "mb@goerlitz.de",
             params: vec![Parameter {
-                key: "internet",
+                key: "internet"  ,
                 val: None,
             }]
         }
@@ -140,7 +160,7 @@ fn parse_property_with_breaks() {
         params: vec![]
     };
 
-    assert_eq!(property::<(_, ErrorKind)>(sample_0), Ok(("", expectation)));
+    assert_parser!(property, sample_0, expectation);
 }
 
 pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -155,7 +175,7 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                         // preceded(multispace0, alpha_or_dash), // key
                         cut(context(
                             "property can't be END or BEGIN",
-                            preceded(multispace0, property_key),
+                            preceded(multispace0, property_key_cow),
                         )), // key
                         parameters, // params
                     )),

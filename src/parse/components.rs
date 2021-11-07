@@ -1,5 +1,7 @@
+use core::fmt;
 use std::convert::TryFrom;
 
+use chrono::Utc;
 use nom::{
     branch::alt,
     bytes::complete::tag,
@@ -12,6 +14,7 @@ use nom::{
 
 #[cfg(test)]
 use nom::error::ErrorKind;
+use uuid::Uuid;
 
 #[cfg(test)]
 use super::parameters::Parameter;
@@ -27,6 +30,7 @@ use pretty_assertions::assert_eq;
 use crate::{
     calendar::CalendarElement,
     components::{InnerComponent, Other},
+    CalendarDateTime,
 };
 
 /// The parsing equivalent of [`crate::components::Component`]
@@ -35,6 +39,38 @@ pub struct Component<'a> {
     pub name: &'a str,
     pub properties: Vec<Property<'a>>,
     pub components: Vec<Component<'a>>,
+}
+
+impl Component<'_> {
+    /// Writes `Component` into a `Writer` using `std::fmt`.
+    pub fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
+        write_crlf!(out, "BEGIN:{}", self.name)?;
+
+        if self.name.to_lowercase() == "calendar" {
+            if !self
+                .properties
+                .iter()
+                .any(|property| property.key == "DTSTAMP")
+            {
+                let now = CalendarDateTime::Utc(Utc::now());
+                write_crlf!(out, "DTSTAMP:{}", now)?;
+            }
+
+            if !self.properties.iter().any(|property| property.key == "UID") {
+                write_crlf!(out, "UID:{}", Uuid::new_v4())?;
+            }
+        }
+        for property in &self.properties {
+            property.fmt_write(out)?;
+        }
+
+        for component in &self.components {
+            component.fmt_write(out)?;
+        }
+
+        write_crlf!(out, "END:{}", self.name)?;
+        Ok(())
+    }
 }
 
 impl From<Component<'_>> for InnerComponent {
@@ -89,14 +125,11 @@ fn parse_empty_component2() {
 #[test]
 #[rustfmt::skip]
 fn parse_component() {
-    // let sample_0 = "BEGIN:VEVENT\nKEY;foo=bar:VALUE\nKEY;foo=bar;DATE=20170218:VALUE\nEND:VEVENT\n";
     let sample_1 = "BEGIN:VEVENT
 KEY;foo=bar:VALUE
 KEY;foo=bar;DATE=20170218:VALUE
 END:VEVENT
 ";
-
-    //assert_eq!(from_utf8(sample_0), from_utf8(sample_1));
 
     let expectation = Component{name: "VEVENT", properties: vec![
             Property{key: "KEY", val: "VALUE", params: vec![
@@ -232,7 +265,7 @@ fn test_components() {
 }
 
 #[test]
-#[ignore]
+#[should_panic]
 fn test_faulty_component() {
     assert_parser!(
         component,
@@ -250,9 +283,3 @@ pub fn components<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 ) -> IResult<&'a str, Vec<Component>, E> {
     complete(many0(all_consuming(component)))(input)
 }
-
-// pub fn components<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
-//     input: &'a str,
-// ) -> IResult<&'a str, Vec<Component>, E> {
-//     complete(many0(component))(input)
-// }

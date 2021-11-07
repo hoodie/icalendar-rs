@@ -25,6 +25,7 @@
 #![allow(missing_docs)]
 use nom::{error::convert_error, error::VerboseError, Finish};
 
+mod calendar;
 pub(crate) mod components;
 mod parameters;
 mod properties;
@@ -32,6 +33,7 @@ mod properties;
 mod tests;
 mod utils;
 
+pub use calendar::Calendar;
 pub use components::Component;
 pub use parameters::Parameter;
 pub use properties::Property;
@@ -54,9 +56,9 @@ pub fn read_calendar_simple<'a>(
 /// This version produces nice and readable errors with line numbers thanks the the awesomeness of [`nom`].
 /// Line numbers are in regard to the normalized/unfolded version of the input, so better keep those around for reference.
 ///
-pub fn read_calendar(input: &str) -> Result<Vec<Component<'_>>, String> {
+pub fn read_calendar(input: &str) -> Result<Calendar<'_>, String> {
     components(input)
         .finish()
-        .map(|(_, components)| components)
+        .map(|(_, components)| Calendar { components })
         .map_err(|e: VerboseError<&str>| format!("error: {}", convert_error(input, e.clone())))
 }

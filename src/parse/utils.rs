@@ -26,6 +26,11 @@ pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         })(input)
     }
 }
+pub fn property_key_cow<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    input: &'a str,
+) -> IResult<&str, &'a str, E> {
+    property_key(input)
+}
 
 pub fn line<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
     prefix: &'a str,

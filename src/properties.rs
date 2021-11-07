@@ -261,7 +261,7 @@ impl From<TodoStatus> for Property {
 //}
 
 // Fold a content line as described in RFC 5545, Section 3.1
-fn fold_line(line: &str) -> String {
+pub(crate) fn fold_line(line: &str) -> String {
     let limit = 75;
     let len = line.len();
     let mut ret = String::with_capacity(len + (len / limit * 3));

@@ -2,10 +2,10 @@ use nom::{
     branch::alt,
     bytes::complete::{tag, take_till1},
     character::complete::{alpha0, space0},
-    combinator::{eof, opt},
+    combinator::{eof, map, opt},
     error::{ContextError, ParseError},
     multi::many0,
-    sequence::preceded,
+    sequence::{preceded, tuple},
     IResult,
 };
 
@@ -87,16 +87,21 @@ fn test_parameter() {
 }
 
 fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
-    i: &'a str,
-) -> IResult<&'a str, Parameter, E> {
-    let (i, _) = tag(";")(i)?;
-    let (i, _) = space0(i)?;
-    let (i, key) = alpha0(i)?;
-    let (i, val) = opt(preceded(
-        tag("="),
-        alt((eof, take_till1(|x| x == ';' || x == ':'))),
-    ))(i)?;
-    Ok((i, Parameter { key, val }))
+    input: &'a str,
+) -> IResult<&'a str, Parameter<'a>, E> {
+    map(
+        tuple((
+            preceded(
+                tuple((tag(";"), space0)),
+                alpha0, // key
+            ),
+            opt(preceded(
+                tag("="),
+                alt((eof, take_till1(|x| x == ';' || x == ':'))),
+            )),
+        )),
+        |(key, val)| Parameter { key, val },
+    )(input)
 }
 
 // parameter list

@@ -1,9 +1,6 @@
-use std::{convert::TryFrom, env::args, fs::read_to_string};
+use std::{env::args, fs::read_to_string};
 
-use icalendar::{
-    parse::{normalize, read_calendar},
-    Calendar,
-};
+use icalendar::parse::{normalize, read_calendar};
 
 fn print_with_lines(content: &str) {
     println!(
@@ -16,16 +13,21 @@ fn print_with_lines(content: &str) {
     );
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
     if let Some(sample) = args().nth(1).map(read_to_string) {
         let normalized = normalize(&sample.unwrap());
         print_with_lines(&normalized);
 
-        let components = read_calendar(&normalized)?;
+        let calendar = match read_calendar(&normalized) {
+            Ok(calendar) => calendar,
+            Err(error) => {
+                println!("{}", error);
+                return;
+            }
+        };
 
-        let calendar = Calendar::try_from(components).unwrap();
+        let calendar = calendar.to_owned();
 
         print_with_lines(&calendar.to_string());
     }
-    Ok(())
 }
