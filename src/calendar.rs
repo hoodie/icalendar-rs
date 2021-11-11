@@ -1,10 +1,5 @@
 use chrono::Duration;
-use std::{
-    convert::{Into, TryFrom, TryInto},
-    fmt,
-    iter::FromIterator,
-    ops::Deref,
-};
+use std::{fmt, iter::FromIterator, ops::Deref};
 
 use crate::{components::*, Parameter, Property};
 
@@ -31,6 +26,12 @@ impl From<Todo> for CalendarElement {
 impl From<Venue> for CalendarElement {
     fn from(val: Venue) -> Self {
         CalendarElement::Venue(val)
+    }
+}
+
+impl From<Other> for CalendarElement {
+    fn from(val: Other) -> Self {
+        CalendarElement::Other(val)
     }
 }
 
@@ -174,11 +175,8 @@ impl<C: Into<CalendarElement>> FromIterator<C> for Calendar {
 }
 
 #[cfg(feature = "parser")]
-impl<'a> TryFrom<Vec<crate::parse::Component<'a>>> for Calendar {
-    // TODO: make this a proper error
-    type Error = String;
-
-    fn try_from(mut components: Vec<crate::parse::Component<'a>>) -> Result<Self, Self::Error> {
+impl<'a> From<Vec<crate::parse::Component<'a>>> for Calendar {
+    fn from(mut components: Vec<crate::parse::Component<'a>>) -> Self {
         let root_is_calendar = components
             .get(0)
             .map(|first_root| first_root.name == "VCALENDAR")
@@ -192,7 +190,7 @@ impl<'a> TryFrom<Vec<crate::parse::Component<'a>>> for Calendar {
         components
             .into_iter()
             .map(|c: crate::parse::Component<'a>| {
-                let elem: Result<CalendarElement, Self::Error> = TryInto::try_into(c);
+                let elem: CalendarElement = c.into();
                 elem
             })
             .collect()

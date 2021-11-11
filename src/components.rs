@@ -68,6 +68,7 @@ pub struct Todo {
 pub struct Venue {
     inner: InnerComponent,
 }
+
 #[derive(Debug, Default)]
 pub struct Other {
     name: String,
