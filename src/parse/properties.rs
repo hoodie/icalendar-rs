@@ -4,7 +4,7 @@ use crate::properties::fold_line;
 
 use super::{
     parameters::{parameters, Parameter},
-    utils::property_key_cow,
+    utils::property_key,
 };
 use nom::{
     bytes::complete::{tag, take_until},
@@ -175,7 +175,7 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                         // preceded(multispace0, alpha_or_dash), // key
                         cut(context(
                             "property can't be END or BEGIN",
-                            preceded(multispace0, property_key_cow),
+                            preceded(multispace0, property_key),
                         )), // key
                         parameters, // params
                     )),

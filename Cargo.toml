@@ -22,10 +22,6 @@ chrono = "0.4"
 version = "7.0"
 optional = true
 
-[dependencies.aho-corasick]
-version = "0.7"
-optional = true
-
 [dependencies.uuid]
 features = ["v4"]
 version = "0.8"
@@ -35,7 +31,7 @@ pretty_assertions = "1"
 
 [features]
 default = ["parser"]
-parser = ["nom", "aho-corasick"]
+parser = ["nom"]
 
 [[example]]
 name = "parse"

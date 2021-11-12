@@ -1,6 +1,6 @@
 use std::{env::args, fs::read_to_string};
 
-use icalendar::parse::{normalize, read_calendar};
+use icalendar::parse::{read_calendar, unfold};
 
 fn print_with_lines(content: &str) {
     println!(
@@ -15,7 +15,7 @@ fn print_with_lines(content: &str) {
 
 fn main() {
     if let Some(sample) = args().nth(1).map(read_to_string) {
-        let normalized = normalize(&sample.unwrap());
+        let normalized = unfold(&sample.unwrap());
         print_with_lines(&normalized);
 
         match read_calendar(&normalized) {

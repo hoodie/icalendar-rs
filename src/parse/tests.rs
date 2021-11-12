@@ -1,4 +1,4 @@
-use crate::parse::normalize;
+use crate::parse::unfold;
 
 #[test]
 fn rfc_2425_8_3_3() {
@@ -33,5 +33,5 @@ key;type=X509;encoding=b:MIICajCCAdOgAwIBAgICBEUwDQYJKoZIhvcNAQEEBQ
  UMk1U7jt8LYpo4YULU7UZHPYVUaSgVttImOHZIKi4hlPXBOhcUQ==
 end:vcard"#;
 
-    crate::parse::read_calendar(&normalize(example)).unwrap();
+    crate::parse::read_calendar(&unfold(example)).unwrap();
 }

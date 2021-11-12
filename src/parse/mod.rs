@@ -7,7 +7,7 @@
 //!
 //! For this reason parsing iCal is a bit indirect.
 //! In this module you find the following functions to parse iCalendar document.
-//! `normalize()` will unfold the iCal content and turn it into the nice machine-readable format it ought to be.
+//! `unfold()` will unfold the iCal content and turn it into the nice machine-readable format it ought to be.
 //! `read_calendar()` returns a Vector of `Component`s
 //! `read_calendar_verbose()` does the same thing but produces nicer parsing errors with line numbers (referencing the normalized content).
 //!
@@ -40,7 +40,7 @@ pub use properties::Property;
 
 use components::*;
 
-pub use utils::normalize;
+pub use utils::unfold;
 
 /// Parse iCalendar file content into an array of [`Component`]s
 ///

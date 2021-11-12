@@ -1,4 +1,3 @@
-use aho_corasick::AhoCorasick;
 use nom::{
     bytes::complete::{tag_no_case, take_while},
     character::complete::line_ending,
@@ -26,11 +25,6 @@ pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         })(input)
     }
 }
-pub fn property_key_cow<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
-    input: &'a str,
-) -> IResult<&str, &'a str, E> {
-    property_key(input)
-}
 
 pub fn line<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
     prefix: &'a str,
@@ -56,62 +50,45 @@ pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
 /// # Example
 ///
 /// ```
-/// # use icalendar::parse::normalize;
-/// let line = r#"this
-///   gets
-///   wrapped
-///   in
-///   a weird
-///   way"#;
+/// # use icalendar::parse::unfold;
+/// #[rustfmt::skip]
+/// let line = r#"this g
+///   ets w
+///   rapped i
+///   n a w
+///    eird w
+///   ay"#;
 ///
-/// assert_eq!(normalize(line), "this gets wrapped in a weird way")
+/// assert_eq!(unfold(line), "this gets wrapped in a weird way")
 /// ```
-pub fn normalize(input: &str) -> String {
-    unfold(&simplify_line_endings(input))
-}
-
-fn unfold(input: &str) -> String {
-    let mut output = Vec::<u8>::new();
-
-    // unfold
-    AhoCorasick::new(&["\n "])
-        .stream_replace_all(input.as_bytes(), &mut output, &[""])
-        .unwrap();
-
-    String::from_utf8(output).unwrap()
-}
-
-fn simplify_line_endings(input: &str) -> String {
-    let mut output = Vec::<u8>::new();
-
-    // unfold
-    AhoCorasick::new(&["\r\n"])
-        .stream_replace_all(input.as_bytes(), &mut output, &["\n"])
-        .unwrap();
-
-    String::from_utf8(output).unwrap()
+pub fn unfold(input: &str) -> String {
+    input
+        .split("\r\n ")
+        .flat_map(|l| l.split("\n "))
+        .map(str::trim_start)
+        .collect()
 }
 
 #[test]
-fn test_unfold() {
-    let input = "1 hello world\r\n2 hello\r\n  world\r\n3 hello world\r\n4 hello world";
-
-    let expected = r#"1 hello world
-2 hello world
-3 hello world
-4 hello world"#;
-    assert_eq!(normalize(input), expected);
+fn test_unfold1() {
+    let input = "1 hello world\r\n2 hello \r\n   world\r\n3 hello \r\n world\r\n4 hello world";
+    let expected = "1 hello world\r\n2 hello world\r\n3 hello world\r\n4 hello world";
+    assert_eq!(unfold(input), expected);
 }
 
 /// this is actually also allowed by the spec
 #[test]
-#[ignore]
 fn test_unfold2() {
-    let input = "1 hello world\r\n2 hello\r\n  world\r\n3 hello world\r\n4 hello world";
+    let input1 = "1 hello world\n2 hello \n  world\n3 hello world\n4 hello world";
+    let input2 = "1 hello world\r\n2 hello \r\n   world\r\n3 hello \r\n world\r\n4 hello world";
 
-    let expected = r#"1 hello world
-2 hello world
- 3 hello world
-  4 hello world"#;
-    assert_eq!(normalize(input), expected);
+    let expected = vec![
+        "1 hello world",
+        "2 hello world",
+        "3 hello world",
+        "4 hello world",
+    ];
+
+    assert_eq!(unfold(input1).lines().collect::<Vec<_>>(), expected);
+    assert_eq!(unfold(input2).lines().collect::<Vec<_>>(), expected);
 }
