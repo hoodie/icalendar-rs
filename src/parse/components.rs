@@ -140,7 +140,7 @@ END:VEVENT
 
     assert_eq!(
         component::<(_, ErrorKind)>(sample_1).unwrap().1,
-        expectation.clone());
+        expectation);
 }
 
 enum ComponentChild<'a> {

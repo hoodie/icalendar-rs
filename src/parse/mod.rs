@@ -31,6 +31,7 @@ mod parameters;
 mod properties;
 #[cfg(test)]
 mod tests;
+mod owned;
 mod utils;
 
 pub use calendar::Calendar;
