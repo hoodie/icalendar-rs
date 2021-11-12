@@ -174,29 +174,6 @@ impl<C: Into<CalendarElement>> FromIterator<C> for Calendar {
     }
 }
 
-#[cfg(feature = "parser")]
-impl<'a> From<Vec<crate::parse::Component<'a>>> for Calendar {
-    fn from(mut components: Vec<crate::parse::Component<'a>>) -> Self {
-        let root_is_calendar = components
-            .get(0)
-            .map(|first_root| first_root.name == "VCALENDAR")
-            .unwrap_or(false);
-
-        let components: Vec<crate::parse::Component<'a>> = if root_is_calendar {
-            components.swap_remove(0).components
-        } else {
-            components
-        };
-        components
-            .into_iter()
-            .map(|c: crate::parse::Component<'a>| {
-                let elem: CalendarElement = c.into();
-                elem
-            })
-            .collect()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

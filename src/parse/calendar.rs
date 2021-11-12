@@ -1,3 +1,5 @@
+use crate::calendar::CalendarElement;
+
 use super::Component;
 use core::fmt::{self, Write};
 
@@ -25,5 +27,33 @@ impl Calendar<'_> {
 impl fmt::Display for Calendar<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.fmt_write(f)
+    }
+}
+
+impl From<Calendar<'_>> for crate::Calendar {
+    fn from(parsed: Calendar) -> Self {
+        parsed.components.into()
+    }
+}
+
+impl<'a> From<Vec<Component<'a>>> for crate::Calendar {
+    fn from(mut components: Vec<Component<'a>>) -> Self {
+        let root_is_calendar = components
+            .get(0)
+            .map(|first_root| first_root.name == "VCALENDAR")
+            .unwrap_or(false);
+
+        let components: Vec<Component<'a>> = if root_is_calendar {
+            components.swap_remove(0).components
+        } else {
+            components
+        };
+        components
+            .into_iter()
+            .map(|c: Component<'a>| {
+                let elem: CalendarElement = c.into();
+                elem
+            })
+            .collect()
     }
 }
