@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use chrono::*;
 use icalendar::{
     parse::{read_calendar, unfold},
@@ -30,7 +32,7 @@ fn main() {
     let ical = built_calendar.to_string();
 
     // and now lets parse it again
-    let from_parsed = Calendar::from(read_calendar(&unfold(&ical)).unwrap());
+    let from_parsed = Calendar::from_str(&ical).unwrap();
 
     println!("{}", &ical); // print what we built
     println!("{}", from_parsed); // print what parsed
