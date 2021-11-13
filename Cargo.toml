@@ -30,10 +30,20 @@ version = "0.8"
 pretty_assertions = "1"
 
 [features]
-default = ["parser"]
+default = []
 parser = ["nom"]
 
 [[example]]
 name = "parse"
 path= "examples/parse.rs"
+required-features = ["parser"]
+
+[[example]]
+name = "full_circle"
+path= "examples/full_circle.rs"
+required-features = ["parser"]
+
+[[example]]
+name = "reserialize"
+path= "examples/reserialize.rs"
 required-features = ["parser"]
