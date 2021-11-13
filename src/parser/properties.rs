@@ -199,21 +199,27 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         "property",
         cut(map(
             tuple((
-                separated_pair(
-                    tuple((
-                        // preceded(multispace0, alpha_or_dash), // key
-                        cut(context(
-                            "property can't be END or BEGIN",
-                            preceded(multispace0, property_key),
-                        )), // key
-                        parameters, // params
-                    )),
-                    context("property sparator", tag(":")), // separator
+                alt((
+                    separated_pair(
+                        tuple((
+                            // preceded(multispace0, alpha_or_dash), // key
+                            cut(context(
+                                "property can't be END or BEGIN",
+                                preceded(multispace0, property_key),
+                            )), // key
+                            parameters, // params
+                        )),
+                        context("property sparator", tag(":")), // separator
+                        context(
+                            "property value",
+                            alt((take_until("\r\n"), take_until("\n"))),
+                        ), // val TODO: replace this with something simpler!
+                    ),
                     context(
-                        "property value",
-                        alt((take_until("\r\n"), take_until("\n"))),
-                    ), // val TODO: replace this with something simpler!
-                ),
+                        "no-value property",
+                        map(valid_key_sequence, |key| ((key, vec![]), "")), // key and nothing else
+                    ),
+                )),
                 opt(line_ending),
             )),
             |(((key, params), val), _)| Property { key, val, params },
