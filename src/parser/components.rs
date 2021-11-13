@@ -4,7 +4,6 @@ use chrono::Utc;
 use nom::{
     branch::alt,
     bytes::complete::tag,
-    character::complete::alpha0,
     combinator::{all_consuming, complete, cut, map},
     error::{context, ContextError, ParseError},
     multi::{many0, many_till},
@@ -19,7 +18,7 @@ use uuid::Uuid;
 use super::parameters::Parameter;
 use super::{
     properties::property,
-    utils::{line, line_separated},
+    utils::{line, line_separated, valid_key_sequence},
     Property,
 };
 
@@ -118,6 +117,15 @@ fn parse_empty_component2() {
 
 #[test]
 #[rustfmt::skip]
+fn parse_empty_component_with_dash() {
+    assert_eq!(
+        component::<(_, ErrorKind)>("BEGIN:X-HOODIE-EVENT\n\nEND:X-HOODIE-EVENT\n"),
+        Ok(("", Component{name: "X-HOODIE-EVENT", properties: vec![], components: vec![]})),
+        "empty component with empty line");
+}
+
+#[test]
+#[rustfmt::skip]
 fn parse_component() {
     let sample_1 = "BEGIN:VEVENT
 KEY;foo=bar:VALUE
@@ -151,7 +159,7 @@ enum ComponentChild<'a> {
 pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Component, E> {
-    let (input, name) = line("BEGIN:", alpha0)(input)?;
+    let (input, name) = line("BEGIN:", valid_key_sequence)(input)?;
 
     let (input, (properties, components)) = map(
         many_till(

@@ -1,7 +1,7 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_till1},
-    character::complete::{alpha0, space0},
+    character::complete::space0,
     combinator::{eof, map, opt},
     error::{ContextError, ParseError},
     multi::many0,
@@ -11,6 +11,8 @@ use nom::{
 
 #[cfg(test)]
 use nom::error::ErrorKind;
+
+use super::utils::valid_key_sequence;
 
 /// Zero-copy version of [`crate::properties::Parameter`]
 #[derive(PartialEq, Debug, Clone)]
@@ -35,6 +37,7 @@ fn test_parameter() {
             val: Some("VALUE")
         }
     );
+
     assert_parser!(
         parameter,
         "; KEY=VALUE",
@@ -86,6 +89,18 @@ fn test_parameter() {
     );
 }
 
+#[test]
+fn test_parameter_with_dash() {
+    assert_parser!(
+        parameter,
+        ";X-HOODIE-KEY=VALUE",
+        Parameter {
+            key: "X-HOODIE-KEY",
+            val: Some("VALUE")
+        }
+    );
+}
+
 fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Parameter<'a>, E> {
@@ -93,7 +108,7 @@ fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         tuple((
             preceded(
                 tuple((tag(";"), space0)),
-                alpha0, // key
+                valid_key_sequence, //key
             ),
             opt(preceded(
                 tag("="),

@@ -4,7 +4,7 @@ use crate::properties::fold_line;
 
 use super::{
     parameters::{parameters, Parameter},
-    utils::property_key,
+    utils::{property_key, valid_key_sequence},
 };
 use nom::{
     bytes::complete::{tag, take_until},
@@ -118,6 +118,19 @@ fn test_property() {
 }
 
 #[test]
+fn test_property_with_dash() {
+    assert_parser!(
+        property,
+        "X-HOODIE-KEY:VALUE\n",
+        Property {
+            key: "X-HOODIE-KEY",
+            val: "VALUE",
+            params: vec![]
+        }
+    );
+}
+
+#[test]
 #[rustfmt::skip]
 fn parse_properties_from_rfc() {
     // TODO: newlines followed by spaces must be ignored
@@ -157,6 +170,21 @@ fn parse_property_with_breaks() {
     let expectation = Property {
         key: "DESCRIPTION",
         val: "Hey, I'm gonna have a party\\n BYOB: Bring your own beer.\\n Hendrik\\n",
+        params: vec![]
+    };
+
+    assert_parser!(property, sample_0, expectation);
+}
+
+#[test]
+#[rustfmt::skip]
+fn parse_property_with_no_value() {
+
+    let sample_0 = "X-NO-VALUE";
+
+    let expectation = Property {
+        key: "X-NO-VALUE",
+        val: "",
         params: vec![]
     };
 
