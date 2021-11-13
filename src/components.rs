@@ -81,7 +81,7 @@ pub(crate) struct InnerComponent {
     pub multi_properties: Vec<Property>,
 }
 
-//impl<'a> Into<InnerComponent> for parse::Component<'a> {
+//impl<'a> Into<InnerComponent> for parser::Component<'a> {
 //    fn into(self) -> InnerComponent {
 //        unimplemented!()
 //    }

@@ -50,7 +50,7 @@ pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
 /// # Example
 ///
 /// ```
-/// # use icalendar::parse::unfold;
+/// # use icalendar::parser::unfold;
 /// #[rustfmt::skip]
 /// let line = r#"this g
 ///   ets w

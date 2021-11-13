@@ -1,6 +1,7 @@
+#![cfg(feature = "parser")]
 use std::{env::args, fs::read_to_string};
 
-use icalendar::parse::{read_calendar, unfold};
+use icalendar::parser::{read_calendar, unfold};
 
 fn print_with_lines(content: &str) {
     println!(

@@ -88,7 +88,7 @@ macro_rules! write_crlf {
     );
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "parser"))]
 #[macro_use]
 mod assert;
 
@@ -96,7 +96,7 @@ mod assert;
 mod calendar;
 mod components;
 #[cfg(feature = "parser")]
-pub mod parse;
+pub mod parser;
 mod properties;
 
 pub use crate::{

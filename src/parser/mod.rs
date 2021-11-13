@@ -6,7 +6,7 @@
 //! > -- [rfc5545 3.1]
 //!
 //! For this reason parsing iCal is a bit indirect.
-//! In this module you find the following functions to parse iCalendar document.
+//! In this module you find the following functions to parser iCalendar document.
 //! `unfold()` will unfold the iCal content and turn it into the nice machine-readable format it ought to be.
 //! `read_calendar()` returns a Vector of `Component`s
 //! `read_calendar_verbose()` does the same thing but produces nicer parsing errors with line numbers (referencing the normalized content).
@@ -27,11 +27,11 @@ use nom::{error::convert_error, error::VerboseError, Finish};
 
 mod calendar;
 pub(crate) mod components;
+mod owned;
 mod parameters;
 mod properties;
 #[cfg(test)]
 mod tests;
-mod owned;
 mod utils;
 
 pub use calendar::Calendar;

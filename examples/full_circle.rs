@@ -1,8 +1,9 @@
+#![cfg(feature = "parser")]
 use std::str::FromStr;
 
 use chrono::*;
 use icalendar::{
-    parse::{read_calendar, unfold},
+    parser::{read_calendar, unfold},
     Calendar, Class, Component, Event, Property, Todo,
 };
 
@@ -31,7 +32,7 @@ fn main() {
     // lets write this as **rfc5545**
     let ical = built_calendar.to_string();
 
-    // and now lets parse it again
+    // and now lets parser it again
     let from_parsed = Calendar::from_str(&ical).unwrap();
 
     println!("{}", &ical); // print what we built

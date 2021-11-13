@@ -1,6 +1,7 @@
+#![cfg(feature = "parser")]
 use std::{env::args, fs::read_to_string};
 
-use icalendar::parse::{read_calendar, unfold};
+use icalendar::parser::{read_calendar, unfold};
 
 fn print_with_lines(content: &str) {
     println!(
@@ -23,7 +24,7 @@ fn main() {
             Err(error) => println!("non-verbose error\n {}", error),
         }
 
-        // match icalendar::parse::read_calendar_simple(&normalized) {
+        // match icalendar::parser::read_calendar_simple(&normalized) {
         //     Ok(read) => println!("{:#?}", read),
         //     Err(error) => println!("verbose error\n {}", error),
         // }
