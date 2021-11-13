@@ -7,6 +7,7 @@ use super::{
     utils::{property_key, valid_key_sequence},
 };
 use nom::{
+    branch::alt,
     bytes::complete::{tag, take_until},
     character::complete::{line_ending, multispace0},
     combinator::{cut, map, opt},
@@ -208,7 +209,10 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                         parameters, // params
                     )),
                     context("property sparator", tag(":")), // separator
-                    context("property value", take_until("\n")), // val TODO: replace this with something simpler!
+                    context(
+                        "property value",
+                        alt((take_until("\r\n"), take_until("\n"))),
+                    ), // val TODO: replace this with something simpler!
                 ),
                 opt(line_ending),
             )),
