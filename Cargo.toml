@@ -12,7 +12,7 @@ documentation = "https://docs.rs/icalendar/"
 repository = "https://github.com/hoodie/icalendar-rs"
 readme = "README.md"
 
-include = ["Cargo.toml", "README.md", "src/*.rs"]
+exclude = ["fixtures"]
 
 
 [dependencies]
