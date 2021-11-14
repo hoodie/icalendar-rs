@@ -3,7 +3,7 @@ authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
 name = "icalendar"
 version = "0.10.0"
 license = "MIT/Apache-2.0"
-edition = "2018"
+edition = "2021"
 
 description = "Early, minimal icalendar crate."
 keywords = ["calendar", "ical", "ics"]

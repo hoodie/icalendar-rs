@@ -174,6 +174,21 @@ impl Deref for Calendar {
     }
 }
 
+impl<T: Into<CalendarElement>, const N: usize> From<[T; N]> for Calendar {
+    fn from(elements: [T; N]) -> Self {
+        elements.into_iter().collect()
+    }
+}
+
+impl<C: Into<CalendarElement>> From<C> for Calendar {
+    fn from(element: C) -> Self {
+        Calendar {
+            components: vec![element.into()],
+            ..Default::default()
+        }
+    }
+}
+
 impl<C: Into<CalendarElement>> FromIterator<C> for Calendar {
     fn from_iter<T: IntoIterator<Item = C>>(iter: T) -> Self {
         Calendar {
