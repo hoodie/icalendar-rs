@@ -9,12 +9,33 @@ mod calendar_event {
     use super::{Event, Other, Todo, Venue};
     use std::fmt;
 
+    /// Wrapper for [`Todo`], [`Event`] or [`Venue`]
+    #[allow(missing_docs)]
+    #[non_exhaustive]
     #[derive(Debug, PartialEq, Eq)]
     pub enum CalendarElement {
         Todo(Todo),
         Event(Event),
         Venue(Venue),
+        #[doc(hidden)]
         Other(Other),
+    }
+
+    impl CalendarElement {
+        /// Attempt to access the containted [`Event`], if it is one
+        pub fn as_event(&self) -> Option<&Event> {
+            match self {
+                Self::Event(ref event) => Some(event),
+                _ => None,
+            }
+        }
+        /// Attempt to access the containted [`Todo`], if it is one
+        pub fn as_todo(&self) -> Option<&Todo> {
+            match self {
+                Self::Todo(ref todo) => Some(todo),
+                _ => None,
+            }
+        }
     }
 
     impl From<Event> for CalendarElement {
@@ -42,7 +63,7 @@ mod calendar_event {
     }
 
     impl CalendarElement {
-        pub fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
+        pub(crate) fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
             match *self {
                 CalendarElement::Todo(ref todo) => todo.fmt_write(out),
                 CalendarElement::Event(ref event) => event.fmt_write(out),

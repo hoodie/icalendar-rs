@@ -177,6 +177,7 @@ impl From<ValueType> for Parameter {
 
 #[derive(Copy, Clone, Debug)]
 /// Encodes the status of an `Event`
+/// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11>
 pub enum EventStatus {
     /// Indicates event is tentative.
     Tentative,
@@ -189,6 +190,7 @@ pub enum EventStatus {
 
 #[derive(Copy, Clone, Debug)]
 /// Encodes the status of a `Todo`
+/// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11>
 pub enum TodoStatus {
     /// Indicates to-do needs action.
     NeedsAction,
