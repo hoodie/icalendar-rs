@@ -4,7 +4,7 @@ use std::{
     mem,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 /// key-value pairs inside of `Property`s
 pub struct Parameter {
     key: String,
@@ -24,7 +24,7 @@ impl Parameter {
 //type EntryParameters = Vec<Parameter>;
 pub type EntryParameters = HashMap<String, Parameter>;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 /// key-value pairs inside of `Component`s
 pub struct Property {
     key: String,

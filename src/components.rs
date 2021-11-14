@@ -52,30 +52,30 @@ impl From<NaiveDateTime> for CalendarDateTime {
 }
 
 /// VEVENT [(RFC 5545, Section 3.6.1 )](https://tools.ietf.org/html/rfc5545#section-3.6.1)
-#[derive(Debug, Default)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct Event {
     inner: InnerComponent,
 }
 
 /// VTODO  [(RFC 5545, Section 3.6.2 )](https://tools.ietf.org/html/rfc5545#section-3.6.2)
-#[derive(Debug, Default)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct Todo {
     inner: InnerComponent,
 }
 
 /// VVENUE  [(ical-venue)](https://tools.ietf.org/html/draft-norris-ical-venue-01)
-#[derive(Debug, Default)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct Venue {
     inner: InnerComponent,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct Other {
     name: String,
     inner: InnerComponent,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub(crate) struct InnerComponent {
     pub properties: BTreeMap<String, Property>,
     pub multi_properties: Vec<Property>,

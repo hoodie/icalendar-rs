@@ -9,7 +9,7 @@ mod calendar_event {
     use super::{Event, Other, Todo, Venue};
     use std::fmt;
 
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq, Eq)]
     pub enum CalendarElement {
         Todo(Todo),
         Event(Event),
@@ -58,7 +58,7 @@ pub use calendar_event::CalendarElement;
 /// Represents a calendar
 ///
 /// You can `.add()` `Component`s to this.
-#[derive(Default, Debug)]
+#[derive(Default, Debug, PartialEq, Eq)]
 pub struct Calendar {
     properties: Vec<Property>,
     components: Vec<CalendarElement>,
