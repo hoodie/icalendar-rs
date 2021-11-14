@@ -1,17 +1,14 @@
-use crate::components::*;
-
-use crate::{Parameter, Property};
 use chrono::Duration;
-use std::convert::Into;
-use std::fmt;
-use std::iter::FromIterator;
-use std::ops::Deref;
+use std::{fmt, iter::FromIterator, ops::Deref};
+
+use crate::{components::*, Parameter, Property};
 
 #[derive(Debug)]
 pub enum CalendarElement {
     Todo(Todo),
     Event(Event),
     Venue(Venue),
+    Other(Other),
 }
 
 impl From<Event> for CalendarElement {
@@ -32,12 +29,19 @@ impl From<Venue> for CalendarElement {
     }
 }
 
+impl From<Other> for CalendarElement {
+    fn from(val: Other) -> Self {
+        CalendarElement::Other(val)
+    }
+}
+
 impl CalendarElement {
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         match *self {
             CalendarElement::Todo(ref todo) => todo.fmt_write(out),
             CalendarElement::Event(ref event) => event.fmt_write(out),
             CalendarElement::Venue(ref venue) => venue.fmt_write(out),
+            CalendarElement::Other(ref other) => other.fmt_write(out),
         }
     }
 }

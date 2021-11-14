@@ -1,12 +1,14 @@
-use std::collections::HashMap;
-use std::fmt::{self, Write};
-use std::mem;
+use std::{
+    collections::HashMap,
+    fmt::{self, Write},
+    mem,
+};
 
 #[derive(Debug)]
 /// key-value pairs inside of `Property`s
 pub struct Parameter {
     key: String,
-    value: String,
+    val: String,
 }
 
 impl Parameter {
@@ -14,20 +16,20 @@ impl Parameter {
     pub fn new(key: &str, val: &str) -> Self {
         Parameter {
             key: key.to_owned(),
-            value: val.to_owned(),
+            val: val.to_owned(),
         }
     }
 }
 
 //type EntryParameters = Vec<Parameter>;
-type EntryParameters = HashMap<String, Parameter>;
+pub type EntryParameters = HashMap<String, Parameter>;
 
 #[derive(Debug)]
 /// key-value pairs inside of `Component`s
 pub struct Property {
     key: String,
-    value: String,
-    parameters: EntryParameters,
+    val: String,
+    params: EntryParameters,
 }
 
 impl Property {
@@ -35,8 +37,8 @@ impl Property {
     pub fn new(key: &str, val: &str) -> Self {
         Property {
             key: key.to_owned(),
-            value: val.replace('\n', "\\n"),
-            parameters: HashMap::new(),
+            val: val.replace('\n', "\\n"),
+            params: HashMap::new(),
         }
     }
 
@@ -47,13 +49,13 @@ impl Property {
 
     /// Clones the key field.
     pub fn value(&self) -> &str {
-        &self.value
+        &self.val
     }
 
     /// Appends a new parameter.
     pub fn append_parameter<I: Into<Parameter>>(&mut self, into_parameter: I) -> &mut Self {
         let parameter = into_parameter.into();
-        self.parameters.insert(parameter.key.clone(), parameter);
+        self.params.insert(parameter.key.clone(), parameter);
         self
     }
 
@@ -67,8 +69,8 @@ impl Property {
     pub fn done(&mut self) -> Self {
         Property {
             key: mem::take(&mut self.key),
-            value: mem::take(&mut self.value),
-            parameters: mem::take(&mut self.parameters),
+            val: mem::take(&mut self.val),
+            params: mem::take(&mut self.params),
         }
     }
 
@@ -78,10 +80,14 @@ impl Property {
         let mut line = String::with_capacity(150);
 
         write!(line, "{}", self.key)?;
-        for &Parameter { ref key, ref value } in self.parameters.values() {
+        for &Parameter {
+            ref key,
+            val: ref value,
+        } in self.params.values()
+        {
             write!(line, ";{}={}", key, value)?;
         }
-        write!(line, ":{}", self.value)?;
+        write!(line, ":{}", self.val)?;
         write_crlf!(out, "{}", fold_line(&line))?;
         Ok(())
     }
@@ -102,12 +108,12 @@ impl From<Class> for Property {
     fn from(val: Class) -> Self {
         Property {
             key: String::from("CLASS"),
-            value: String::from(match val {
+            val: String::from(match val {
                 Class::Public => "PUBLIC",
                 Class::Private => "PRIVATE",
                 Class::Confidential => "CONFIDENTIAL",
             }),
-            parameters: HashMap::new(),
+            params: HashMap::new(),
         }
     }
 }
@@ -149,7 +155,7 @@ impl From<ValueType> for Parameter {
     fn from(val: ValueType) -> Self {
         Parameter {
             key: String::from("VALUE"),
-            value: String::from(match val {
+            val: String::from(match val {
                 ValueType::Binary => "BINARY",
                 ValueType::Boolean => "BOOLEAN",
                 ValueType::CalAddress => "CAL-ADDRESS",
@@ -206,12 +212,12 @@ impl From<EventStatus> for Property {
     fn from(val: EventStatus) -> Self {
         Property {
             key: String::from("STATUS"),
-            value: String::from(match val {
+            val: String::from(match val {
                 EventStatus::Tentative => "TENTATIVE",
                 EventStatus::Confirmed => "CONFIRMED",
                 EventStatus::Cancelled => "CANCELLED",
             }),
-            parameters: HashMap::new(),
+            params: HashMap::new(),
         }
     }
 }
@@ -220,14 +226,14 @@ impl From<TodoStatus> for Property {
     fn from(val: TodoStatus) -> Self {
         Property {
             key: String::from("STATUS"),
-            value: String::from(match val {
+            val: String::from(match val {
                 TodoStatus::NeedsAction => "NEEDS-ACTION",
                 TodoStatus::Completed => "COMPLETED",
                 TodoStatus::InProcess => "IN-PROCESS",
                 TodoStatus::Cancelled => "CANCELLED",
                 //TodoStatus::Custom(s)   => "CU",
             }),
-            parameters: HashMap::new(),
+            params: HashMap::new(),
         }
     }
 }
@@ -259,7 +265,7 @@ impl From<TodoStatus> for Property {
 //}
 
 // Fold a content line as described in RFC 5545, Section 3.1
-fn fold_line(line: &str) -> String {
+pub(crate) fn fold_line(line: &str) -> String {
     let limit = 75;
     let len = line.len();
     let mut ret = String::with_capacity(len + (len / limit * 3));

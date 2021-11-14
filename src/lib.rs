@@ -11,11 +11,8 @@
 //! * [`Property`]s may have [`Parameter`]s
 //!
 //! ```rust
-//! # extern crate chrono;
-//! # extern crate icalendar;
 //! # use chrono::*;
 //! # use icalendar::*;
-//! # fn main() {
 //! let event = Event::new()
 //!     .summary("test event")
 //!     .description("here I have something really important to do")
@@ -42,10 +39,9 @@
 //!
 //!
 //! let mut calendar = Calendar::new();
-//! calendar.add(event);
-//! calendar.add(todo);
-//! calendar.add(bday);
-//! # }
+//! calendar.push(event);
+//! calendar.push(todo);
+//! calendar.push(bday);
 //! ```
 //!
 //! ## Breaking API Changes in version 0.7.0
@@ -60,7 +56,7 @@
 //!   [`chrono::DateTime<Utc>`](chrono::DateTime) are provided for ergonomics, the latter also restoring API
 //!   compatibility in case of UTC date-times.
 
-#![deny(
+#![warn(
     missing_docs,
     missing_copy_implementations,
     trivial_casts,
@@ -92,15 +88,21 @@ macro_rules! write_crlf {
     );
 }
 
+#[cfg(all(test, feature = "parser"))]
+#[macro_use]
+mod assert;
+
 //pub mod period;
 mod calendar;
 mod components;
+#[cfg(feature = "parser")]
+pub mod parser;
 mod properties;
 
-//pub mod repeats;
-pub use crate::calendar::Calendar;
-pub use crate::components::{CalendarDateTime, Component, Event, Todo, Venue};
-pub use crate::properties::{Class, Parameter, Property, ValueType};
-pub use crate::properties::{EventStatus, TodoStatus};
+pub use crate::{
+    calendar::Calendar,
+    components::{CalendarDateTime, Component, Event, Todo, Venue},
+    properties::{Class, EventStatus, Parameter, Property, TodoStatus, ValueType},
+};
 
 // TODO Calendar TimeZone VTIMEZONE STANDARD DAYLIGHT (see thunderbird exports)
