@@ -57,6 +57,57 @@ pub use calendar_event::CalendarElement;
 
 /// Represents a calendar
 ///
+///
+/// ### create calendar from an array of calendar events
+/// You can create a [`Calendar`] in a few different ways.
+/// ```
+/// # use icalendar::*;
+/// let todo1 = Todo::new();
+/// let todo2 = Todo::new();
+///
+/// let calendar = Calendar::from([todo1, todo2])
+///     .name("things that need to get done")
+///     .print();
+/// ```
+///
+/// ### push events into a calendar
+/// ```
+/// # use icalendar::*;
+/// let todo = Todo::new();
+/// let event = Event::new();
+///
+/// let mut calendar = Calendar::new();
+/// calendar.push(todo);
+/// calendar.push(event);
+/// calendar.print();
+/// ```
+///
+/// ## Container semantics
+///
+/// ### collect into a calendar from an `iterator` of calendar events
+/// ```
+/// # use icalendar::*;
+/// let todo1 = Todo::new();
+/// let todo2 = Todo::new();
+///
+/// let cal_from_iterator = vec![todo1, todo2]
+///     .into_iter()
+///     .collect::<Calendar>();
+/// ```
+///
+/// ### `Calendar` is a container for `CalendarElement`
+/// ```
+/// # use icalendar::*;
+/// let todo1 = Todo::new();
+/// let todo2 = Todo::new();
+///
+/// let calendar = Calendar::from([todo1, todo2]);
+/// for element in calendar.iter() {
+/// // ...
+/// }
+/// ```
+///
+///
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct Calendar {
     properties: Vec<Property>,
@@ -101,28 +152,30 @@ impl Calendar {
         self
     }
 
-    /// Set the NAME and X-WR-CALNAME `Property`s
+    /// Set the `NAME` and `X-WR-CALNAME` `Property`s
+    // TODO: where is `NAME` specified? it's not in rfc5545 or rfc2445
     pub fn name(&mut self, name: &str) -> &mut Self {
         self.append_property(Property::new("NAME", name));
         self.append_property(Property::new("X-WR-CALNAME", name));
         self
     }
 
-    /// Set the DESCRIPTION and X-WR-CALDESC `Property`s
+    /// Set the [`DESCRIPTION`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.5) and `X-WR-CALDESC` `Property`s
     pub fn description(&mut self, description: &str) -> &mut Self {
         self.append_property(Property::new("DESCRIPTION", description));
         self.append_property(Property::new("X-WR-CALDESC", description));
         self
     }
 
-    /// Set the TIMEZONE-ID and X-WR-TIMEZONE `Property`s
+    /// Set the `TIMEZONE-ID` and `X-WR-TIMEZONE` `Property`s
+    // TODO: where is `TIMEZONE-ID` specified? it's not in rfc5545 or rfc2445
     pub fn timezone(&mut self, timezone: &str) -> &mut Self {
         self.append_property(Property::new("TIMEZONE-ID", timezone));
         self.append_property(Property::new("X-WR-TIMEZONE", timezone));
         self
     }
 
-    /// Set the REFRESH-INTERVAL and X-PUBLISHED-TTL `Property`s
+    /// Set the `REFRESH-INTERVAL` and `X-PUBLISHED-TTL` `Property`s
     pub fn ttl(&mut self, duration: &Duration) -> &mut Self {
         let duration_string = duration.to_string();
         self.append_property(
@@ -178,6 +231,12 @@ impl Deref for Calendar {
     type Target = [CalendarElement];
 
     fn deref(&self) -> &[CalendarElement] {
+        self.components.deref()
+    }
+}
+
+impl AsRef<[CalendarElement]> for Calendar {
+    fn as_ref(&self) -> &[CalendarElement] {
         self.components.deref()
     }
 }
