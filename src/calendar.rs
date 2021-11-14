@@ -1,5 +1,5 @@
 use chrono::Duration;
-use std::{fmt, iter::FromIterator, ops::Deref};
+use std::{fmt, iter::FromIterator, mem, ops::Deref};
 
 use crate::{components::*, Parameter, Property};
 
@@ -57,7 +57,6 @@ pub use calendar_event::CalendarElement;
 
 /// Represents a calendar
 ///
-/// You can `.add()` `Component`s to this.
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct Calendar {
     properties: Vec<Property>,
@@ -133,6 +132,15 @@ impl Calendar {
         );
         self.append_property(Property::new("X-PUBLISHED-TTL", duration_string.as_str()));
         self
+    }
+
+    /// End of builder pattern.
+    /// copies over everything
+    pub fn done(&mut self) -> Self {
+        Calendar {
+            properties: mem::take(&mut self.properties),
+            components: mem::take(&mut self.components),
+        }
     }
 
     /// Writes `Calendar` into a `Writer` using `std::fmt`.
