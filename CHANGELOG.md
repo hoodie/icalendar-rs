@@ -1,9 +1,11 @@
 # Changelog
 
-## [Unreleased](https://github.com/hoodie/icalendar-rs/compare/v0.10.0...HEAD) (2021-10-25)
+## [Unreleased](https://github.com/hoodie/icalendar-rs/compare/v0.10.0...HEAD) (2021-11-14)
 
 ### Features
 
+* add FromStr implementation for calendar e670469
+* reserialize parsed calendar 64c116d
 * simple nom parser 21c0cfa
 
 
