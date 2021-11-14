@@ -3,48 +3,57 @@ use std::{fmt, iter::FromIterator, ops::Deref};
 
 use crate::{components::*, Parameter, Property};
 
-#[derive(Debug)]
-pub enum CalendarElement {
-    Todo(Todo),
-    Event(Event),
-    Venue(Venue),
-    Other(Other),
-}
+mod calendar_event {
+    use crate::Component;
 
-impl From<Event> for CalendarElement {
-    fn from(val: Event) -> Self {
-        CalendarElement::Event(val)
+    use super::{Event, Other, Todo, Venue};
+    use std::fmt;
+
+    #[derive(Debug)]
+    pub enum CalendarElement {
+        Todo(Todo),
+        Event(Event),
+        Venue(Venue),
+        Other(Other),
     }
-}
 
-impl From<Todo> for CalendarElement {
-    fn from(val: Todo) -> Self {
-        CalendarElement::Todo(val)
+    impl From<Event> for CalendarElement {
+        fn from(val: Event) -> Self {
+            CalendarElement::Event(val)
+        }
     }
-}
 
-impl From<Venue> for CalendarElement {
-    fn from(val: Venue) -> Self {
-        CalendarElement::Venue(val)
+    impl From<Todo> for CalendarElement {
+        fn from(val: Todo) -> Self {
+            CalendarElement::Todo(val)
+        }
     }
-}
 
-impl From<Other> for CalendarElement {
-    fn from(val: Other) -> Self {
-        CalendarElement::Other(val)
+    impl From<Venue> for CalendarElement {
+        fn from(val: Venue) -> Self {
+            CalendarElement::Venue(val)
+        }
     }
-}
 
-impl CalendarElement {
-    fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
-        match *self {
-            CalendarElement::Todo(ref todo) => todo.fmt_write(out),
-            CalendarElement::Event(ref event) => event.fmt_write(out),
-            CalendarElement::Venue(ref venue) => venue.fmt_write(out),
-            CalendarElement::Other(ref other) => other.fmt_write(out),
+    impl From<Other> for CalendarElement {
+        fn from(val: Other) -> Self {
+            CalendarElement::Other(val)
+        }
+    }
+
+    impl CalendarElement {
+        pub fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
+            match *self {
+                CalendarElement::Todo(ref todo) => todo.fmt_write(out),
+                CalendarElement::Event(ref event) => event.fmt_write(out),
+                CalendarElement::Venue(ref venue) => venue.fmt_write(out),
+                CalendarElement::Other(ref other) => other.fmt_write(out),
+            }
         }
     }
 }
+
+pub use calendar_event::CalendarElement;
 
 /// Represents a calendar
 ///
