@@ -27,6 +27,7 @@ use nom::{error::convert_error, error::VerboseError, Finish};
 
 mod calendar;
 pub(crate) mod components;
+#[cfg(feature = "parser_owned")]
 mod owned;
 mod parameters;
 mod properties;
