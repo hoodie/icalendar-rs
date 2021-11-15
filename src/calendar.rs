@@ -3,78 +3,9 @@ use std::{fmt, iter::FromIterator, mem, ops::Deref};
 
 use crate::{components::*, Parameter, Property};
 
-mod calendar_event {
-    use crate::Component;
+mod calendar_component;
 
-    use super::{Event, Other, Todo, Venue};
-    use std::fmt;
-
-    /// Wrapper for [`Todo`], [`Event`] or [`Venue`]
-    #[allow(missing_docs)]
-    #[non_exhaustive]
-    #[derive(Debug, PartialEq, Eq)]
-    pub enum CalendarElement {
-        Todo(Todo),
-        Event(Event),
-        Venue(Venue),
-        #[doc(hidden)]
-        Other(Other),
-    }
-
-    impl CalendarElement {
-        /// Attempt to access the containted [`Event`], if it is one
-        pub fn as_event(&self) -> Option<&Event> {
-            match self {
-                Self::Event(ref event) => Some(event),
-                _ => None,
-            }
-        }
-        /// Attempt to access the containted [`Todo`], if it is one
-        pub fn as_todo(&self) -> Option<&Todo> {
-            match self {
-                Self::Todo(ref todo) => Some(todo),
-                _ => None,
-            }
-        }
-    }
-
-    impl From<Event> for CalendarElement {
-        fn from(val: Event) -> Self {
-            CalendarElement::Event(val)
-        }
-    }
-
-    impl From<Todo> for CalendarElement {
-        fn from(val: Todo) -> Self {
-            CalendarElement::Todo(val)
-        }
-    }
-
-    impl From<Venue> for CalendarElement {
-        fn from(val: Venue) -> Self {
-            CalendarElement::Venue(val)
-        }
-    }
-
-    impl From<Other> for CalendarElement {
-        fn from(val: Other) -> Self {
-            CalendarElement::Other(val)
-        }
-    }
-
-    impl CalendarElement {
-        pub(crate) fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
-            match *self {
-                CalendarElement::Todo(ref todo) => todo.fmt_write(out),
-                CalendarElement::Event(ref event) => event.fmt_write(out),
-                CalendarElement::Venue(ref venue) => venue.fmt_write(out),
-                CalendarElement::Other(ref other) => other.fmt_write(out),
-            }
-        }
-    }
-}
-
-pub use calendar_event::CalendarElement;
+pub use calendar_component::CalendarComponent;
 
 /// Represents a calendar
 ///
@@ -132,7 +63,7 @@ pub use calendar_event::CalendarElement;
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct Calendar {
     properties: Vec<Property>,
-    components: Vec<CalendarElement>,
+    components: Vec<CalendarComponent>,
 }
 
 impl Calendar {
@@ -143,7 +74,7 @@ impl Calendar {
 
     #[deprecated(note = "Use .push() instead")]
     #[doc(hidden)]
-    pub fn add<T: Into<CalendarElement>>(&mut self, component: T) -> &mut Self {
+    pub fn add<T: Into<CalendarComponent>>(&mut self, component: T) -> &mut Self {
         self.push(component)
     }
 
@@ -162,13 +93,13 @@ impl Calendar {
     pub fn extend<T, U>(&mut self, other: T)
     where
         T: IntoIterator<Item = U>,
-        U: Into<CalendarElement>,
+        U: Into<CalendarComponent>,
     {
         self.components.extend(other.into_iter().map(Into::into));
     }
 
     /// Appends an element to the back of the `Calendar`.
-    pub fn push<T: Into<CalendarElement>>(&mut self, component: T) -> &mut Self {
+    pub fn push<T: Into<CalendarComponent>>(&mut self, component: T) -> &mut Self {
         self.components.push(component.into());
         self
     }
@@ -249,26 +180,26 @@ impl fmt::Display for Calendar {
 }
 
 impl Deref for Calendar {
-    type Target = [CalendarElement];
+    type Target = [CalendarComponent];
 
-    fn deref(&self) -> &[CalendarElement] {
+    fn deref(&self) -> &[CalendarComponent] {
         self.components.deref()
     }
 }
 
-impl AsRef<[CalendarElement]> for Calendar {
-    fn as_ref(&self) -> &[CalendarElement] {
+impl AsRef<[CalendarComponent]> for Calendar {
+    fn as_ref(&self) -> &[CalendarComponent] {
         self.components.deref()
     }
 }
 
-impl<T: Into<CalendarElement>, const N: usize> From<[T; N]> for Calendar {
+impl<T: Into<CalendarComponent>, const N: usize> From<[T; N]> for Calendar {
     fn from(elements: [T; N]) -> Self {
         elements.into_iter().collect()
     }
 }
 
-impl<C: Into<CalendarElement>> From<C> for Calendar {
+impl<C: Into<CalendarComponent>> From<C> for Calendar {
     fn from(element: C) -> Self {
         Calendar {
             components: vec![element.into()],
@@ -277,7 +208,7 @@ impl<C: Into<CalendarElement>> From<C> for Calendar {
     }
 }
 
-impl<C: Into<CalendarElement>> FromIterator<C> for Calendar {
+impl<C: Into<CalendarComponent>> FromIterator<C> for Calendar {
     fn from_iter<T: IntoIterator<Item = C>>(iter: T) -> Self {
         Calendar {
             components: iter.into_iter().map(Into::into).collect(),
@@ -294,8 +225,8 @@ mod tests {
     fn calendar_extend_components() {
         let mut calendar = Calendar::new();
         let components = vec![
-            CalendarElement::Event(Event::new()),
-            CalendarElement::Event(Event::new()),
+            CalendarComponent::Event(Event::new()),
+            CalendarComponent::Event(Event::new()),
         ];
         calendar.extend(components);
         assert_eq!(calendar.components.len(), 2);

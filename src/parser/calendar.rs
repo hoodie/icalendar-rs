@@ -1,4 +1,4 @@
-use crate::calendar::CalendarElement;
+use crate::calendar::CalendarComponent;
 
 use super::{read_calendar, unfold, Component};
 use core::fmt::{self, Write};

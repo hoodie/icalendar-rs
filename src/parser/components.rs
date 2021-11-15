@@ -26,7 +26,7 @@ use super::{
 use pretty_assertions::assert_eq;
 
 use crate::{
-    calendar::CalendarElement,
+    calendar::CalendarComponent,
     components::{InnerComponent, Other},
     CalendarDateTime,
 };
@@ -84,8 +84,8 @@ impl From<Component<'_>> for InnerComponent {
     }
 }
 
-impl<'a> From<Component<'a>> for CalendarElement {
-    fn from(component: Component<'_>) -> CalendarElement {
+impl<'a> From<Component<'a>> for CalendarComponent {
+    fn from(component: Component<'_>) -> CalendarComponent {
         use crate::{Event, Todo, Venue};
         match component.name {
             "VEVENT" => Event::from(InnerComponent::from(component)).into(),

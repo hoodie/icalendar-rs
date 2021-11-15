@@ -5,75 +5,17 @@ use std::{collections::BTreeMap, fmt, mem};
 
 use crate::properties::*;
 
-/// Representation of various forms of `DATE-TIME` per
-/// [RFC 5545, Section 3.3.5](https://tools.ietf.org/html/rfc5545#section-3.3.5)
-///
-/// Conversions from [chrono] types are provided in form of [From] implementations, see
-/// documentation of individual variants.
-///
-/// In addition to readily implemented `FORM #1` and `FORM #2`, the RFC also specifies
-/// `FORM #3: DATE WITH LOCAL TIME AND TIME ZONE REFERENCE`. This variant is not yet implemented.
-/// Adding it will require adding support for `VTIMEZONE` and referencing it using `TZID`.
-#[derive(Clone, Copy, Debug)]
-pub enum CalendarDateTime {
-    /// `FORM #1: DATE WITH LOCAL TIME`: floating, follows current time-zone of the attendee.
-    ///
-    /// Conversion from [`chrono::NaiveDateTime`] results in this variant.
-    Floating(NaiveDateTime),
-    /// `FORM #2: DATE WITH UTC TIME`: rendered with Z suffix character.
-    ///
-    /// Conversion from [`chrono::DateTime<Utc>`](DateTime) results in this variant. Use
-    /// `date_time.with_timezone(&Utc)` to convert `date_time` from arbitrary time zone to UTC.
-    Utc(DateTime<Utc>),
-}
+mod date_time;
+mod event;
+mod other;
+mod todo;
+mod venue;
 
-impl fmt::Display for CalendarDateTime {
-    /// Format date-time in RFC 5545 compliant manner.
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        match self {
-            CalendarDateTime::Floating(naive_dt) => naive_dt.format("%Y%m%dT%H%M%S").fmt(f),
-            CalendarDateTime::Utc(utc_dt) => utc_dt.format("%Y%m%dT%H%M%SZ").fmt(f),
-        }
-    }
-}
-
-/// Converts from time zone-aware UTC date-time to [`CalendarDateTime::Utc`].
-impl From<DateTime<Utc>> for CalendarDateTime {
-    fn from(dt: DateTime<Utc>) -> Self {
-        Self::Utc(dt)
-    }
-}
-
-/// Converts from time zone-less date-time to [`CalendarDateTime::Floating`].
-impl From<NaiveDateTime> for CalendarDateTime {
-    fn from(dt: NaiveDateTime) -> Self {
-        Self::Floating(dt)
-    }
-}
-
-/// VEVENT [(RFC 5545, Section 3.6.1 )](https://tools.ietf.org/html/rfc5545#section-3.6.1)
-#[derive(Debug, Default, PartialEq, Eq)]
-pub struct Event {
-    inner: InnerComponent,
-}
-
-/// VTODO  [(RFC 5545, Section 3.6.2 )](https://tools.ietf.org/html/rfc5545#section-3.6.2)
-#[derive(Debug, Default, PartialEq, Eq)]
-pub struct Todo {
-    inner: InnerComponent,
-}
-
-/// VVENUE  [(ical-venue)](https://tools.ietf.org/html/draft-norris-ical-venue-01)
-#[derive(Debug, Default, PartialEq, Eq)]
-pub struct Venue {
-    inner: InnerComponent,
-}
-
-#[derive(Debug, Default, PartialEq, Eq)]
-pub struct Other {
-    name: String,
-    inner: InnerComponent,
-}
+pub use date_time::CalendarDateTime;
+pub use event::*;
+pub use other::*;
+pub use todo::*;
+pub use venue::*;
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub(crate) struct InnerComponent {
@@ -95,144 +37,6 @@ impl InnerComponent {
             properties: mem::take(&mut self.properties),
             multi_properties: mem::take(&mut self.multi_properties),
         }
-    }
-}
-
-impl Event {
-    /// Creates a new Event.
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    /// End of builder pattern.
-    /// copies over everything
-    pub fn done(&mut self) -> Self {
-        Event {
-            inner: self.inner.done(),
-        }
-    }
-
-    ///  Defines the overall status or confirmation
-    pub fn status(&mut self, status: EventStatus) -> &mut Self {
-        self.append_property(status.into());
-        self
-    }
-
-    //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
-    //    unimplemented!()
-    //}
-}
-
-impl Todo {
-    /// Creates a new Todo.
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    /// End of builder pattern.
-    /// copies over everything
-    pub fn done(&mut self) -> Self {
-        Todo {
-            inner: self.inner.done(),
-        }
-    }
-
-    /// Set the `PERCENT-COMPLETE` property
-    ///
-    /// Ranges between 0 - 100
-    pub fn percent_complete(&mut self, percent: u8) -> &mut Self {
-        self.add_property("PERCENT-COMPLETE", &percent.to_string());
-        self
-    }
-
-    /// Set the `DUE` property
-    ///
-    /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
-    pub fn due<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
-        let calendar_dt: CalendarDateTime = dt.into();
-        self.add_property("DUE", &calendar_dt.to_string());
-        self
-    }
-
-    /// Set the `COMPLETED` property
-    ///
-    /// Per [RFC 5545, Section 3.8.2.1](https://tools.ietf.org/html/rfc5545#section-3.8.2.1), this
-    /// must be a date-time in UTC format.
-    pub fn completed(&mut self, dt: DateTime<Utc>) -> &mut Self {
-        self.add_property("COMPLETED", &CalendarDateTime::Utc(dt).to_string());
-        self
-    }
-
-    ///  Defines the overall status or confirmation
-    ///
-    pub fn status(&mut self, status: TodoStatus) -> &mut Self {
-        self.append_property(status.into());
-        self
-    }
-
-    //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
-    //    unimplemented!()
-    //}
-}
-
-impl Venue {
-    /// Creates a new Venue.
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    /// End of builder pattern.
-    /// copies over everything
-    pub fn done(&mut self) -> Self {
-        Venue {
-            inner: self.inner.done(),
-        }
-    }
-
-    /// Set the STREET-ADDRESS `Property`
-    ///
-    /// This specifies the street address of a location. If the location requires a multiple-line
-    /// address, they may be separated by an encoded newline "\n".
-    pub fn street_address(&mut self, address: &str) -> &mut Self {
-        self.add_property("STREET-ADDRESS", address)
-    }
-
-    /// Set the EXTENDED-ADDRESS `Property`
-    ///
-    /// This property provides the opportunity to include extended address information for a
-    /// location. This property may be used to give additional information about an address that is
-    /// not usually considered part of the street address. If the location requires a multiple-line
-    /// address, they may be separated by an encoded newline "\n".
-    pub fn extended_address(&mut self, address: &str) -> &mut Self {
-        self.add_property("EXTENDED-ADDRESS", address)
-    }
-
-    /// Set the LOCALITY `Property`
-    ///
-    /// This specifies the city or locality of a venue.
-    pub fn locality(&mut self, locality: &str) -> &mut Self {
-        self.add_property("LOCALITY", locality)
-    }
-
-    /// Set the REGION `Property`
-    ///
-    /// This specifies the region (state, province, canton, etc.) of a location.
-    pub fn region(&mut self, region: &str) -> &mut Self {
-        self.add_property("REGION", region)
-    }
-
-    /// Set the COUNTRY `Property`
-    ///
-    /// This specifies the country of a location.
-    pub fn country(&mut self, country: &str) -> &mut Self {
-        self.add_property("COUNTRY", country)
-    }
-
-    /// Set the POSTAL-CODE `Property`
-    ///
-    /// This specifies the postal code of a location.
-    pub fn postal_code(&mut self, postal_code: &str) -> &mut Self {
-        self.add_property("POSTAL-CODE", postal_code)
     }
 }
 
@@ -475,42 +279,3 @@ macro_rules! component_impl {
 component_impl! { Event, String::from("VEVENT") }
 component_impl! { Todo , String::from("VTODO")}
 component_impl! { Venue , String::from("VVENUE")}
-
-impl Component for Other {
-    /// Tells you what kind of `Component` this is
-    ///
-    /// Might be `VEVENT`, `VTODO`, `VALARM` etc
-    fn component_kind(&self) -> String {
-        self.name.clone()
-    }
-
-    /// Read-only access to `properties`
-    fn properties(&self) -> &BTreeMap<String, Property> {
-        &self.inner.properties
-    }
-
-    /// Read-only access to `multi_properties`
-    fn multi_properties(&self) -> &Vec<Property> {
-        &self.inner.multi_properties
-    }
-
-    /// Adds a `Property`
-    fn append_property(&mut self, property: Property) -> &mut Self {
-        self.inner
-            .properties
-            .insert(property.key().to_owned(), property);
-        self
-    }
-
-    /// Adds a `Property` of which there may be many
-    fn append_multi_property(&mut self, property: Property) -> &mut Self {
-        self.inner.multi_properties.push(property);
-        self
-    }
-}
-
-impl From<(String, InnerComponent)> for Other {
-    fn from((name, inner): (String, InnerComponent)) -> Self {
-        Self { name, inner }
-    }
-}
