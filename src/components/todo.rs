@@ -22,7 +22,7 @@ impl Todo {
         }
     }
 
-    /// Set the `PERCENT-COMPLETE` property
+    /// Set the [`PERCENT-COMPLETE`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.8) property
     ///
     /// Ranges between 0 - 100
     pub fn percent_complete(&mut self, percent: u8) -> &mut Self {
@@ -30,7 +30,7 @@ impl Todo {
         self
     }
 
-    /// Set the `DUE` property
+    /// Set the [`DUE`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.3) property
     ///
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     pub fn due<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
@@ -39,7 +39,7 @@ impl Todo {
         self
     }
 
-    /// Set the `COMPLETED` property
+    /// Set the [`COMPLETED`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.1) property
     ///
     /// Per [RFC 5545, Section 3.8.2.1](https://tools.ietf.org/html/rfc5545#section-3.8.2.1), this
     /// must be a date-time in UTC format.

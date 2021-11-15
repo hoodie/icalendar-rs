@@ -55,7 +55,7 @@ pub trait Component {
     /// Read-only access to `multi_properties`
     fn multi_properties(&self) -> &Vec<Property>;
 
-    /// Writes `Component` into a `Writer` using `std::fmt`.
+    /// Writes [`Component`] using [`std::fmt`].
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         write_crlf!(out, "BEGIN:{}", self.component_kind())?;
 
@@ -87,25 +87,25 @@ pub trait Component {
         out_string
     }
 
-    /// Append a given `Property`
+    /// Append a given [`Property`]
     fn append_property(&mut self, property: Property) -> &mut Self;
 
-    /// Adds a `Property` of which there may be many
+    /// Adds a [`Property`] of which there may be many
     fn append_multi_property(&mut self, property: Property) -> &mut Self;
 
-    /// Construct and append a `Property`
+    /// Construct and append a [`Property`]
     fn add_property(&mut self, key: &str, val: &str) -> &mut Self {
         self.append_property(Property::new(key, val));
         self
     }
 
-    /// Construct and append a `Property`
+    /// Construct and append a [`Property`]
     fn add_multi_property(&mut self, key: &str, val: &str) -> &mut Self {
         self.append_multi_property(Property::new(key, val));
         self
     }
 
-    /// Set the DTSTART `Property`
+    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
     ///
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     fn starts<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
@@ -114,7 +114,7 @@ pub trait Component {
         self
     }
 
-    /// Set the DTEND `Property`
+    /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`]
     ///
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     fn ends<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
@@ -123,7 +123,7 @@ pub trait Component {
         self
     }
 
-    /// Set the DTSTART `Property`, date only
+    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`], date only
     fn start_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
     where
         TZ::Offset: fmt::Display,
@@ -137,7 +137,7 @@ pub trait Component {
         self
     }
 
-    /// Set the `DTEND` property, date only
+    /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`], date only
     fn end_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
     where
         TZ::Offset: fmt::Display,
@@ -151,7 +151,9 @@ pub trait Component {
         self
     }
 
-    /// Set the DTSTART `Property`, date only
+    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
+    /// and [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`],
+    /// date only
     fn all_day<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
     where
         TZ::Offset: fmt::Display,
@@ -236,9 +238,9 @@ pub trait Component {
 macro_rules! component_impl {
     ($t:ty, $kind:expr) => {
         impl Component for $t {
-            /// Tells you what kind of `Component` this is
+            /// Tells you what kind of [`Component`] this is
             ///
-            /// Might be `VEVENT`, `VTODO`, `VALARM` etc
+            /// Might be [`VEVENT`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.1), [`VTODO`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.2), [`VALARM`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.6) etc
             fn component_kind(&self) -> String {
                 $kind
             }
@@ -253,7 +255,7 @@ macro_rules! component_impl {
                 &self.inner.multi_properties
             }
 
-            /// Adds a `Property`
+            /// Adds a [`Property`]
             fn append_property(&mut self, property: Property) -> &mut Self {
                 self.inner
                     .properties
@@ -261,7 +263,7 @@ macro_rules! component_impl {
                 self
             }
 
-            /// Adds a `Property` of which there may be many
+            /// Adds a [`Property`] of which there may be many
             fn append_multi_property(&mut self, property: Property) -> &mut Self {
                 self.inner.multi_properties.push(property);
                 self
