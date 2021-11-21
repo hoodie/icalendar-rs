@@ -52,7 +52,7 @@ impl<'a> From<Vec<Component<'a>>> for crate::Calendar {
         components
             .into_iter()
             .map(|c: Component<'a>| {
-                let elem: CalendarElement = c.into();
+                let elem: CalendarComponent = c.into();
                 elem
             })
             .collect()
