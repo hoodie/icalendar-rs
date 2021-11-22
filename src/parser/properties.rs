@@ -48,7 +48,15 @@ impl Property<'_> {
 
 impl From<Property<'_>> for crate::Property {
     fn from(parsed: Property<'_>) -> Self {
-        Self::new(parsed.key, parsed.val)
+        Self {
+            key: parsed.key.to_owned(),
+            val: parsed.val.to_owned(),
+            params: parsed
+                .params
+                .into_iter()
+            .map(|p| (p.key.to_owned(), p.into()))
+                .collect(),
+        }
     }
 }
 

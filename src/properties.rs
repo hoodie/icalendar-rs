@@ -27,9 +27,9 @@ pub type EntryParameters = HashMap<String, Parameter>;
 #[derive(Debug, PartialEq, Eq)]
 /// key-value pairs inside of `Component`s
 pub struct Property {
-    key: String,
-    val: String,
-    params: EntryParameters,
+    pub(crate) key: String,
+    pub(crate) val: String,
+    pub(crate) params: EntryParameters,
 }
 
 impl Property {
