@@ -4,7 +4,7 @@ use std::{
     mem,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 /// key-value pairs inside of `Property`s
 pub struct Parameter {
     key: String,
@@ -24,7 +24,7 @@ impl Parameter {
 //type EntryParameters = Vec<Parameter>;
 pub type EntryParameters = HashMap<String, Parameter>;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 /// key-value pairs inside of `Component`s
 pub struct Property {
     key: String,
@@ -93,14 +93,15 @@ impl Property {
     }
 }
 
-/// Defines: `Public`, `Private`, `Confidential`
+/// This property defines the access classification for a calendar component.
+/// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.3>
 #[derive(Copy, Clone, Debug)]
 pub enum Class {
-    /// Public
+    /// [`Public`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.3)
     Public,
-    /// Private
+    /// [`Private`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.3)
     Private,
-    /// Confidential
+    /// [`Confidential`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.3)
     Confidential,
 }
 
@@ -121,33 +122,33 @@ impl From<Class> for Property {
 /// see 8.3.4. [Value Data Types Registry](https://tools.ietf.org/html/rfc5545#section-8.3.4)
 #[derive(Copy, Clone, Debug)]
 pub enum ValueType {
-    /// Binary
+    /// [`Binary`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.1)
     Binary,
-    /// Boolean
+    /// [`Boolean`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.2)
     Boolean,
-    /// CalAddress
+    /// [`CalAddress`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.3)
     CalAddress,
-    /// Date
+    /// [`Date`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.4)
     Date,
-    /// DateTime
+    /// [`DateTime`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.5)
     DateTime,
-    /// Duration
+    /// [`Duration`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.6)
     Duration,
-    /// Float
+    /// [`Float`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.7)
     Float,
-    /// Integer
+    /// [`Integer`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.8)
     Integer,
-    /// Period
+    /// [`Period`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.9)
     Period,
-    /// Recur
+    /// [`Recur`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10)
     Recur,
-    /// Text
+    /// [`Text`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.11)
     Text,
-    /// Time
+    /// [`Time`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.12)
     Time,
-    /// Uri
+    /// [`Uri`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.13)
     Uri,
-    /// UtcOffset
+    /// [`UtcOffset`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.14)
     UtcOffset,
 }
 
@@ -177,6 +178,7 @@ impl From<ValueType> for Parameter {
 
 #[derive(Copy, Clone, Debug)]
 /// Encodes the status of an `Event`
+/// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11>
 pub enum EventStatus {
     /// Indicates event is tentative.
     Tentative,
@@ -189,6 +191,7 @@ pub enum EventStatus {
 
 #[derive(Copy, Clone, Debug)]
 /// Encodes the status of a `Todo`
+/// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11>
 pub enum TodoStatus {
     /// Indicates to-do needs action.
     NeedsAction,

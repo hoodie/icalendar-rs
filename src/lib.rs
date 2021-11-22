@@ -100,7 +100,7 @@ pub mod parser;
 mod properties;
 
 pub use crate::{
-    calendar::Calendar,
+    calendar::{Calendar, CalendarComponent},
     components::{CalendarDateTime, Component, Event, Todo, Venue},
     properties::{Class, EventStatus, Parameter, Property, TodoStatus, ValueType},
 };

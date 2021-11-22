@@ -1,58 +1,69 @@
 use chrono::Duration;
-use std::{fmt, iter::FromIterator, ops::Deref};
+use std::{fmt, iter::FromIterator, mem, ops::Deref};
 
 use crate::{components::*, Parameter, Property};
 
-#[derive(Debug)]
-pub enum CalendarElement {
-    Todo(Todo),
-    Event(Event),
-    Venue(Venue),
-    Other(Other),
-}
+mod calendar_component;
 
-impl From<Event> for CalendarElement {
-    fn from(val: Event) -> Self {
-        CalendarElement::Event(val)
-    }
-}
-
-impl From<Todo> for CalendarElement {
-    fn from(val: Todo) -> Self {
-        CalendarElement::Todo(val)
-    }
-}
-
-impl From<Venue> for CalendarElement {
-    fn from(val: Venue) -> Self {
-        CalendarElement::Venue(val)
-    }
-}
-
-impl From<Other> for CalendarElement {
-    fn from(val: Other) -> Self {
-        CalendarElement::Other(val)
-    }
-}
-
-impl CalendarElement {
-    fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
-        match *self {
-            CalendarElement::Todo(ref todo) => todo.fmt_write(out),
-            CalendarElement::Event(ref event) => event.fmt_write(out),
-            CalendarElement::Venue(ref venue) => venue.fmt_write(out),
-            CalendarElement::Other(ref other) => other.fmt_write(out),
-        }
-    }
-}
+pub use calendar_component::CalendarComponent;
 
 /// Represents a calendar
 ///
-/// You can `.add()` `Component`s to this.
-#[derive(Default, Debug)]
+///
+/// ### create calendar from an array of calendar events
+/// You can create a [`Calendar`] in a few different ways.
+/// ```
+/// # use icalendar::*;
+/// let todo1 = Todo::new();
+/// let todo2 = Todo::new();
+///
+/// let calendar = Calendar::from([todo1, todo2])
+///     .name("things that need to get done")
+///     .print();
+/// ```
+///
+/// ### push events into a calendar
+/// ```
+/// # use icalendar::*;
+/// let todo = Todo::new();
+/// let event = Event::new();
+///
+/// let mut calendar = Calendar::new();
+/// calendar.push(todo);
+/// calendar.push(event);
+/// calendar.print();
+/// ```
+///
+/// ## Container semantics
+///
+/// ### collect into a calendar from an `iterator` of calendar events
+/// ```
+/// # use icalendar::*;
+/// let todo1 = Todo::new();
+/// let todo2 = Todo::new();
+///
+/// let cal_from_iterator = vec![todo1, todo2]
+///     .into_iter()
+///     .collect::<Calendar>();
+/// ```
+///
+/// ### `Calendar` is a container for `CalendarElement`
+/// ```
+/// # use icalendar::*;
+/// let todo1 = Todo::new();
+/// let todo2 = Todo::new();
+///
+/// let calendar = Calendar::from([todo1, todo2]);
+/// for element in calendar.iter() {
+/// // ...
+/// }
+/// ```
+///
+///
+#[derive(Default, Debug, PartialEq, Eq)]
 pub struct Calendar {
     properties: Vec<Property>,
-    components: Vec<CalendarElement>,
+    components: Vec<CalendarComponent>,
 }
 
 impl Calendar {
@@ -63,7 +74,7 @@ impl Calendar {
 
     #[deprecated(note = "Use .push() instead")]
     #[doc(hidden)]
-    pub fn add<T: Into<CalendarElement>>(&mut self, component: T) -> &mut Self {
+    pub fn add<T: Into<CalendarComponent>>(&mut self, component: T) -> &mut Self {
         self.push(component)
     }
 
@@ -82,39 +93,41 @@ impl Calendar {
     pub fn extend<T, U>(&mut self, other: T)
     where
         T: IntoIterator<Item = U>,
-        U: Into<CalendarElement>,
+        U: Into<CalendarComponent>,
     {
         self.components.extend(other.into_iter().map(Into::into));
     }
 
     /// Appends an element to the back of the `Calendar`.
-    pub fn push<T: Into<CalendarElement>>(&mut self, component: T) -> &mut Self {
+    pub fn push<T: Into<CalendarComponent>>(&mut self, component: T) -> &mut Self {
         self.components.push(component.into());
         self
     }
 
-    /// Set the NAME and X-WR-CALNAME `Property`s
+    /// Set the `NAME` and `X-WR-CALNAME` `Property`s
+    // TODO: where is `NAME` specified? it's not in rfc5545 or rfc2445
     pub fn name(&mut self, name: &str) -> &mut Self {
         self.append_property(Property::new("NAME", name));
         self.append_property(Property::new("X-WR-CALNAME", name));
         self
     }
 
-    /// Set the DESCRIPTION and X-WR-CALDESC `Property`s
+    /// Set the [`DESCRIPTION`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.5) and `X-WR-CALDESC` `Property`s
     pub fn description(&mut self, description: &str) -> &mut Self {
         self.append_property(Property::new("DESCRIPTION", description));
         self.append_property(Property::new("X-WR-CALDESC", description));
         self
     }
 
-    /// Set the TIMEZONE-ID and X-WR-TIMEZONE `Property`s
+    /// Set the `TIMEZONE-ID` and `X-WR-TIMEZONE` `Property`s
+    // TODO: where is `TIMEZONE-ID` specified? it's not in rfc5545 or rfc2445
     pub fn timezone(&mut self, timezone: &str) -> &mut Self {
         self.append_property(Property::new("TIMEZONE-ID", timezone));
         self.append_property(Property::new("X-WR-TIMEZONE", timezone));
         self
     }
 
-    /// Set the REFRESH-INTERVAL and X-PUBLISHED-TTL `Property`s
+    /// Set the `REFRESH-INTERVAL` and `X-PUBLISHED-TTL` `Property`s
     pub fn ttl(&mut self, duration: &Duration) -> &mut Self {
         let duration_string = duration.to_string();
         self.append_property(
@@ -124,6 +137,15 @@ impl Calendar {
         );
         self.append_property(Property::new("X-PUBLISHED-TTL", duration_string.as_str()));
         self
+    }
+
+    /// End of builder pattern.
+    /// copies over everything
+    pub fn done(&mut self) -> Self {
+        Calendar {
+            properties: mem::take(&mut self.properties),
+            components: mem::take(&mut self.components),
+        }
     }
 
     /// Writes `Calendar` into a `Writer` using `std::fmt`.
@@ -158,14 +180,35 @@ impl fmt::Display for Calendar {
 }
 
 impl Deref for Calendar {
-    type Target = [CalendarElement];
+    type Target = [CalendarComponent];
 
-    fn deref(&self) -> &[CalendarElement] {
+    fn deref(&self) -> &[CalendarComponent] {
         self.components.deref()
     }
 }
 
-impl<C: Into<CalendarElement>> FromIterator<C> for Calendar {
+impl AsRef<[CalendarComponent]> for Calendar {
+    fn as_ref(&self) -> &[CalendarComponent] {
+        self.components.deref()
+    }
+}
+
+impl<T: Into<CalendarComponent>, const N: usize> From<[T; N]> for Calendar {
+    fn from(elements: [T; N]) -> Self {
+        elements.into_iter().collect()
+    }
+}
+
+impl<C: Into<CalendarComponent>> From<C> for Calendar {
+    fn from(element: C) -> Self {
+        Calendar {
+            components: vec![element.into()],
+            ..Default::default()
+        }
+    }
+}
+
+impl<C: Into<CalendarComponent>> FromIterator<C> for Calendar {
     fn from_iter<T: IntoIterator<Item = C>>(iter: T) -> Self {
         Calendar {
             components: iter.into_iter().map(Into::into).collect(),
@@ -182,8 +225,8 @@ mod tests {
     fn calendar_extend_components() {
         let mut calendar = Calendar::new();
         let components = vec![
-            CalendarElement::Event(Event::new()),
-            CalendarElement::Event(Event::new()),
+            CalendarComponent::Event(Event::new()),
+            CalendarComponent::Event(Event::new()),
         ];
         calendar.extend(components);
         assert_eq!(calendar.components.len(), 2);

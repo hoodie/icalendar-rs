@@ -3,15 +3,16 @@ authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
 name = "icalendar"
 version = "0.10.0"
 license = "MIT/Apache-2.0"
-edition = "2018"
+edition = "2021"
 
-description = "Early, minimal icalendar crate."
-keywords = ["calendar", "ical", "ics"]
+description = "Strongly typed iCalendar builder and parser."
+keywords = ["calendar", "ical", "ics", "icalendar", "parser"]
 
 documentation = "https://docs.rs/icalendar/"
 repository = "https://github.com/hoodie/icalendar-rs"
 readme = "README.md"
 
+rust-version = "1.56"
 exclude = ["fixtures", ".github", ".gitignore", "*.json"]
 
 [dependencies]

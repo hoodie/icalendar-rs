@@ -1,4 +1,4 @@
-use crate::calendar::CalendarElement;
+use crate::calendar::CalendarComponent;
 
 use super::{read_calendar, unfold, Component};
 use core::fmt::{self, Write};
@@ -52,7 +52,7 @@ impl<'a> From<Vec<Component<'a>>> for crate::Calendar {
         components
             .into_iter()
             .map(|c: Component<'a>| {
-                let elem: CalendarElement = c.into();
+                let elem: CalendarComponent = c.into();
                 elem
             })
             .collect()
