@@ -3,10 +3,10 @@ use nom::{
     bytes::complete::{tag, take_till1},
     character::complete::space0,
     combinator::{eof, map, opt},
-    error::{ContextError, ParseError},
+    error::{convert_error, ContextError, ParseError, VerboseError},
     multi::many0,
     sequence::{preceded, tuple},
-    IResult,
+    Finish, IResult,
 };
 
 #[cfg(test)]
@@ -19,6 +19,17 @@ use super::utils::valid_key_sequence;
 pub struct Parameter<'a> {
     pub key: &'a str,
     pub val: Option<&'a str>,
+}
+
+impl<'a> TryFrom<&'a str> for Parameter<'a> {
+    type Error = String;
+
+    fn try_from(input: &'a str) -> Result<Self, Self::Error> {
+        parameter(input)
+            .finish()
+            .map(|(_, x)| x)
+            .map_err(|e: VerboseError<&str>| format!("error: {}", convert_error(input, e.clone())))
+    }
 }
 
 impl<'a> From<Parameter<'a>> for crate::properties::Parameter {

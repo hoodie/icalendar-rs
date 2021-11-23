@@ -47,3 +47,7 @@ required-features = ["parser"]
 name = "reserialize"
 path= "examples/reserialize.rs"
 required-features = ["parser"]
+[[example]]
+name = "parsed_property"
+path= "examples/parsed_property.rs"
+required-features = ["parser"]

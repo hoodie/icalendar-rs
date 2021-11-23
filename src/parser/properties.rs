@@ -1,4 +1,7 @@
-use std::fmt::{self, Write};
+use std::{
+    fmt::{self, Write},
+    str::FromStr,
+};
 
 use crate::properties::fold_line;
 
@@ -8,12 +11,12 @@ use super::{
 };
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_until},
+    bytes::complete::{tag, take_until, take_while},
     character::complete::{line_ending, multispace0},
     combinator::{cut, map, opt},
-    error::{context, ContextError, ParseError},
+    error::{context, convert_error, ContextError, ParseError, VerboseError},
     sequence::{preceded, separated_pair, tuple},
-    IResult,
+    Finish, IResult,
 };
 
 #[cfg(test)]
@@ -46,6 +49,17 @@ impl Property<'_> {
     }
 }
 
+impl<'a> TryFrom<&'a str> for Property<'a> {
+    type Error = String;
+
+    fn try_from(input: &'a str) -> Result<Self, Self::Error> {
+        property(input)
+            .finish()
+            .map(|(_, x)| x)
+            .map_err(|e: VerboseError<&str>| format!("error: {}", convert_error(input, e.clone())))
+    }
+}
+
 impl From<Property<'_>> for crate::Property {
     fn from(parsed: Property<'_>) -> Self {
         Self {
@@ -54,9 +68,17 @@ impl From<Property<'_>> for crate::Property {
             params: parsed
                 .params
                 .into_iter()
-            .map(|p| (p.key.to_owned(), p.into()))
+                .map(|p| (p.key.to_owned(), p.into()))
                 .collect(),
         }
+    }
+}
+
+impl FromStr for crate::Property {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(crate::parser::Property::try_from(s)?.into())
     }
 }
 
@@ -220,7 +242,12 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                         context("property sparator", tag(":")), // separator
                         context(
                             "property value",
-                            alt((take_until("\r\n"), take_until("\n"))),
+                            alt((
+                                take_until("\r\n"),
+                                take_until("\n"),
+                                // this is for single line prop parsing, just so I can leave off the '\n'
+                                take_while(|_| true),
+                            )),
                         ), // val TODO: replace this with something simpler!
                     ),
                     context(
