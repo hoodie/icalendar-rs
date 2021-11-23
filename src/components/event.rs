@@ -4,6 +4,7 @@ use super::*;
 pub struct Event {
     pub(super) inner: InnerComponent,
 }
+
 impl Event {
     /// Creates a new Event.
     pub fn new() -> Self {
@@ -28,3 +29,5 @@ impl Event {
     //    unimplemented!()
     //}
 }
+
+// impl std::Str

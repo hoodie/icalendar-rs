@@ -20,8 +20,7 @@ Hendrik"#,
 
     #[cfg(feature = "parser")]
     {
-        use std::str::FromStr;
-        let parsed_calendar = dbg!(Calendar::from_str(&calendar.to_string())?);
+        let parsed_calendar = dbg!(calendar.to_string().parse::<Calendar>()?);
         parsed_calendar.print()?;
     }
     Ok(())

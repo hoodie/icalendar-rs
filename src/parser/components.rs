@@ -1,13 +1,13 @@
-use std::fmt;
+use std::{fmt, str::FromStr};
 
 use chrono::Utc;
 use nom::{
     branch::alt,
     bytes::complete::tag,
     combinator::{all_consuming, complete, cut, map},
-    error::{context, ContextError, ParseError},
+    error::{context, convert_error, ContextError, ParseError, VerboseError},
     multi::{many0, many_till},
-    IResult,
+    Finish, IResult,
 };
 
 #[cfg(test)]
@@ -18,6 +18,7 @@ use uuid::Uuid;
 use super::parameters::Parameter;
 use super::{
     properties::property,
+    unfold,
     utils::{line, line_separated, valid_key_sequence},
     Property,
 };
@@ -71,6 +72,17 @@ impl Component<'_> {
     }
 }
 
+impl<'a> TryFrom<&'a str> for Component<'a> {
+    type Error = String;
+
+    fn try_from(input: &'a str) -> Result<Self, Self::Error> {
+        component(input)
+            .finish()
+            .map(|(_, x)| x)
+            .map_err(|e: VerboseError<&str>| format!("error: {}", convert_error(input, e.clone())))
+    }
+}
+
 impl From<Component<'_>> for InnerComponent {
     fn from(component: Component) -> Self {
         Self {
@@ -93,6 +105,15 @@ impl<'a> From<Component<'a>> for CalendarComponent {
             "VVENUE" => Venue::from(InnerComponent::from(component)).into(),
             _ => Other::from((component.name.into(), InnerComponent::from(component))).into(),
         }
+    }
+}
+
+impl<'a> FromStr for CalendarComponent {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let from_parsed = crate::CalendarComponent::from(read_component(&unfold(s))?);
+        Ok(from_parsed)
     }
 }
 
@@ -154,6 +175,13 @@ END:VEVENT
 enum ComponentChild<'a> {
     Property(Property<'a>),
     Component(Component<'a>),
+}
+
+pub fn read_component(input: &str) -> Result<Component<'_>, String> {
+    component(input)
+        .finish()
+        .map(|(_, component)| component)
+        .map_err(|e: VerboseError<&str>| format!("error: {}", convert_error(input, e.clone())))
 }
 
 pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(

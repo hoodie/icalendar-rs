@@ -1,8 +1,10 @@
 use crate::calendar::CalendarComponent;
 
 use super::{read_calendar, unfold, Component};
-use core::fmt::{self, Write};
-use std::str::FromStr;
+use core::{
+    fmt::{self, Write},
+    str::FromStr,
+};
 
 /// Helpertype for reserialization
 #[derive(Clone, Debug)]
