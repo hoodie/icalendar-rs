@@ -72,7 +72,7 @@ fn test_parameter() {
         "; KEY=",
         Parameter {
             key: "KEY",
-            val: Some("")
+            val: None
         }
     );
 
@@ -123,9 +123,16 @@ fn test_quirky_parameter() {
         ";KEY=",
         Parameter {
             key: "KEY",
-            val: Some("")
+            val: None
         }
     );
+}
+
+fn remove_empty_string(input: Option<&str>) -> Option<&str> {
+    if let Some(input) = input {
+        return if input.is_empty() { None } else { Some(input) };
+    }
+    None
 }
 
 fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -143,7 +150,10 @@ fn pair_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
             separated_pair(
                 valid_key_sequence, //key
                 tag("="),
-                opt(alt((eof, take_till1(|x| x == ';' || x == ':')))),
+                map(
+                    opt(alt((eof, take_till1(|x| x == ';' || x == ':')))),
+                    remove_empty_string,
+                ),
             ),
         ),
         |(key, val)| Parameter { key, val },
@@ -159,10 +169,13 @@ fn base_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                 tuple((tag(";"), space0)),
                 valid_key_sequence, //key
             ),
-            opt(preceded(
-                tag("="),
-                alt((eof, take_till1(|x| x == ';' || x == ':'))),
-            )),
+            map(
+                opt(preceded(
+                    tag("="),
+                    alt((eof, take_till1(|x| x == ';' || x == ':'))),
+                )),
+                remove_empty_string,
+            ),
         )),
         |(key, val)| Parameter { key, val },
     )(input)

@@ -32,7 +32,7 @@ macro_rules! assert_parser {
                     $line
                 );
                 assert!(rest.is_empty(), "not parsed completely");
-            },
+            }
             Err(error) => {
                 assert!(false, "{}", error);
             }
