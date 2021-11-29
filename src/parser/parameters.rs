@@ -5,7 +5,7 @@ use nom::{
     combinator::{eof, map, opt},
     error::{convert_error, ContextError, ParseError, VerboseError},
     multi::many0,
-    sequence::{preceded, tuple},
+    sequence::{preceded, separated_pair, tuple},
     Finish, IResult,
 };
 
@@ -57,6 +57,7 @@ fn test_parameter() {
             val: Some("VALUE")
         }
     );
+
     assert_parser!(
         parameter,
         "; KEY=VAL UE",
@@ -65,6 +66,7 @@ fn test_parameter() {
             val: Some("VAL UE")
         }
     );
+
     assert_parser!(
         parameter,
         "; KEY=",
@@ -73,6 +75,7 @@ fn test_parameter() {
             val: Some("")
         }
     );
+
     assert_parser!(
         parameter,
         ";KEY=VAL-UE",
@@ -81,6 +84,7 @@ fn test_parameter() {
             val: Some("VAL-UE")
         }
     );
+
     assert_parser!(
         parameter,
         ";KEY",
@@ -112,7 +116,41 @@ fn test_parameter_with_dash() {
     );
 }
 
+#[test]
+fn test_quirky_parameter() {
+    assert_parser!(
+        parameter,
+        ";KEY=",
+        Parameter {
+            key: "KEY",
+            val: Some("")
+        }
+    );
+}
+
 fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    input: &'a str,
+) -> IResult<&'a str, Parameter<'a>, E> {
+    alt((pair_parameter, base_parameter))(input)
+}
+
+fn pair_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    input: &'a str,
+) -> IResult<&'a str, Parameter<'a>, E> {
+    map(
+        preceded(
+            tuple((tag(";"), space0)),
+            separated_pair(
+                valid_key_sequence, //key
+                tag("="),
+                opt(alt((eof, take_till1(|x| x == ';' || x == ':')))),
+            ),
+        ),
+        |(key, val)| Parameter { key, val },
+    )(input)
+}
+
+fn base_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Parameter<'a>, E> {
     map(
