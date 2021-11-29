@@ -206,6 +206,24 @@ fn parse_property_with_breaks() {
 
     assert_parser!(property, sample_0, expectation);
 }
+#[test]
+#[rustfmt::skip]
+fn parse_property_with_colon() {
+
+    let sample_0 = "RELATED-TO;RELTYPE=:c605e4e8-8ea3-4315-b139-19394ab3ced6\n";
+    // let sample_0 = "RELATED-TO;RELTYPE:c605e4e8-8ea3-4315-b139-19394ab3ced6\n";
+
+    let expectation = Property {
+        key: "RELATED-TO",
+        val: "c605e4e8-8ea3-4315-b139-19394ab3ced6",
+        params: vec![Parameter {
+            key: "RELTYPE",
+            val: None
+        }]
+    };
+
+    assert_parser!(property, sample_0, expectation);
+}
 
 #[test]
 #[rustfmt::skip]

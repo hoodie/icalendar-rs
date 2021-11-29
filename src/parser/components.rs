@@ -271,6 +271,7 @@ fn test_components() {
             components: vec![]
         }
     );
+
     assert_parser!(
         component,
         "BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:FOO",
@@ -290,6 +291,106 @@ fn test_components() {
                 }],
                 components: vec![]
             }]
+        }
+    );
+}
+
+#[test]
+fn test_nested_components() {
+    assert_parser!(
+        component,
+        "BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:BAR\nEND:FOO",
+        Component {
+            name: "FOO",
+            properties: vec![Property {
+                key: "FOO-PROP",
+                val: "spam",
+                params: vec![]
+            }],
+            components: vec![
+                Component {
+                    name: "BAR",
+                    properties: vec![Property {
+                        key: "BAR-PROP",
+                        val: "spam",
+                        params: vec![]
+                    }],
+                    components: vec![
+                        Component {
+                            name: "BAR",
+                            properties: vec![Property {
+                                key: "BAR-PROP",
+                                val: "spam",
+                                params: vec![]
+                            }],
+                            components: vec![]
+                        },
+
+                    ]
+                },
+            ]
+        }
+    );
+}
+
+#[test]
+fn test_multi_components() {
+    assert_parser!(
+        component,
+        r#"
+BEGIN:VEVENT
+BEGIN:VALARM
+RELATED-TO;RELTYPE=:c605e4e8-8ea3-4315-b139-19394ab3ced6
+END:VALARM
+END:VEVENT
+"#,
+        Component {
+            name: "VEVENT",
+            properties: vec![],
+            components: vec![Component {
+                name: "VALARM",
+                properties: vec![Property {
+                    key: "RELATED-TO",
+                    val: "c605e4e8-8ea3-4315-b139-19394ab3ced6",
+                    params: vec![Parameter {
+                        key: "RELTYPE",
+                        val: None,
+                    },],
+                },],
+                components: vec![],
+            },],
+        }
+    );
+    assert_parser!(
+        component,
+        "BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:FOO",
+        Component {
+            name: "FOO",
+            properties: vec![Property {
+                key: "FOO-PROP",
+                val: "spam",
+                params: vec![]
+            }],
+            components: vec![
+                Component {
+                name: "BAR",
+                properties: vec![Property {
+                    key: "BAR-PROP",
+                    val: "spam",
+                    params: vec![]
+                }],
+                components: vec![]
+            },
+                Component {
+                name: "BAR",
+                properties: vec![Property {
+                    key: "BAR-PROP",
+                    val: "spam",
+                    params: vec![]
+                }],
+                components: vec![]
+            }
+            ]
         }
     );
 }
