@@ -1,7 +1,7 @@
 use nom::{
     bytes::complete::{tag_no_case, take_while},
     character::complete::line_ending,
-    combinator::complete,
+    combinator::{complete, map},
     error::{ContextError, ParseError},
     multi::many0,
     sequence::{delimited, preceded},
@@ -9,6 +9,8 @@ use nom::{
 };
 #[cfg(test)]
 use pretty_assertions::assert_eq;
+
+use super::parsed_string::ParseString;
 
 // TODO: how do I express <<alpha_or_dash, but not "END">>
 pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
@@ -30,6 +32,17 @@ pub fn valid_key_sequence<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     take_while(|c: char| {
         c == '.' || c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()
     })(input)
+}
+
+pub fn valid_key_sequence_cow<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    input: &'a str,
+) -> IResult<&'a str, ParseString<'a>, E> {
+    map(
+        take_while(|c: char| {
+            c == '.' || c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()
+        }),
+        ParseString::from,
+    )(input)
 }
 
 pub fn line<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(

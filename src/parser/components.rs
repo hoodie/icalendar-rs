@@ -89,7 +89,7 @@ impl From<Component<'_>> for InnerComponent {
             properties: component
                 .properties
                 .into_iter()
-                .map(|p| (p.key.into(), p.into()))
+                .map(|p| (p.key.clone().into_owned().into(), p.into()))
                 .collect(),
             multi_properties: Default::default(),
         }
@@ -155,12 +155,12 @@ END:VEVENT
 ";
 
     let expectation = Component{name: "VEVENT", properties: vec![
-            Property{key: "KEY", val: "VALUE", params: vec![
-                Parameter{key:"foo", val: Some("bar")},
+            Property{key: "KEY".into(), val: "VALUE".into(), params: vec![
+                Parameter::new_ref("foo", Some("bar")),
             ]},
-            Property{key: "KEY", val: "VALUE", params: vec![
-                Parameter{key:"foo", val: Some("bar")},
-                Parameter{key:"DATE", val: Some("20170218")},
+            Property{key: "KEY".into(), val: "VALUE".into(), params: vec![
+                Parameter::new_ref("foo", Some("bar")),
+                Parameter::new_ref("DATE", Some("20170218")),
             ]},
             ], components: vec![]};
 
@@ -243,8 +243,8 @@ fn test_components() {
         Component {
             name: "FOO",
             properties: vec![Property {
-                key: "FOO-PROP",
-                val: "important: spam €",
+                key: "FOO-PROP".into(),
+                val: "important: spam €".into(),
                 params: vec![]
             }],
             components: vec![]
@@ -258,13 +258,13 @@ fn test_components() {
             name: "FOO",
             properties: vec![
                 Property {
-                    key: "UID",
-                    val: "e1c97b31-38bb-4b72-b94f-463a12ef5239",
+                    key: "UID".into(),
+                    val: "e1c97b31-38bb-4b72-b94f-463a12ef5239".into(),
                     params: vec![]
                 },
                 Property {
-                    key: "FOO-PROP",
-                    val: "sp.am",
+                    key: "FOO-PROP".into(),
+                    val: "sp.am".into(),
                     params: vec![]
                 },
             ],
@@ -278,15 +278,15 @@ fn test_components() {
         Component {
             name: "FOO",
             properties: vec![Property {
-                key: "FOO-PROP",
-                val: "spam",
+                key: "FOO-PROP".into(),
+                val: "spam".into(),
                 params: vec![]
             }],
             components: vec![Component {
                 name: "BAR",
                 properties: vec![Property {
-                    key: "BAR-PROP",
-                    val: "spam",
+                    key: "BAR-PROP".into(),
+                    val: "spam".into(),
                     params: vec![]
                 }],
                 components: vec![]
@@ -302,27 +302,24 @@ fn test_nested_components() {
         "BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:BAR\nEND:FOO",
         Component {
             name: "FOO",
-            properties: vec![Property {
-                key: "FOO-PROP",
-                val: "spam",
-                params: vec![]
-            }],
+            properties: vec![Property::new_ref (
+                "FOO-PROP",
+                "spam",
+            )],
             components: vec![
                 Component {
                     name: "BAR",
-                    properties: vec![Property {
-                        key: "BAR-PROP",
-                        val: "spam",
-                        params: vec![]
-                    }],
+                    properties: vec![Property::new_ref (
+                         "BAR-PROP",
+                         "spam",
+                    )],
                     components: vec![
                         Component {
                             name: "BAR",
-                            properties: vec![Property {
-                                key: "BAR-PROP",
-                                val: "spam",
-                                params: vec![]
-                            }],
+                            properties: vec![Property::new_ref (
+                                "BAR-PROP",
+                                "spam",
+                            )],
                             components: vec![]
                         },
 
@@ -350,15 +347,12 @@ END:VEVENT
             components: vec![Component {
                 name: "VALARM",
                 properties: vec![Property {
-                    key: "RELATED-TO",
-                    val: "c605e4e8-8ea3-4315-b139-19394ab3ced6",
-                    params: vec![Parameter {
-                        key: "RELTYPE",
-                        val: None,
-                    },],
-                },],
+                    key: "RELATED-TO".into(),
+                    val: "c605e4e8-8ea3-4315-b139-19394ab3ced6".into(),
+                    params: vec![Parameter::new_ref("RELTYPE", None,)],
+                }],
                 components: vec![],
-            },],
+            }],
         }
     );
     assert_parser!(
@@ -366,28 +360,25 @@ END:VEVENT
         "BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:FOO",
         Component {
             name: "FOO",
-            properties: vec![Property {
-                key: "FOO-PROP",
-                val: "spam",
-                params: vec![]
-            }],
+            properties: vec![Property::new_ref(
+                "FOO-PROP",
+                "spam",
+            )],
             components: vec![
                 Component {
                 name: "BAR",
-                properties: vec![Property {
-                    key: "BAR-PROP",
-                    val: "spam",
-                    params: vec![]
-                }],
+                properties: vec![Property::new_ref(
+                    "BAR-PROP",
+                    "spam",
+                )],
                 components: vec![]
             },
                 Component {
                 name: "BAR",
-                properties: vec![Property {
-                    key: "BAR-PROP",
-                    val: "spam",
-                    params: vec![]
-                }],
+                properties: vec![Property::new_ref(
+                    "BAR-PROP",
+                    "spam",
+                )],
                 components: vec![]
             }
             ]

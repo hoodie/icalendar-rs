@@ -12,13 +12,22 @@ use nom::{
 #[cfg(test)]
 use nom::error::ErrorKind;
 
-use super::utils::valid_key_sequence;
+use super::{parsed_string::ParseString, utils::valid_key_sequence_cow};
 
 /// Zero-copy version of [`crate::properties::Parameter`]
 #[derive(PartialEq, Debug, Clone)]
 pub struct Parameter<'a> {
-    pub key: &'a str,
-    pub val: Option<&'a str>,
+    pub key: ParseString<'a>,
+    pub val: Option<ParseString<'a>>,
+}
+
+impl<'a> Parameter<'a> {
+    pub fn new_ref(key: &'a str, val: Option<&'a str>) -> Parameter<'a> {
+        Parameter {
+            key: key.into(),
+            val: val.map(Into::into),
+        }
+    }
 }
 
 impl<'a> TryFrom<&'a str> for Parameter<'a> {
@@ -34,7 +43,10 @@ impl<'a> TryFrom<&'a str> for Parameter<'a> {
 
 impl<'a> From<Parameter<'a>> for crate::properties::Parameter {
     fn from(parameter: Parameter<'_>) -> crate::properties::Parameter {
-        crate::properties::Parameter::new(parameter.key, parameter.val.unwrap_or(""))
+        crate::properties::Parameter::new(
+            parameter.key.as_ref(),
+            parameter.val.as_ref().map(AsRef::as_ref).unwrap_or(""),
+        )
     }
 }
 
@@ -43,53 +55,34 @@ fn test_parameter() {
     assert_parser!(
         parameter,
         ";KEY=VALUE",
-        Parameter {
-            key: "KEY",
-            val: Some("VALUE")
-        }
+        Parameter::new_ref("KEY", Some("VALUE"))
     );
 
     assert_parser!(
         parameter,
         "; KEY=VALUE",
-        Parameter {
-            key: "KEY",
-            val: Some("VALUE")
-        }
+        Parameter::new_ref("KEY", Some("VALUE"))
     );
 
     assert_parser!(
         parameter,
         "; KEY=VAL UE",
-        Parameter {
-            key: "KEY",
-            val: Some("VAL UE")
-        }
+        Parameter::new_ref("KEY", Some("VAL UE"))
     );
 
-    assert_parser!(
-        parameter,
-        "; KEY=",
-        Parameter {
-            key: "KEY",
-            val: None
-        }
-    );
+    assert_parser!(parameter, "; KEY=", Parameter::new_ref("KEY", None));
 
     assert_parser!(
         parameter,
         ";KEY=VAL-UE",
-        Parameter {
-            key: "KEY",
-            val: Some("VAL-UE")
-        }
+        Parameter::new_ref("KEY", Some("VAL-UE"))
     );
 
     assert_parser!(
         parameter,
         ";KEY",
         Parameter {
-            key: "KEY",
+            key: "KEY".into(),
             val: None,
         }
     );
@@ -97,10 +90,7 @@ fn test_parameter() {
     assert_parser!(
         parameter,
         ";email=rust@hoodie.de",
-        Parameter {
-            key: "email",
-            val: Some("rust@hoodie.de")
-        }
+        Parameter::new_ref("email", Some("rust@hoodie.de"))
     );
 }
 
@@ -109,28 +99,29 @@ fn test_parameter_with_dash() {
     assert_parser!(
         parameter,
         ";X-HOODIE-KEY=VALUE",
-        Parameter {
-            key: "X-HOODIE-KEY",
-            val: Some("VALUE")
-        }
+        Parameter::new_ref("X-HOODIE-KEY", Some("VALUE"))
     );
 }
 
 #[test]
 fn test_quirky_parameter() {
-    assert_parser!(
-        parameter,
-        ";KEY=",
-        Parameter {
-            key: "KEY",
-            val: None
-        }
-    );
+    assert_parser!(parameter, ";KEY=", Parameter::new_ref("KEY", None));
 }
 
 fn remove_empty_string(input: Option<&str>) -> Option<&str> {
     if let Some(input) = input {
         return if input.is_empty() { None } else { Some(input) };
+    }
+    None
+}
+
+fn remove_empty_string_parsed(input: Option<ParseString<'_>>) -> Option<ParseString<'_>> {
+    if let Some(input) = input {
+        return if input.as_ref().is_empty() {
+            None
+        } else {
+            Some(input)
+        };
     }
     None
 }
@@ -148,7 +139,7 @@ fn pair_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         preceded(
             tuple((tag(";"), space0)),
             separated_pair(
-                valid_key_sequence, //key
+                valid_key_sequence_cow, //key
                 tag("="),
                 map(
                     opt(alt((eof, take_till1(|x| x == ';' || x == ':')))),
@@ -156,7 +147,10 @@ fn pair_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                 ),
             ),
         ),
-        |(key, val)| Parameter { key, val },
+        |(key, val)| Parameter {
+            key,
+            val: val.map(ParseString::from),
+        },
     )(input)
 }
 
@@ -167,14 +161,17 @@ fn base_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         tuple((
             preceded(
                 tuple((tag(";"), space0)),
-                valid_key_sequence, //key
+                valid_key_sequence_cow, //key
             ),
             map(
                 opt(preceded(
                     tag("="),
-                    alt((eof, take_till1(|x| x == ';' || x == ':'))),
+                    map(
+                        alt((eof, take_till1(|x| x == ';' || x == ':'))),
+                        ParseString::from,
+                    ),
                 )),
-                remove_empty_string,
+                remove_empty_string_parsed,
             ),
         )),
         |(key, val)| Parameter { key, val },
@@ -187,24 +184,15 @@ pub fn parse_parameter_list() {
     assert_parser!(
         parameters,
         ";KEY=VALUE",
-        vec![Parameter {
-            key: "KEY",
-            val: Some("VALUE")
-        }]
+        vec![Parameter::new_ref("KEY", Some("VALUE"))]
     );
 
     assert_parser!(
         parameters,
         ";KEY=VALUE;DATE=TODAY",
         vec![
-            Parameter {
-                key: "KEY",
-                val: Some("VALUE")
-            },
-            Parameter {
-                key: "DATE",
-                val: Some("TODAY")
-            }
+            Parameter::new_ref("KEY", Some("VALUE")),
+            Parameter::new_ref("DATE", Some("TODAY")),
         ]
     );
 
@@ -212,14 +200,8 @@ pub fn parse_parameter_list() {
         parameters,
         ";KEY=VALUE;DATE=20170218",
         vec![
-            Parameter {
-                key: "KEY",
-                val: Some("VALUE")
-            },
-            Parameter {
-                key: "DATE",
-                val: Some("20170218")
-            }
+            Parameter::new_ref("KEY", Some("VALUE")),
+            Parameter::new_ref("DATE", Some("20170218")),
         ]
     );
 }

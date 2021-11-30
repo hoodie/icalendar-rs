@@ -28,6 +28,7 @@ use nom::{error::convert_error, error::VerboseError, Finish};
 mod calendar;
 pub(crate) mod components;
 mod parameters;
+mod parsed_string;
 mod properties;
 #[cfg(test)]
 mod tests;
