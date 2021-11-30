@@ -2,8 +2,11 @@ use chrono::*;
 use icalendar::*;
 
 fn main() {
+    // lets create a calendar
     let my_calendar = Calendar::new()
+        .name("example calendar")
         .push(
+            // add an event
             Event::new()
                 .summary("test event")
                 .description("here I have something really important to do")
@@ -19,12 +22,14 @@ fn main() {
                 .done(),
         )
         .push(
+            // add a todo
             Todo::new()
                 .summary("groceries")
                 .description("Buy some milk")
                 .done(),
         )
         .push(
+            // add an all-day event
             Event::new()
                 .all_day(Utc.ymd(2016, 3, 15))
                 .summary("My Birthday")

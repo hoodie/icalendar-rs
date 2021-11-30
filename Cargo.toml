@@ -39,15 +39,16 @@ path= "examples/parse.rs"
 required-features = ["parser"]
 
 [[example]]
+name = "parse_advanced"
+path= "examples/parse_advanced.rs"
+required-features = ["parser"]
+
+[[example]]
 name = "full_circle"
 path= "examples/full_circle.rs"
 required-features = ["parser"]
 
 [[example]]
-name = "reserialize"
-path= "examples/reserialize.rs"
-required-features = ["parser"]
-[[example]]
 name = "parsed_property"
-path= "examples/parsed_property.rs"
+path= "examples/custom_property_parsed.rs"
 required-features = ["parser"]
