@@ -23,8 +23,11 @@ Use the builder-pattern to assemble the full calender or event by event.
 Display printing produces the rfc5545 format.
 
 ```rust
+// lets create a calendar
 let my_calendar = Calendar::new()
+    .name("example calendar")
     .push(
+        // add an event
         Event::new()
             .summary("test event")
             .description("here I have something really important to do")
@@ -40,12 +43,14 @@ let my_calendar = Calendar::new()
             .done(),
     )
     .push(
+        // add a todo
         Todo::new()
             .summary("groceries")
             .description("Buy some milk")
             .done(),
     )
     .push(
+        // add an all-day event
         Event::new()
             .all_day(Utc.ymd(2016, 3, 15))
             .summary("My Birthday")
@@ -54,8 +59,16 @@ let my_calendar = Calendar::new()
     )
     .done();
 
-println!("{}", my_calendar)
+println!("{}", my_calendar);
+```
 
+## Parsing
+There is a feature called `"parser"` which allows you to read calendars again like this:
+
+```rust
+//... continue from previous example
+
+let parsed_capendar = my_calendar.parse::<Calendar>()?;
 ```
 
 ## License
