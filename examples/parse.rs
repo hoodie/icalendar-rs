@@ -1,6 +1,6 @@
 #![cfg(feature = "parser")]
-
 use icalendar::{parser::unfold, Calendar};
+
 mod example_utils;
 use example_utils::{content_from_arg, print_with_lines};
 

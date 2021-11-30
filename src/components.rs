@@ -80,11 +80,20 @@ pub trait Component {
         Ok(())
     }
 
-    /// Guess what
+    /// Serializes this component into [`rfc5545`](http://tools.ietf.org/html/rfc5545) again
+    ///
+    /// # Panic
+    /// this can panic if [`std::fmt::write`] returns an Error
+    /// use [`Component::try_into_string()`] if you don't like panicking
     fn to_string(&self) -> String {
+        self.try_into_string().unwrap()
+    }
+
+    /// Serializes this component into [`rfc5545`](http://tools.ietf.org/html/rfc5545) again
+    fn try_into_string(&self) -> Result<String, std::fmt::Error> {
         let mut out_string = String::new();
-        self.fmt_write(&mut out_string).unwrap();
-        out_string
+        self.fmt_write(&mut out_string)?;
+        Ok(out_string)
     }
 
     /// Append a given [`Property`]

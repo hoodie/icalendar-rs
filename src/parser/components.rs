@@ -42,7 +42,7 @@ pub struct Component<'a> {
 
 impl Component<'_> {
     /// Writes `Component` into a `Writer` using `std::fmt`.
-    pub fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
+    pub(crate) fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         write_crlf!(out, "BEGIN:{}", self.name)?;
 
         if self.name.to_lowercase() == "calendar" {

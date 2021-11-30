@@ -14,12 +14,13 @@ pub struct Calendar<'a> {
 
 impl Calendar<'_> {
     /// Writes `Component` into a `Writer` using `std::fmt`.
-    pub fn fmt_write<W: Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
+    pub(crate) fn fmt_write<W: Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         for component in &self.components {
             component.fmt_write(out)?;
         }
         Ok(())
     }
+
     /// Prints to stdout
     pub fn print(&self) -> Result<(), fmt::Error> {
         print_crlf!("{}", self);

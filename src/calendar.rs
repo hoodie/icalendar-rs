@@ -179,6 +179,15 @@ impl fmt::Display for Calendar {
     }
 }
 
+impl TryInto<String> for &Calendar {
+    type Error = std::fmt::Error;
+    fn try_into(self) -> Result<String, Self::Error> {
+        let mut out_string = String::new();
+        self.fmt_write(&mut out_string)?;
+        Ok(out_string)
+    }
+}
+
 impl Deref for Calendar {
     type Target = [CalendarComponent];
 

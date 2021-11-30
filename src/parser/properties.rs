@@ -31,7 +31,7 @@ pub struct Property<'a> {
 }
 
 impl Property<'_> {
-    pub fn fmt_write<W: Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
+    pub(crate) fn fmt_write<W: Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         // A nice starting capacity for the majority of content lines
         let mut line = String::with_capacity(150);
 
