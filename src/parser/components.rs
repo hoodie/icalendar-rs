@@ -17,9 +17,10 @@ use uuid::Uuid;
 #[cfg(test)]
 use super::parameters::Parameter;
 use super::{
+    parsed_string::ParseString,
     properties::property,
     unfold,
-    utils::{line, line_separated, valid_key_sequence},
+    utils::{line, line_separated, valid_key_sequence_cow},
     Property,
 };
 
@@ -34,28 +35,44 @@ use crate::{
 
 /// The parsing equivalent of [`crate::components::Component`]
 #[derive(PartialEq, Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Component<'a> {
-    pub name: &'a str,
+    pub name: ParseString<'a>,
     pub properties: Vec<Property<'a>>,
     pub components: Vec<Component<'a>>,
+}
+
+impl<'a> Component<'a> {
+    #[cfg(test)]
+    pub(crate) fn new_empty(name: &'a str) -> Component<'a> {
+        Component {
+            name: name.into(),
+            properties: Default::default(),
+            components: Default::default(),
+        }
+    }
 }
 
 impl Component<'_> {
     /// Writes `Component` into a `Writer` using `std::fmt`.
     pub(crate) fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
-        write_crlf!(out, "BEGIN:{}", self.name)?;
+        write_crlf!(out, "BEGIN:{}", self.name.as_str())?;
 
-        if self.name.to_lowercase() == "calendar" {
+        if self.name.as_ref().to_lowercase() == "calendar" {
             if !self
                 .properties
                 .iter()
-                .any(|property| property.key == "DTSTAMP")
+                .any(|property| property.name == "DTSTAMP")
             {
                 let now = CalendarDateTime::Utc(Utc::now());
                 write_crlf!(out, "DTSTAMP:{}", now)?;
             }
 
-            if !self.properties.iter().any(|property| property.key == "UID") {
+            if !self
+                .properties
+                .iter()
+                .any(|property| property.name == "UID")
+            {
                 write_crlf!(out, "UID:{}", Uuid::new_v4())?;
             }
         }
@@ -67,7 +84,7 @@ impl Component<'_> {
             component.fmt_write(out)?;
         }
 
-        write_crlf!(out, "END:{}", self.name)?;
+        write_crlf!(out, "END:{}", self.name.as_str())?;
         Ok(())
     }
 }
@@ -89,7 +106,7 @@ impl From<Component<'_>> for InnerComponent {
             properties: component
                 .properties
                 .into_iter()
-                .map(|p| (p.key.into(), p.into()))
+                .map(|p| (p.name.clone().into_owned().into(), p.into()))
                 .collect(),
             multi_properties: Default::default(),
         }
@@ -99,11 +116,11 @@ impl From<Component<'_>> for InnerComponent {
 impl<'a> From<Component<'a>> for CalendarComponent {
     fn from(component: Component<'_>) -> CalendarComponent {
         use crate::{Event, Todo, Venue};
-        match component.name {
+        match component.name.as_ref() {
             "VEVENT" => Event::from(InnerComponent::from(component)).into(),
             "VTODO" => Todo::from(InnerComponent::from(component)).into(),
             "VVENUE" => Venue::from(InnerComponent::from(component)).into(),
-            _ => Other::from((component.name.into(), InnerComponent::from(component))).into(),
+            _ => Other::from((component.name.to_string(), InnerComponent::from(component))).into(),
         }
     }
 }
@@ -122,7 +139,7 @@ impl<'a> FromStr for CalendarComponent {
 fn parse_empty_component1() {
     assert_eq!(
         component::<(_, ErrorKind)>("BEGIN:VEVENT\nEND:VEVENT\n"),
-        Ok(("", Component{name: "VEVENT", properties: vec![], components: vec![] }))
+        Ok(("", Component::new_empty("VEVENT")))
     );
 
 }
@@ -132,7 +149,7 @@ fn parse_empty_component1() {
 fn parse_empty_component2() {
     assert_eq!(
         component::<(_, ErrorKind)>("BEGIN:VEVENT\n\nEND:VEVENT\n"),
-        Ok(("", Component{name: "VEVENT", properties: vec![], components: vec![]})),
+        Ok(("", Component::new_empty("VEVENT"))),
         "empty component with empty line");
 }
 
@@ -141,7 +158,7 @@ fn parse_empty_component2() {
 fn parse_empty_component_with_dash() {
     assert_eq!(
         component::<(_, ErrorKind)>("BEGIN:X-HOODIE-EVENT\n\nEND:X-HOODIE-EVENT\n"),
-        Ok(("", Component{name: "X-HOODIE-EVENT", properties: vec![], components: vec![]})),
+        Ok(("", Component::new_empty("X-HOODIE-EVENT"))),
         "empty component with empty line");
 }
 
@@ -154,13 +171,13 @@ KEY;foo=bar;DATE=20170218:VALUE
 END:VEVENT
 ";
 
-    let expectation = Component{name: "VEVENT", properties: vec![
-            Property{key: "KEY", val: "VALUE", params: vec![
-                Parameter{key:"foo", val: Some("bar")},
+    let expectation = Component{name: "VEVENT".into(), properties: vec![
+            Property{name: "KEY".into(), val: "VALUE".into(), params: vec![
+                Parameter::new_ref("foo", Some("bar")),
             ]},
-            Property{key: "KEY", val: "VALUE", params: vec![
-                Parameter{key:"foo", val: Some("bar")},
-                Parameter{key:"DATE", val: Some("20170218")},
+            Property{name: "KEY".into(), val: "VALUE".into(), params: vec![
+                Parameter::new_ref("foo", Some("bar")),
+                Parameter::new_ref("DATE", Some("20170218")),
             ]},
             ], components: vec![]};
 
@@ -187,7 +204,7 @@ pub fn read_component(input: &str) -> Result<Component<'_>, String> {
 pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Component, E> {
-    let (input, name) = line("BEGIN:", valid_key_sequence)(input)?;
+    let (input, name) = line("BEGIN:", valid_key_sequence_cow)(input)?;
 
     let (input, (properties, components)) = map(
         many_till(
@@ -198,7 +215,7 @@ pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                     map(line_separated(property), ComponentChild::Property),
                 )),
             )),
-            line("END:", cut(context("MISMATCHING END", tag(name)))),
+            line("END:", cut(context("MISMATCHING END", tag(name.as_str())))),
         ),
         |(body_elements, _)| {
             let mut properties = Vec::new();
@@ -227,24 +244,16 @@ pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 
 #[test]
 fn test_components() {
-    assert_parser!(
-        component,
-        "BEGIN:FOO\nEND:FOO",
-        Component {
-            name: "FOO",
-            properties: vec![],
-            components: vec![]
-        }
-    );
+    assert_parser!(component, "BEGIN:FOO\nEND:FOO", Component::new_empty("FOO"));
 
     assert_parser!(
         component,
         "BEGIN:FOO\nFOO-PROP:important: spam €\nEND:FOO",
         Component {
-            name: "FOO",
+            name: "FOO".into(),
             properties: vec![Property {
-                key: "FOO-PROP",
-                val: "important: spam €",
+                name: "FOO-PROP".into(),
+                val: "important: spam €".into(),
                 params: vec![]
             }],
             components: vec![]
@@ -255,16 +264,16 @@ fn test_components() {
         component,
         "BEGIN:FOO\nUID:e1c97b31-38bb-4b72-b94f-463a12ef5239\nFOO-PROP:sp.am\nEND:FOO",
         Component {
-            name: "FOO",
+            name: "FOO".into(),
             properties: vec![
                 Property {
-                    key: "UID",
-                    val: "e1c97b31-38bb-4b72-b94f-463a12ef5239",
+                    name: "UID".into(),
+                    val: "e1c97b31-38bb-4b72-b94f-463a12ef5239".into(),
                     params: vec![]
                 },
                 Property {
-                    key: "FOO-PROP",
-                    val: "sp.am",
+                    name: "FOO-PROP".into(),
+                    val: "sp.am".into(),
                     params: vec![]
                 },
             ],
@@ -276,17 +285,17 @@ fn test_components() {
         component,
         "BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:FOO",
         Component {
-            name: "FOO",
+            name: "FOO".into(),
             properties: vec![Property {
-                key: "FOO-PROP",
-                val: "spam",
+                name: "FOO-PROP".into(),
+                val: "spam".into(),
                 params: vec![]
             }],
             components: vec![Component {
-                name: "BAR",
+                name: "BAR".into(),
                 properties: vec![Property {
-                    key: "BAR-PROP",
-                    val: "spam",
+                    name: "BAR-PROP".into(),
+                    val: "spam".into(),
                     params: vec![]
                 }],
                 components: vec![]
@@ -301,28 +310,25 @@ fn test_nested_components() {
         component,
         "BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:BAR\nEND:FOO",
         Component {
-            name: "FOO",
-            properties: vec![Property {
-                key: "FOO-PROP",
-                val: "spam",
-                params: vec![]
-            }],
+            name: "FOO".into(),
+            properties: vec![Property::new_ref (
+                "FOO-PROP",
+                "spam",
+            )],
             components: vec![
                 Component {
-                    name: "BAR",
-                    properties: vec![Property {
-                        key: "BAR-PROP",
-                        val: "spam",
-                        params: vec![]
-                    }],
+                    name: "BAR".into(),
+                    properties: vec![Property::new_ref (
+                         "BAR-PROP",
+                         "spam",
+                    )],
                     components: vec![
                         Component {
-                            name: "BAR",
-                            properties: vec![Property {
-                                key: "BAR-PROP",
-                                val: "spam",
-                                params: vec![]
-                            }],
+                            name: "BAR".into(),
+                            properties: vec![Property::new_ref (
+                                "BAR-PROP",
+                                "spam",
+                            )],
                             components: vec![]
                         },
 
@@ -345,49 +351,43 @@ END:VALARM
 END:VEVENT
 "#,
         Component {
-            name: "VEVENT",
+            name: "VEVENT".into(),
             properties: vec![],
             components: vec![Component {
-                name: "VALARM",
+                name: "VALARM".into(),
                 properties: vec![Property {
-                    key: "RELATED-TO",
-                    val: "c605e4e8-8ea3-4315-b139-19394ab3ced6",
-                    params: vec![Parameter {
-                        key: "RELTYPE",
-                        val: None,
-                    },],
-                },],
+                    name: "RELATED-TO".into(),
+                    val: "c605e4e8-8ea3-4315-b139-19394ab3ced6".into(),
+                    params: vec![Parameter::new_ref("RELTYPE", None,)],
+                }],
                 components: vec![],
-            },],
+            }],
         }
     );
     assert_parser!(
         component,
         "BEGIN:FOO\nFOO-PROP:spam\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nBEGIN:BAR\nBAR-PROP:spam\nEND:BAR\nEND:FOO",
         Component {
-            name: "FOO",
-            properties: vec![Property {
-                key: "FOO-PROP",
-                val: "spam",
-                params: vec![]
-            }],
+            name: "FOO".into(),
+            properties: vec![Property::new_ref(
+                "FOO-PROP",
+                "spam",
+            )],
             components: vec![
                 Component {
-                name: "BAR",
-                properties: vec![Property {
-                    key: "BAR-PROP",
-                    val: "spam",
-                    params: vec![]
-                }],
+                name: "BAR".into(),
+                properties: vec![Property::new_ref(
+                    "BAR-PROP",
+                    "spam",
+                )],
                 components: vec![]
             },
                 Component {
-                name: "BAR",
-                properties: vec![Property {
-                    key: "BAR-PROP",
-                    val: "spam",
-                    params: vec![]
-                }],
+                name: "BAR".into(),
+                properties: vec![Property::new_ref(
+                    "BAR-PROP",
+                    "spam",
+                )],
                 components: vec![]
             }
             ]
@@ -402,7 +402,7 @@ fn test_faulty_component() {
         component,
         "BEGIN:FOO\nEND:F0O",
         Component {
-            name: "FOO",
+            name: "FOO".into(),
             properties: vec![],
             components: vec![]
         }
