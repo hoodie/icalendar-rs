@@ -35,6 +35,7 @@ use crate::{
 
 /// The parsing equivalent of [`crate::components::Component`]
 #[derive(PartialEq, Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Component<'a> {
     pub name: ParseString<'a>,
     pub properties: Vec<Property<'a>>,

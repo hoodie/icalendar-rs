@@ -16,6 +16,7 @@ use super::{parsed_string::ParseString, utils::valid_key_sequence_cow};
 
 /// Zero-copy version of [`crate::properties::Parameter`]
 #[derive(PartialEq, Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Parameter<'a> {
     pub key: ParseString<'a>,
     pub val: Option<ParseString<'a>>,

@@ -8,6 +8,7 @@ use core::{
 
 /// Helpertype for reserialization
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Calendar<'a> {
     pub components: Vec<Component<'a>>,
 }

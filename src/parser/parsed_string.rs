@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 #[derive(Debug, Eq, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ParseString<'a>(Cow<'a, str>);
 
 impl ParseString<'_> {
