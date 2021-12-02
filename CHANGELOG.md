@@ -1,12 +1,24 @@
 # Changelog
 
-## [Unreleased](https://github.com/hoodie/icalendar-rs/compare/v0.10.0...HEAD) (2021-11-14)
+## [Unreleased](https://github.com/hoodie/icalendar-rs/compare/v0.10.0...HEAD) (2021-12-02)
 
 ### Features
 
+* add serde support c0ffee7
+* add try_into_string to Component c0ffeea
+* deprecate fmt_write c0ffee0
+* add TryInto<String> for &Calendar c0ffeed
+* add FromStr implementations c0ffee2
+* expose `CalendarElement` 684deda
+* add missing .done() for `Calendar` 7bbde0e
+* more From implementations for Calendar 70c70c1
 * add FromStr implementation for calendar e670469
 * reserialize parsed calendar 64c116d
 * simple nom parser 21c0cfa
+
+### Fixes
+
+* conversion between parsed Property and Property lost params b71826d
 
 
 ## [v0.10.0](https://github.com/hoodie/icalendar-rs/compare/v0.9.0...v0.10.0) (2021-02-12)
