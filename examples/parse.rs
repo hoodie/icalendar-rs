@@ -2,12 +2,12 @@
 use icalendar::{parser::unfold, Calendar};
 
 mod example_utils;
-use example_utils::{content_from_arg, print_with_lines};
+use example_utils::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(sample) = content_from_arg()? {
         let unfolded = unfold(&sample);
-        print_with_lines(&unfolded);
+        //print_with_lines(&unfolded);
 
         let parsed_calendar = match sample.parse::<Calendar>() {
             Ok(read) => read,
@@ -16,7 +16,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 return Ok(());
             }
         };
-        println!("{:#?}", parsed_calendar);
+        parsed_calendar.to_string();
+        // println!("{}", parsed_calendar);
     }
     Ok(())
 }

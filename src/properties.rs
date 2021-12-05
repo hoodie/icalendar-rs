@@ -277,8 +277,21 @@ pub(crate) fn fold_line(line: &str) -> String {
     let mut pos = 0;
     let mut next_pos = limit;
     while bytes_remaining > limit {
+        let pos_is_whitespace = |line: &str, next_pos| {
+            line.chars()
+                .nth(next_pos)
+                .map(char::is_whitespace)
+                .unwrap_or(false)
+        };
+        if pos_is_whitespace(line, next_pos) {
+            next_pos -= 1;
+        }
+
         while !line.is_char_boundary(next_pos) {
             next_pos -= 1;
+            if pos_is_whitespace(line, next_pos) {
+                next_pos -= 1;
+            }
         }
         ret.push_str(&line[pos..next_pos]);
         ret.push_str("\r\n ");
@@ -318,14 +331,15 @@ mod tests {
     #[test]
     fn preserve_spaces() {
         use crate::parser::unfold;
+        let lines = [
+            r#"01234567890123456789012345678901234567890123456789012345HERE_COMES_A_SPACE( )"#,
+            r#"01234567890123456789012345678901234567890123456789012345HERE_COMES_A_SPACE( )<-----78901234567890123456789012345678901234567890123HERE_COMES_A_SPACE( )<---"#,
+        ];
+        for line in lines {
+            let folded = fold_line(line);
+            let unfolded = unfold(&folded);
 
-        // let line = r#"Inventore quia saepe vero blanditiis recusandae corporis. Vel optio sit tempore aut. Recusandae dolorem minima perferendis aliquid molestiae occaecati odit. Sunt itaque soluta possimus. Commodi blanditiis dolorem culpa molestias doloribus magnam. Qui animi nulla eos at."#;
-        let line =
-            r#"01234567890123456789012345678901234567890123456789012345HERE_COMES_A_SPACE( )<---"#;
-        let folded = dbg!(fold_line(line));
-
-        let unfolded = unfold(&folded);
-
-        assert_eq!(line, unfolded);
+            assert_eq!(line, unfolded);
+        }
     }
 }
