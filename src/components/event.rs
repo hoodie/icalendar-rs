@@ -1,8 +1,9 @@
 use super::*;
 /// VEVENT [(RFC 5545, Section 3.6.1 )](https://tools.ietf.org/html/rfc5545#section-3.6.1)
 #[derive(Debug, Default, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Clone))]
 pub struct Event {
-    pub(super) inner: InnerComponent,
+    pub(crate) inner: InnerComponent,
 }
 
 impl Event {

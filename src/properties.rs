@@ -4,11 +4,19 @@ use std::{
     mem,
 };
 
-#[derive(Debug, PartialEq, Eq)]
 /// key-value pairs inside of `Property`s
+#[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Clone, serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    serde(
+        into = "crate::parser::Parameter<'static>",
+        from = "crate::parser::Parameter<'static>"
+    )
+)]
 pub struct Parameter {
-    key: String,
-    val: String,
+    pub(crate) key: String,
+    pub(crate) val: String,
 }
 
 impl Parameter {
@@ -24,8 +32,16 @@ impl Parameter {
 //type EntryParameters = Vec<Parameter>;
 pub type EntryParameters = HashMap<String, Parameter>;
 
-#[derive(Debug, PartialEq, Eq)]
 /// key-value pairs inside of `Component`s
+#[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Clone, serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    serde(
+        into = "crate::parser::Property<'static>",
+        from = "crate::parser::Property<'static>"
+    )
+)]
 pub struct Property {
     pub(crate) key: String,
     pub(crate) val: String,

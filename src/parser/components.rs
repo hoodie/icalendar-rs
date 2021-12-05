@@ -125,6 +125,36 @@ impl<'a> From<Component<'a>> for CalendarComponent {
     }
 }
 
+impl<'a> From<CalendarComponent> for Component<'static> {
+    fn from(component: CalendarComponent) -> Component<'static> {
+        use crate::{Event, Todo, Venue};
+        let (name, properties, multi_properties) = match component {
+            CalendarComponent::Event(Event { inner }) => {
+                ("VEVENT".into(), inner.properties, inner.multi_properties)
+            }
+            CalendarComponent::Todo(Todo { inner }) => {
+                ("VTODO".into(), inner.properties, inner.multi_properties)
+            }
+            CalendarComponent::Venue(Venue { inner }) => {
+                ("VVENUE".into(), inner.properties, inner.multi_properties)
+            }
+            CalendarComponent::Other(Other { name, inner }) => {
+                (name.into(), inner.properties, inner.multi_properties)
+            }
+        };
+
+        Component {
+            name,
+            properties: properties
+                .into_values()
+                .map(Into::into)
+                .chain(multi_properties.into_iter().map(Into::into))
+                .collect(),
+            components: Default::default(),
+        }
+    }
+}
+
 impl<'a> FromStr for CalendarComponent {
     type Err = String;
 

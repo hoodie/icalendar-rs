@@ -4,8 +4,9 @@ use super::*;
 
 /// VTODO  [(RFC 5545, Section 3.6.2 )](https://tools.ietf.org/html/rfc5545#section-3.6.2)
 #[derive(Debug, Default, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Clone))]
 pub struct Todo {
-    pub(super) inner: InnerComponent,
+    pub(crate) inner: InnerComponent,
 }
 
 impl Todo {

@@ -2,8 +2,9 @@ use super::*;
 
 /// VVENUE  [(ical-venue)](https://tools.ietf.org/html/draft-norris-ical-venue-01)
 #[derive(Debug, Default, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Clone))]
 pub struct Venue {
-    pub(super) inner: InnerComponent,
+    pub(crate) inner: InnerComponent,
 }
 impl Venue {
     /// Creates a new Venue.

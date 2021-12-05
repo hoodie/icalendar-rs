@@ -50,6 +50,14 @@ impl<'a> From<Parameter<'a>> for crate::properties::Parameter {
         )
     }
 }
+impl<'a> From<crate::properties::Parameter> for Parameter<'static> {
+    fn from(c: crate::properties::Parameter) -> Self {
+        Self {
+            key: c.key.into(),
+            val: Some(c.val.into()),
+        }
+    }
+}
 
 #[test]
 fn test_parameter() {

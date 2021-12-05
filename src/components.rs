@@ -18,6 +18,7 @@ pub use todo::*;
 pub use venue::*;
 
 #[derive(Debug, Default, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Clone))]
 pub(crate) struct InnerComponent {
     pub properties: BTreeMap<String, Property>,
     pub multi_properties: Vec<Property>,

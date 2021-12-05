@@ -41,6 +41,7 @@ impl<'a> Property<'a> {
         }
     }
 }
+
 impl Property<'_> {
     pub(crate) fn fmt_write<W: Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         // A nice starting capacity for the majority of content lines
@@ -81,6 +82,15 @@ impl From<Property<'_>> for crate::Property {
                 .into_iter()
                 .map(|p| (p.key.as_ref().to_owned(), p.into()))
                 .collect(),
+        }
+    }
+}
+impl From<crate::Property> for Property<'static> {
+    fn from(c: crate::Property) -> Self {
+        Self {
+            name: c.key.into(),
+            val: c.val.into(),
+            params: c.params.into_values().map(Into::into).collect(),
         }
     }
 }

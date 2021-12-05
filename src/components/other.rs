@@ -1,9 +1,10 @@
 use super::*;
 
 #[derive(Debug, Default, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Clone))]
 pub struct Other {
-    name: String,
-    inner: InnerComponent,
+    pub(crate) name: String,
+    pub(crate) inner: InnerComponent,
 }
 
 impl Component for Other {

@@ -7,6 +7,14 @@ use std::fmt;
 #[allow(missing_docs)]
 #[non_exhaustive]
 #[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Clone, serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    serde(
+        into = "crate::parser::Component<'static>",
+        from = "crate::parser::Component<'static>"
+    )
+)]
 pub enum CalendarComponent {
     Todo(Todo),
     Event(Event),

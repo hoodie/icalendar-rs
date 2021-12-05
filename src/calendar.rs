@@ -61,6 +61,7 @@ pub use calendar_component::CalendarComponent;
 ///
 ///
 #[derive(Default, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Calendar {
     properties: Vec<Property>,
     components: Vec<CalendarComponent>,
