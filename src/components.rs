@@ -114,6 +114,15 @@ pub trait Component {
         self
     }
 
+    /// Set the [`DTSTAMP`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.2) [`Property`]
+    ///
+    /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
+    fn timestamp<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
+        let calendar_dt = dt.into();
+        self.add_property("DTSTAMP", &calendar_dt.to_string());
+        self
+    }
+
     /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
     ///
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
