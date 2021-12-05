@@ -295,24 +295,21 @@ pub(crate) fn fold_line(line: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::string::String;
 
     #[test]
     fn fold_line_short() {
-        let line = String::from("This is a short line");
-        assert_eq!(line, fold_line(&line));
+        let line = "This is a short line";
+        assert_eq!(line, fold_line(line));
     }
 
     #[test]
     fn fold_line_folds_on_char_boundary() {
-        let line = String::from(
-            "Content lines shouldn't be folded in the middle \
-             of a UTF-8 character. 老虎.",
-        );
-        let expected = String::from(
-            "Content lines shouldn't be folded in the middle \
-             of a UTF-8 character. 老\r\n 虎.",
-        );
-        assert_eq!(expected, fold_line(&line));
+        let line = "Content lines shouldn't be folded in the middle \
+             of a UTF-8 character. 老虎.";
+
+        let expected = "Content lines shouldn't be folded in the middle \
+             of a UTF-8 character. 老\r\n 虎.";
+        assert_eq!(expected, fold_line(line));
     }
+
 }
