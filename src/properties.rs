@@ -294,6 +294,8 @@ pub(crate) fn fold_line(line: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[test]
@@ -312,4 +314,18 @@ mod tests {
         assert_eq!(expected, fold_line(line));
     }
 
+    #[cfg(feature = "parser")]
+    #[test]
+    fn preserve_spaces() {
+        use crate::parser::unfold;
+
+        // let line = r#"Inventore quia saepe vero blanditiis recusandae corporis. Vel optio sit tempore aut. Recusandae dolorem minima perferendis aliquid molestiae occaecati odit. Sunt itaque soluta possimus. Commodi blanditiis dolorem culpa molestias doloribus magnam. Qui animi nulla eos at."#;
+        let line =
+            r#"01234567890123456789012345678901234567890123456789012345HERE_COMES_A_SPACE( )<---"#;
+        let folded = dbg!(fold_line(line));
+
+        let unfolded = unfold(&folded);
+
+        assert_eq!(line, unfolded);
+    }
 }
