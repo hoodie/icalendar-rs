@@ -1,6 +1,6 @@
 use crate::calendar::CalendarComponent;
 
-use super::{read_calendar, unfold, Component};
+use super::{read_calendar, unfold, Component, Property};
 use core::{
     fmt::{self, Write},
     str::FromStr,
@@ -10,6 +10,7 @@ use core::{
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Calendar<'a> {
+    pub properties: Vec<Property<'a>>,
     pub components: Vec<Component<'a>>,
 }
 

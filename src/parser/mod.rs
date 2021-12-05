@@ -60,6 +60,36 @@ pub fn read_calendar_simple<'a>(
 pub fn read_calendar(input: &str) -> Result<Calendar<'_>, String> {
     components(input)
         .finish()
-        .map(|(_, components)| Calendar { components })
+        .map(|(_, mut components)| {
+            let root_is_calendar = components
+                .get(0)
+                .map(|first_root| first_root.name == "VCALENDAR")
+                .unwrap_or(false);
+
+            if root_is_calendar {
+                let root = components.swap_remove(0);
+                Calendar {
+                    properties: root.properties,
+                    components: root.components,
+                }
+            } else {
+                Calendar {
+                    components,
+                    properties: Vec::new(),
+                }
+            }
+        })
+        .map_err(|e: VerboseError<&str>| format!("error: {}", convert_error(input, e.clone())))
+}
+
+/// Parse iCalendar file content into an array of [`Component`]s
+///
+/// This version produces nice and readable errors with line numbers thanks the the awesomeness of [`nom`].
+/// Line numbers are in regard to the normalized/unfolded version of the input, so better keep those around for reference.
+///
+pub fn read_components(input: &str) -> Result<Vec<Component<'_>>, String> {
+    components(input)
+        .finish()
+        .map(|(_, components)| components)
         .map_err(|e: VerboseError<&str>| format!("error: {}", convert_error(input, e.clone())))
 }
