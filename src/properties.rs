@@ -277,8 +277,21 @@ pub(crate) fn fold_line(line: &str) -> String {
     let mut pos = 0;
     let mut next_pos = limit;
     while bytes_remaining > limit {
+        let pos_is_whitespace = |line: &str, next_pos| {
+            line.chars()
+                .nth(next_pos)
+                .map(char::is_whitespace)
+                .unwrap_or(false)
+        };
+        if pos_is_whitespace(line, next_pos) {
+            next_pos -= 1;
+        }
+
         while !line.is_char_boundary(next_pos) {
             next_pos -= 1;
+            if pos_is_whitespace(line, next_pos) {
+                next_pos -= 1;
+            }
         }
         ret.push_str(&line[pos..next_pos]);
         ret.push_str("\r\n ");
@@ -294,25 +307,39 @@ pub(crate) fn fold_line(line: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use super::*;
-    use std::string::String;
 
     #[test]
     fn fold_line_short() {
-        let line = String::from("This is a short line");
-        assert_eq!(line, fold_line(&line));
+        let line = "This is a short line";
+        assert_eq!(line, fold_line(line));
     }
 
     #[test]
     fn fold_line_folds_on_char_boundary() {
-        let line = String::from(
-            "Content lines shouldn't be folded in the middle \
-             of a UTF-8 character. 老虎.",
-        );
-        let expected = String::from(
-            "Content lines shouldn't be folded in the middle \
-             of a UTF-8 character. 老\r\n 虎.",
-        );
-        assert_eq!(expected, fold_line(&line));
+        let line = "Content lines shouldn't be folded in the middle \
+             of a UTF-8 character. 老虎.";
+
+        let expected = "Content lines shouldn't be folded in the middle \
+             of a UTF-8 character. 老\r\n 虎.";
+        assert_eq!(expected, fold_line(line));
+    }
+
+    #[cfg(feature = "parser")]
+    #[test]
+    fn preserve_spaces() {
+        use crate::parser::unfold;
+        let lines = [
+            r#"01234567890123456789012345678901234567890123456789012345HERE_COMES_A_SPACE( )"#,
+            r#"01234567890123456789012345678901234567890123456789012345HERE_COMES_A_SPACE( )<-----78901234567890123456789012345678901234567890123HERE_COMES_A_SPACE( )<---"#,
+        ];
+        for line in lines {
+            let folded = fold_line(line);
+            let unfolded = unfold(&folded);
+
+            assert_eq!(line, unfolded);
+        }
     }
 }

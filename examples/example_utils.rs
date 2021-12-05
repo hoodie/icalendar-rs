@@ -1,4 +1,5 @@
 use std::{env, fs, io};
+#[allow(dead_code)]
 pub fn print_with_lines(content: &str) {
     println!(
         "{}",

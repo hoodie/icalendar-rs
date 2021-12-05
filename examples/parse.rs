@@ -2,7 +2,7 @@
 use icalendar::{parser::unfold, Calendar};
 
 mod example_utils;
-use example_utils::{content_from_arg, print_with_lines};
+use example_utils::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(sample) = content_from_arg()? {
@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 return Ok(());
             }
         };
-        println!("{:#?}", parsed_calendar);
+        println!("{}", parsed_calendar);
     }
     Ok(())
 }
