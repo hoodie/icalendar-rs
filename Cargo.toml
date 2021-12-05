@@ -32,7 +32,7 @@ version = "0.8"
 pretty_assertions = "1"
 
 [features]
-default = []
+default = ["parser", "serde"]
 parser = ["nom"]
 
 [[example]]
@@ -48,6 +48,11 @@ required-features = ["parser"]
 [[example]]
 name = "ical_to_json"
 path = "examples/ical_to_json.rs"
+required-features = ["parser", "serde", "serde_json"]
+
+[[example]]
+name = "ical_to_json2"
+path = "examples/ical_to_json2.rs"
 required-features = ["parser", "serde", "serde_json"]
 
 [[example]]

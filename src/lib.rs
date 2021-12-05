@@ -1,12 +1,10 @@
 //! A library (far from anything) to generate icalendars
-//! This implementation is still far from complete, I haven't even read the entire [spec](http://tools.ietf.org/html/rfc5545) yet.
-//! Instead I implemented the parts I needed first.
 //! More to come, contributions very welcome.
-//!
 //!
 //! ## Structure
 //! * [`Calendar`]s consist of [`Component`]s
-//! * [`Component`]s are e.g. [`Event`] or [`Todo`]
+//! * [`Component`]s are e.g. [`Event`] or [`Todo`], [`Alarm`], [`Venue`]
+//!   (more under [component registry](https://datatracker.ietf.org/doc/html/rfc5545#section-8.3.1))
 //! * [`Component`]s consist of [`Property`]s
 //! * [`Property`]s may have [`Parameter`]s
 //!
@@ -50,7 +48,7 @@
 //!   reference
 //! - [`Todo::completed`] now requires its [`chrono::DateTime`] argument to have exactly [`chrono::Utc`]
 //!   specified as its time zone as mandated by the RFC.
-//! - [`Component::starts`], [`Component::ends`] and [`Todo::due`] now take newly introduced
+//! - [`EventLike::starts`], [`EventLike::ends`] and [`Todo::due`] now take newly introduced
 //!   [`CalendarDateTime`] (through [`Into<CalendarDateTime>`] indirection). This allows callers to
 //!   define time zone handling. Conversions from [`chrono::NaiveDateTime`] and
 //!   [`chrono::DateTime<Utc>`](chrono::DateTime) are provided for ergonomics, the latter also restoring API
@@ -101,8 +99,8 @@ mod properties;
 
 pub use crate::{
     calendar::{Calendar, CalendarComponent},
-    components::{CalendarDateTime, Component, Event, Todo, Venue},
-    properties::{Class, EventStatus, Parameter, Property, TodoStatus, ValueType},
+    components::{Alarm, CalendarDateTime, Component, Event, EventLike, Todo, Venue},
+    properties::{Action, Class, EventStatus, Parameter, Property, TodoStatus, ValueType},
 };
 
 // TODO Calendar TimeZone VTIMEZONE STANDARD DAYLIGHT (see thunderbird exports)

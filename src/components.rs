@@ -4,14 +4,17 @@ use uuid::Uuid;
 use std::{collections::BTreeMap, fmt, mem};
 
 use crate::properties::*;
-
 mod date_time;
+
+mod alarm;
 mod event;
 mod other;
 mod todo;
 mod venue;
 
 pub use date_time::CalendarDateTime;
+
+pub use alarm::*;
 pub use event::*;
 pub use other::*;
 pub use todo::*;
@@ -123,73 +126,6 @@ pub trait Component {
         self
     }
 
-    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
-    ///
-    /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
-    fn starts<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
-        let calendar_dt = dt.into();
-        self.add_property("DTSTART", &calendar_dt.to_string());
-        self
-    }
-
-    /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`]
-    ///
-    /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
-    fn ends<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
-        let calendar_dt = dt.into();
-        self.add_property("DTEND", &calendar_dt.to_string());
-        self
-    }
-
-    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`], date only
-    fn start_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
-    where
-        TZ::Offset: fmt::Display,
-    {
-        // DTSTART
-        self.append_property(
-            Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
-        );
-        self
-    }
-
-    /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`], date only
-    fn end_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
-    where
-        TZ::Offset: fmt::Display,
-    {
-        // DTSTART
-        self.append_property(
-            Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
-        );
-        self
-    }
-
-    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
-    /// and [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`],
-    /// date only
-    fn all_day<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
-    where
-        TZ::Offset: fmt::Display,
-    {
-        // DTSTART
-        self.append_property(
-            Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
-        )
-        .append_property(
-            Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
-        );
-        self
-    }
-
     ///  Defines the relative priority.
     ///
     ///  Ranges from 0 to 10, larger values will be truncated
@@ -295,7 +231,83 @@ macro_rules! component_impl {
         }
     };
 }
+macro_rules! eventlike_impl {
+    ($t:ty) => {
+        impl EventLike for $t {
+            /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
+            ///
+            /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
+            fn starts<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
+                let calendar_dt = dt.into();
+                self.add_property("DTSTART", &calendar_dt.to_string());
+                self
+            }
+
+            /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`]
+            ///
+            /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
+            fn ends<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
+                let calendar_dt = dt.into();
+                self.add_property("DTEND", &calendar_dt.to_string());
+                self
+            }
+
+            /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`], date only
+            fn start_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+            where
+                TZ::Offset: fmt::Display,
+            {
+                // DTSTART
+                self.append_property(
+                    Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
+                        .append_parameter(ValueType::Date)
+                        .done(),
+                );
+                self
+            }
+
+            /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`], date only
+            fn end_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+            where
+                TZ::Offset: fmt::Display,
+            {
+                // DTSTART
+                self.append_property(
+                    Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
+                        .append_parameter(ValueType::Date)
+                        .done(),
+                );
+                self
+            }
+
+            /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
+            /// and [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`],
+            /// date only
+            fn all_day<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
+            where
+                TZ::Offset: fmt::Display,
+            {
+                // DTSTART
+                self.append_property(
+                    Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
+                        .append_parameter(ValueType::Date)
+                        .done(),
+                )
+                .append_property(
+                    Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
+                        .append_parameter(ValueType::Date)
+                        .done(),
+                );
+                self
+            }
+        }
+    };
+}
 
 component_impl! { Event, String::from("VEVENT") }
+eventlike_impl! { Event }
 component_impl! { Todo , String::from("VTODO")}
-component_impl! { Venue , String::from("VVENUE")}
+eventlike_impl! { Todo }
+component_impl! { Venue, String::from("VVENUE")}
+component_impl! { Alarm, String::from("VVENUE")}
+eventlike_impl! { Alarm }

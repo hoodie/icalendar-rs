@@ -2,10 +2,8 @@
 use std::str::FromStr;
 
 use chrono::*;
-use icalendar::{
-    parser::{read_calendar, unfold},
-    Calendar, Class, Component, Event, Property, Todo,
-};
+use icalendar::parser::{read_calendar, unfold};
+use icalendar::*;
 
 fn main() {
     let event = Event::new()

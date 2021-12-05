@@ -1,4 +1,4 @@
-//! # Parsing iCalendar document parser
+//! # iCalendar document parser
 //!
 //! I would have loved to provide a zero-copy parser here however the *Internet Calendaring and Scheduling Core Object Specification (iCalendar)*
 //! allows, nay demands special line folding

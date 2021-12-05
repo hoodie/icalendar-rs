@@ -4,6 +4,8 @@ use std::{
     mem,
 };
 
+use chrono::{DateTime, Duration, Utc};
+
 #[derive(Debug, PartialEq, Eq)]
 /// key-value pairs inside of `Property`s
 pub struct Parameter {
@@ -239,6 +241,79 @@ impl From<TodoStatus> for Property {
             params: HashMap::new(),
         }
     }
+}
+
+/// [rfc5545#section-3.8.6.1](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.1)
+#[derive(Debug, PartialEq, Eq)]
+pub enum Action {
+    /// [rfc5545#section-3.8.6.1](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.1)
+    Audio,
+    /// [rfc5545#section-3.8.6.1](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.1)
+    Email,
+    /// [rfc5545#section-3.8.6.1](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.1)
+    Display,
+    // /// [rfc5545#section-3.8.6.1](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.1)
+    // IanaToken(String),
+    // /// [rfc5545#section-3.8.6.1](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.1)
+    // XName{vendor: String, name: String},
+    /// what ever else
+    Other(String),
+}
+
+impl ToString for Action {
+    /// convert the ACTION into its serialized representation
+    fn to_string(&self) -> String {
+        match self {
+            Action::Audio => "AUDIO".into(),
+            Action::Email => "EMAIL".into(),
+            Action::Display => "DISPLAY".into(),
+            Action::Other(other) => other.clone(),
+        }
+    }
+}
+
+impl From<Action> for Property {
+    fn from(action: Action) -> Self {
+        Property {
+            key: String::from("ACTION"),
+            val: action.to_string(),
+            params: HashMap::new(),
+        }
+    }
+}
+
+pub enum Trigger {
+    Duration(Duration),
+    DateTime(DateTime<Utc>),
+}
+
+fn simple_params(key: &str, val: &str) -> EntryParameters {
+    let key = String::from(key);
+    let param = Parameter::new(&key, val.into());
+    let mut map = EntryParameters::new();
+    map.insert(key, param);
+    map
+}
+
+impl From<Trigger> for Property {
+    fn from(trigger: Trigger) -> Self {
+        match trigger {
+            Trigger::Duration(duration) => Property {
+                key: "TRIGGER".into(),
+                val: duration.to_string(),
+                params: simple_params("VALUE", "DATE-TIME"),
+            },
+            Trigger::DateTime(_) => todo!(),
+        }
+    }
+}
+
+#[test]
+fn test_trigger() {
+    let prop: Property = dbg!(Trigger::Duration(Duration::weeks(14)).into());
+    let mut out = String::new();
+    prop.fmt_write(&mut out).unwrap();
+    dbg!(out);
 }
 
 //pub enum AttendeeRole {
