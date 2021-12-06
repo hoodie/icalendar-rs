@@ -53,14 +53,18 @@ impl<'a> Component<'a> {
     }
 }
 
-impl Component<'_> {
-    /// Writes `Component` into a `Writer` using `std::fmt`.
-    pub(crate) fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
-        write_crlf!(out, "BEGIN:{}", self.name.as_str())?;
+pub(crate) trait LikeComponent<'a> {
+    fn name(&self) -> &str;
+    fn properties(&self) -> &[Property<'a>];
+    fn components(&self) -> &[Component<'a>];
 
-        if self.name.as_ref().to_lowercase() == "calendar" {
+    /// Writes `Component` into a `Writer` using `std::fmt`.
+    fn fmt_write<W: fmt::Write>(&'a self, out: &mut W) -> Result<(), fmt::Error> {
+        write_crlf!(out, "BEGIN:{}", self.name())?;
+
+        if self.name().to_lowercase() == "calendar" {
             if !self
-                .properties
+                .properties()
                 .iter()
                 .any(|property| property.name == "DTSTAMP")
             {
@@ -69,23 +73,37 @@ impl Component<'_> {
             }
 
             if !self
-                .properties
+                .properties()
                 .iter()
                 .any(|property| property.name == "UID")
             {
                 write_crlf!(out, "UID:{}", Uuid::new_v4())?;
             }
         }
-        for property in &self.properties {
+        for property in self.properties() {
             property.fmt_write(out)?;
         }
 
-        for component in &self.components {
+        for component in self.components() {
             component.fmt_write(out)?;
         }
 
-        write_crlf!(out, "END:{}", self.name.as_str())?;
+        write_crlf!(out, "END:{}", self.name())?;
         Ok(())
+    }
+}
+
+impl<'a> LikeComponent<'a> for Component<'a> {
+    fn name(&self) -> &str {
+        self.name.as_str()
+    }
+
+    fn properties(&self) -> &[Property<'a>] {
+        &self.properties
+    }
+
+    fn components(&self) -> &[Component<'a>] {
+        &self.components
     }
 }
 

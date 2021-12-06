@@ -1,10 +1,7 @@
 use crate::calendar::CalendarComponent;
 
-use super::{read_calendar, unfold, Component, Property};
-use core::{
-    fmt::{self, Write},
-    str::FromStr,
-};
+use super::{components::LikeComponent, read_calendar, unfold, Component, Property};
+use core::{fmt, str::FromStr};
 
 /// Helpertype for reserialization
 #[derive(Clone, Debug)]
@@ -15,18 +12,24 @@ pub struct Calendar<'a> {
 }
 
 impl Calendar<'_> {
-    /// Writes `Component` into a `Writer` using `std::fmt`.
-    pub(crate) fn fmt_write<W: Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
-        for component in &self.components {
-            component.fmt_write(out)?;
-        }
-        Ok(())
-    }
-
     /// Prints to stdout
     pub fn print(&self) -> Result<(), fmt::Error> {
         print_crlf!("{}", self);
         Ok(())
+    }
+}
+impl<'a> LikeComponent<'a> for Calendar<'a> {
+    fn name(&self) -> &str {
+        const CALNAME: &str = "VCALENDAR";
+        CALNAME
+    }
+
+    fn properties(&self) -> &[Property<'a>] {
+        &self.properties
+    }
+
+    fn components(&self) -> &[Component<'a>] {
+        &self.components
     }
 }
 

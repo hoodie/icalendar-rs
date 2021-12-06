@@ -41,6 +41,7 @@ impl<'a> Property<'a> {
         }
     }
 }
+
 impl Property<'_> {
     pub(crate) fn fmt_write<W: Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         // A nice starting capacity for the majority of content lines
@@ -57,6 +58,12 @@ impl Property<'_> {
         write!(line, ":{}", self.val.as_str())?;
         write_crlf!(out, "{}", fold_line(&line))?;
         Ok(())
+    }
+}
+
+impl fmt::Display for Property<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.fmt_write(f)
     }
 }
 
