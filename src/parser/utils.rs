@@ -71,39 +71,34 @@ pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
 /// ```
 /// # use icalendar::parser::unfold;
 /// #[rustfmt::skip]
-/// let line = r#"this g
-///   ets w
-///   rapped i
-///   n a w
-///    eird w
-///   ay"#;
+/// let line = "this gets w\r
+///  rapped i\r
+///  n a w\r
+///  eird\r
+///   way";
 ///
 /// assert_eq!(unfold(line), "this gets wrapped in a weird way")
 /// ```
 pub fn unfold(input: &str) -> String {
-    input
-        .split("\r\n ")
-        .flat_map(|l| l.split("\n "))
-        .map(str::trim_start)
-        .collect()
+    input.split("\r\n ").flat_map(|l| l.split("\n ")).collect()
 }
 
 #[test]
 fn test_unfold1() {
     let input = "1 hello world\r\n2 hello \r\n   world\r\n3 hello \r\n world\r\n4 hello world";
-    let expected = "1 hello world\r\n2 hello world\r\n3 hello world\r\n4 hello world";
+    let expected = "1 hello world\r\n2 hello   world\r\n3 hello world\r\n4 hello world";
     assert_eq!(unfold(input), expected);
 }
 
 /// this is actually also allowed by the spec
 #[test]
 fn test_unfold2() {
-    let input1 = "1 hello world\n2 hello \n  world\n3 hello world\n4 hello world";
+    let input1 = "1 hello world\n2 hello \n   world\n3 hello world\n4 hello world";
     let input2 = "1 hello world\r\n2 hello \r\n   world\r\n3 hello \r\n world\r\n4 hello world";
 
     let expected = vec![
         "1 hello world",
-        "2 hello world",
+        "2 hello   world",
         "3 hello world",
         "4 hello world",
     ];
