@@ -141,7 +141,7 @@ impl Calendar {
 
     /// End of builder pattern.
     /// copies over everything
-    pub fn done(&mut self) -> Self {
+    pub fn done(&mut self) -> Calendar {
         Calendar {
             properties: mem::take(&mut self.properties),
             components: mem::take(&mut self.components),
@@ -170,6 +170,35 @@ impl Calendar {
     pub fn print(&self) -> Result<(), fmt::Error> {
         print_crlf!("{}", self);
         Ok(())
+    }
+
+    /// Returns a queryable object
+    #[cfg(feature = "query")]
+    pub fn query(&self) -> crate::query::CalendarQuery<Self> {
+        crate::query::CalendarQuery { calendar: self }
+    }
+}
+
+#[cfg(feature = "query")]
+impl crate::query::CalendarQuery<'_, Calendar> {
+    pub fn properties(&self) -> &[Property] {
+        &self.calendar.properties
+    }
+
+    pub fn events(&self) -> Vec<&Event> {
+        self.calendar
+            .components
+            .iter()
+            .filter_map(CalendarComponent::as_event)
+            .collect()
+    }
+
+    pub fn todos(&self) -> Vec<&Todo> {
+        self.calendar
+            .components
+            .iter()
+            .filter_map(CalendarComponent::as_todo)
+            .collect()
     }
 }
 
@@ -232,10 +261,10 @@ mod tests {
 
     #[test]
     fn calendar_extend_components() {
-        let mut calendar = Calendar::new();
+        let mut calendar = Calendar::default();
         let components = vec![
-            CalendarComponent::Event(Event::new()),
-            CalendarComponent::Event(Event::new()),
+            CalendarComponent::Event(Event::default()),
+            CalendarComponent::Event(Event::default()),
         ];
         calendar.extend(components);
         assert_eq!(calendar.components.len(), 2);

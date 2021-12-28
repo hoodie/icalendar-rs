@@ -1,5 +1,5 @@
 use chrono::*;
-use std::fmt;
+use std::{fmt, str::FromStr};
 
 /// Representation of various forms of `DATE-TIME` per
 /// [RFC 5545, Section 3.3.5](https://tools.ietf.org/html/rfc5545#section-3.3.5)
@@ -23,13 +23,25 @@ pub enum CalendarDateTime {
     Utc(DateTime<Utc>),
 }
 
+static FLOATING_FORMAT: &str = "%Y%m%dT%H%M%S";
+static UTC_FORMAT: &str = "%Y%m%dT%H%M%SZ";
+
 impl fmt::Display for CalendarDateTime {
     /// Format date-time in RFC 5545 compliant manner.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         match self {
-            CalendarDateTime::Floating(naive_dt) => naive_dt.format("%Y%m%dT%H%M%S").fmt(f),
-            CalendarDateTime::Utc(utc_dt) => utc_dt.format("%Y%m%dT%H%M%SZ").fmt(f),
+            CalendarDateTime::Floating(naive_dt) => naive_dt.format(FLOATING_FORMAT).fmt(f),
+            CalendarDateTime::Utc(utc_dt) => utc_dt.format(UTC_FORMAT).fmt(f),
         }
+    }
+}
+
+impl FromStr for CalendarDateTime {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let dt = NaiveDateTime::parse_from_str(s, FLOATING_FORMAT)?;
+        Ok(CalendarDateTime::Floating(dt))
     }
 }
 

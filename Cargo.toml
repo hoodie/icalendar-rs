@@ -19,6 +19,7 @@ exclude = ["fixtures", ".github", ".gitignore", "*.json"]
 chrono = "0.4"
 serde = { version = "1.0", optional = true, features = ["derive"] }
 serde_json = { version = "1.0", optional = true }
+iso8601 = "0.4.1"
 
 [dependencies.nom]
 version = "7"
@@ -32,8 +33,9 @@ version = "0.8"
 pretty_assertions = "1"
 
 [features]
-default = []
+default = ["query", "parser"]
 parser = ["nom"]
+query = []
 
 [[example]]
 name = "parse"

@@ -296,6 +296,6 @@ macro_rules! component_impl {
     };
 }
 
-component_impl! { Event, String::from("VEVENT") }
-component_impl! { Todo , String::from("VTODO")}
-component_impl! { Venue , String::from("VVENUE")}
+component_impl! (Event, String::from("VEVENT"));
+component_impl! (Todo, String::from("VTODO"));
+component_impl! (Venue, String::from("VVENUE"));

@@ -97,6 +97,8 @@ mod calendar;
 mod components;
 #[cfg(feature = "parser")]
 pub mod parser;
+#[cfg(feature = "query")]
+mod query;
 mod properties;
 
 pub use crate::{

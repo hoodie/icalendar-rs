@@ -1,4 +1,5 @@
 use super::*;
+use crate::query::ComponentQuery;
 /// VEVENT [(RFC 5545, Section 3.6.1 )](https://tools.ietf.org/html/rfc5545#section-3.6.1)
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct Event {
@@ -28,6 +29,12 @@ impl Event {
     //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
     //    unimplemented!()
     //}
+
+    /// Returns a queryable object
+    #[cfg(feature = "query")]
+    pub fn query(&self) -> ComponentQuery<'_, Self> {
+        ComponentQuery::from(self)
+    }
 }
 
 // impl std::Str
