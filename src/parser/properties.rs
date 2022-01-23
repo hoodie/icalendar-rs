@@ -259,6 +259,8 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                         tuple((
                             // preceded(multispace0, alpha_or_dash), // key
                             cut(context(
+                                // this must be interpretet as component by `component()`
+                                // if you get here at all then the parser is in a wrong state
                                 "property can't be END or BEGIN",
                                 map(preceded(multispace0, property_key), ParseString::from),
                             )), // key

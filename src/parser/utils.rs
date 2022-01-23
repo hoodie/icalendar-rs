@@ -80,13 +80,25 @@ pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
 /// assert_eq!(unfold(line), "this gets wrapped in a weird way")
 /// ```
 pub fn unfold(input: &str) -> String {
-    input.split("\r\n ").flat_map(|l| l.split("\n ")).collect()
+    input
+    .split("\r\n ")
+    .flat_map(|l| l.split("\n "))
+    .flat_map(|l| l.split("\r\n	"))
+    .flat_map(|l| l.split("\n	"))
+    .collect()
 }
 
 #[test]
 fn test_unfold1() {
     let input = "1 hello world\r\n2 hello \r\n   world\r\n3 hello \r\n world\r\n4 hello world";
     let expected = "1 hello world\r\n2 hello   world\r\n3 hello world\r\n4 hello world";
+    assert_eq!(unfold(input), expected);
+}
+
+#[test]
+fn test_unfold1_tabs() {
+    let input = "1 hello world\r\n2 hello \r\n		world\r\n3 hello \r\n	world\r\n4 hello world";
+    let expected = "1 hello world\r\n2 hello 	world\r\n3 hello world\r\n4 hello world";
     assert_eq!(unfold(input), expected);
 }
 
