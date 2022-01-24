@@ -81,11 +81,11 @@ pub fn line_separated<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(
 /// ```
 pub fn unfold(input: &str) -> String {
     input
-    .split("\r\n ")
-    .flat_map(|l| l.split("\n "))
-    .flat_map(|l| l.split("\r\n	"))
-    .flat_map(|l| l.split("\n	"))
-    .collect()
+        .split("\r\n ")
+        .flat_map(|l| l.split("\n "))
+        .flat_map(|l| l.split("\r\n	"))
+        .flat_map(|l| l.split("\n	"))
+        .collect()
 }
 
 #[test]
