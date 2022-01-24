@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/hoodie/icalendar-rs/compare/v0.10.0...HEAD) (2021-12-05)
+## [v0.11.0](https://github.com/hoodie/icalendar-rs/compare/v0.10.0...v0.11.0) (2022-01-24)
 
 
 ### Features
@@ -43,6 +43,9 @@
 
 
 ### Fixes
+
+* unfold by tabs as well
+ c0ffee8
 
 * lost spaces when folding
  c0ffeea
