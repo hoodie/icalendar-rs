@@ -68,7 +68,7 @@ There is a feature called `"parser"` which allows you to read calendars again li
 ```rust
 //... continue from previous example
 
-let parsed_capendar = my_calendar.parse::<Calendar>()?;
+let parsed_calendar = my_calendar.parse::<Calendar>()?;
 ```
 
 ## License
