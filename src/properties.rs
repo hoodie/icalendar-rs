@@ -200,6 +200,17 @@ pub enum EventStatus {
     //Custom(&str)
 }
 
+impl EventStatus {
+    pub(crate) fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "TENTATIVE" => Some(Self::Tentative),
+            "CONFIRMED" => Some(Self::Confirmed),
+            "CANCELLED" => Some(Self::Cancelled),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 /// Encodes the status of a `Todo`
 /// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11>
@@ -213,6 +224,18 @@ pub enum TodoStatus {
     /// Indicates to-do was cancelled.
     Cancelled,
     //Custom(&str)
+}
+
+impl TodoStatus {
+    pub(crate) fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "NEEDS-ACTION" => Some(Self::NeedsAction),
+            "COMPLETED" => Some(Self::Completed),
+            "IN-PROCESS" => Some(Self::InProcess),
+            "CANCELLED" => Some(Self::Cancelled),
+            _ => None,
+        }
+    }
 }
 
 //pub enum JournalStatuw{

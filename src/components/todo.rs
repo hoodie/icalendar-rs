@@ -30,6 +30,13 @@ impl Todo {
         self
     }
 
+    /// Gets the [`PERCENT-COMPLETE`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.8) property.
+    ///
+    /// Ranges between 0 - 100.
+    pub fn get_percent_complete(&self) -> Option<u8> {
+        self.property_value("PERCENT-COMPLETE")?.parse().ok()
+    }
+
     /// Set the [`DUE`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.3) property
     ///
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
@@ -48,14 +55,40 @@ impl Todo {
         self
     }
 
-    ///  Defines the overall status or confirmation
-    ///
+    /// Defines the overall status or confirmation
     pub fn status(&mut self, status: TodoStatus) -> &mut Self {
         self.append_property(status.into());
         self
     }
 
+    /// Gets the overall status.
+    pub fn get_status(&self) -> Option<TodoStatus> {
+        TodoStatus::from_str(self.property_value("STATUS")?)
+    }
+
     //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
     //    unimplemented!()
     //}
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_properties_unset() {
+        let todo = Todo::new();
+        assert_eq!(todo.get_percent_complete(), None);
+        assert_eq!(todo.get_status(), None);
+    }
+
+    #[test]
+    fn get_properties_set() {
+        let todo = Todo::new()
+            .percent_complete(42)
+            .status(TodoStatus::NeedsAction)
+            .done();
+        assert_eq!(todo.get_percent_complete(), Some(42));
+        assert_eq!(todo.get_status(), Some(TodoStatus::NeedsAction));
+    }
 }

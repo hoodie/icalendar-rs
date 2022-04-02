@@ -19,10 +19,15 @@ impl Event {
         }
     }
 
-    ///  Defines the overall status or confirmation
+    /// Defines the overall status or confirmation
     pub fn status(&mut self, status: EventStatus) -> &mut Self {
         self.append_property(status.into());
         self
+    }
+
+    /// Gets the overall status or confirmation.
+    pub fn get_status(&self) -> Option<EventStatus> {
+        EventStatus::from_str(self.property_value("STATUS")?)
     }
 
     //pub fn repeats<R:Repeater+?Sized>(&mut self, repeat: R) -> &mut Self {
@@ -30,4 +35,19 @@ impl Event {
     //}
 }
 
-// impl std::Str
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_properties_unset() {
+        let event = Event::new();
+        assert_eq!(event.get_status(), None);
+    }
+
+    #[test]
+    fn get_properties_set() {
+        let event = Event::new().status(EventStatus::Tentative).done();
+        assert_eq!(event.get_status(), Some(EventStatus::Tentative));
+    }
+}
