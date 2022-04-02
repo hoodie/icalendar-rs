@@ -89,6 +89,16 @@ impl Calendar {
         self
     }
 
+    /// Gets the value of a property.
+    fn property_value(&self, key: &str) -> Option<&str> {
+        Some(
+            self.properties
+                .iter()
+                .find(|property| property.key() == key)?
+                .value(),
+        )
+    }
+
     /// Extends this `Calendar` with the contends of another.
     pub fn extend<T, U>(&mut self, other: T)
     where
@@ -112,11 +122,23 @@ impl Calendar {
         self
     }
 
+    /// Gets the value of the `NAME` or `X-WR-CALNAME` property.
+    pub fn get_name(&self) -> Option<&str> {
+        self.property_value("NAME")
+            .or_else(|| self.property_value("X-WR-CALNAME"))
+    }
+
     /// Set the [`DESCRIPTION`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.5) and `X-WR-CALDESC` `Property`s
     pub fn description(&mut self, description: &str) -> &mut Self {
         self.append_property(Property::new("DESCRIPTION", description));
         self.append_property(Property::new("X-WR-CALDESC", description));
         self
+    }
+
+    /// Gets the value of the `DESCRIPTION` or `X-WR-CALDESC` property.
+    pub fn get_description(&self) -> Option<&str> {
+        self.property_value("DESCRIPTION")
+            .or_else(|| self.property_value("X-WR-CALDESC"))
     }
 
     /// Set the `TIMEZONE-ID` and `X-WR-TIMEZONE` `Property`s
@@ -127,15 +149,21 @@ impl Calendar {
         self
     }
 
+    /// Gets the value of the `TIMEZONE_ID` or `X-WR-TIMEZONE` property.
+    pub fn get_timezone(&self) -> Option<&str> {
+        self.property_value("TIMEZONE_ID")
+            .or_else(|| self.property_value("X-WR-TIMEZONE"))
+    }
+
     /// Set the `REFRESH-INTERVAL` and `X-PUBLISHED-TTL` `Property`s
     pub fn ttl(&mut self, duration: &Duration) -> &mut Self {
         let duration_string = duration.to_string();
         self.append_property(
-            Property::new("REFRESH-INTERVAL", duration_string.as_str())
+            Property::new("REFRESH-INTERVAL", &duration_string)
                 .append_parameter(Parameter::new("VALUE", "DURATION"))
                 .done(),
         );
-        self.append_property(Property::new("X-PUBLISHED-TTL", duration_string.as_str()));
+        self.append_property(Property::new("X-PUBLISHED-TTL", &duration_string));
         self
     }
 
@@ -247,5 +275,37 @@ mod tests {
         let events = vec![Event::new(), Event::new()];
         calendar.extend(events);
         assert_eq!(calendar.components.len(), 2);
+    }
+
+    #[test]
+    fn get_properties_unset() {
+        let calendar = Calendar::new();
+        assert_eq!(calendar.get_name(), None);
+        assert_eq!(calendar.get_description(), None);
+        assert_eq!(calendar.get_timezone(), None);
+    }
+
+    #[test]
+    fn get_properties_set() {
+        let calendar = Calendar::new()
+            .name("name")
+            .description("description")
+            .timezone("timezone")
+            .done();
+        assert_eq!(calendar.get_name(), Some("name"));
+        assert_eq!(calendar.get_description(), Some("description"));
+        assert_eq!(calendar.get_timezone(), Some("timezone"));
+    }
+
+    #[test]
+    fn get_properties_alternate() {
+        let calendar = Calendar::new()
+            .append_property(Property::new("X-WR-CALNAME", "name"))
+            .append_property(Property::new("X-WR-CALDESC", "description"))
+            .append_property(Property::new("X-WR-TIMEZONE", "timezone"))
+            .done();
+        assert_eq!(calendar.get_name(), Some("name"));
+        assert_eq!(calendar.get_description(), Some("description"));
+        assert_eq!(calendar.get_timezone(), Some("timezone"));
     }
 }
