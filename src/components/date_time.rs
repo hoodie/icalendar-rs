@@ -10,7 +10,7 @@ use std::fmt;
 /// In addition to readily implemented `FORM #1` and `FORM #2`, the RFC also specifies
 /// `FORM #3: DATE WITH LOCAL TIME AND TIME ZONE REFERENCE`. This variant is not yet implemented.
 /// Adding it will require adding support for `VTIMEZONE` and referencing it using `TZID`.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CalendarDateTime {
     /// `FORM #1: DATE WITH LOCAL TIME`: floating, follows current time-zone of the attendee.
     ///
