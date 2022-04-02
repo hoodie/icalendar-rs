@@ -1,6 +1,10 @@
 use chrono::*;
 use std::fmt;
 
+const NAIVE_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%S";
+const UTC_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";
+pub(crate) const NAIVE_DATE_FORMAT: &str = "%Y%m%d";
+
 /// Representation of various forms of `DATE-TIME` per
 /// [RFC 5545, Section 3.3.5](https://tools.ietf.org/html/rfc5545#section-3.3.5)
 ///
@@ -27,8 +31,8 @@ impl fmt::Display for CalendarDateTime {
     /// Format date-time in RFC 5545 compliant manner.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         match self {
-            CalendarDateTime::Floating(naive_dt) => naive_dt.format("%Y%m%dT%H%M%S").fmt(f),
-            CalendarDateTime::Utc(utc_dt) => utc_dt.format("%Y%m%dT%H%M%SZ").fmt(f),
+            CalendarDateTime::Floating(naive_dt) => naive_dt.format(NAIVE_DATE_TIME_FORMAT).fmt(f),
+            CalendarDateTime::Utc(utc_dt) => utc_dt.format(UTC_DATE_TIME_FORMAT).fmt(f),
         }
     }
 }

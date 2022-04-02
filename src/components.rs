@@ -12,6 +12,7 @@ mod todo;
 mod venue;
 
 pub use date_time::CalendarDateTime;
+use date_time::NAIVE_DATE_FORMAT;
 pub use event::*;
 pub use other::*;
 pub use todo::*;
@@ -153,9 +154,12 @@ pub trait Component {
     {
         // DTSTART
         self.append_property(
-            Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
+            Property::new(
+                "DTSTART",
+                date.format(NAIVE_DATE_FORMAT).to_string().as_ref(),
+            )
+            .append_parameter(ValueType::Date)
+            .done(),
         );
         self
     }
@@ -167,7 +171,7 @@ pub trait Component {
     {
         // DTSTART
         self.append_property(
-            Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
+            Property::new("DTEND", date.format(NAIVE_DATE_FORMAT).to_string().as_ref())
                 .append_parameter(ValueType::Date)
                 .done(),
         );
@@ -183,12 +187,15 @@ pub trait Component {
     {
         // DTSTART
         self.append_property(
-            Property::new("DTSTART", date.format("%Y%m%d").to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
+            Property::new(
+                "DTSTART",
+                date.format(NAIVE_DATE_FORMAT).to_string().as_ref(),
+            )
+            .append_parameter(ValueType::Date)
+            .done(),
         )
         .append_property(
-            Property::new("DTEND", date.format("%Y%m%d").to_string().as_ref())
+            Property::new("DTEND", date.format(NAIVE_DATE_FORMAT).to_string().as_ref())
                 .append_parameter(ValueType::Date)
                 .done(),
         );
