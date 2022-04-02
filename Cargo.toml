@@ -35,6 +35,9 @@ pretty_assertions = "1"
 default = []
 parser = ["nom"]
 
+[package.metadata.docs.rs]
+all-features = true
+
 [[example]]
 name = "parse"
 path = "examples/parse.rs"
