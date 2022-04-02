@@ -1,8 +1,10 @@
 use chrono::*;
 use std::fmt;
 
+use crate::{Property, ValueType};
+
 const NAIVE_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%S";
-const UTC_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";
+pub(crate) const UTC_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";
 pub(crate) const NAIVE_DATE_FORMAT: &str = "%Y%m%d";
 
 /// Representation of various forms of `DATE-TIME` per
@@ -27,6 +29,18 @@ pub enum CalendarDateTime {
     Utc(DateTime<Utc>),
 }
 
+impl CalendarDateTime {
+    pub(crate) fn from_str(s: &str) -> Option<Self> {
+        if let Ok(naive_date_time) = NaiveDateTime::parse_from_str(s, NAIVE_DATE_TIME_FORMAT) {
+            Some(naive_date_time.into())
+        } else if let Ok(utc) = Utc.datetime_from_str(s, UTC_DATE_TIME_FORMAT) {
+            Some(utc.into())
+        } else {
+            None
+        }
+    }
+}
+
 impl fmt::Display for CalendarDateTime {
     /// Format date-time in RFC 5545 compliant manner.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
@@ -48,5 +62,50 @@ impl From<DateTime<Utc>> for CalendarDateTime {
 impl From<NaiveDateTime> for CalendarDateTime {
     fn from(dt: NaiveDateTime) -> Self {
         Self::Floating(dt)
+    }
+}
+
+/// Either a `DATE-TIME` or a `DATE`.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DatePerhapsTime {
+    DateTime(CalendarDateTime),
+    Date(NaiveDate),
+}
+
+impl DatePerhapsTime {
+    pub(crate) fn from_property(property: &Property) -> Option<Self> {
+        if property.value_type() == Some(ValueType::Date) {
+            Some(
+                NaiveDate::parse_from_str(property.value(), NAIVE_DATE_FORMAT)
+                    .ok()?
+                    .into(),
+            )
+        } else {
+            Some(CalendarDateTime::from_str(property.value())?.into())
+        }
+    }
+}
+
+impl From<CalendarDateTime> for DatePerhapsTime {
+    fn from(dt: CalendarDateTime) -> Self {
+        Self::DateTime(dt)
+    }
+}
+
+impl From<DateTime<Utc>> for DatePerhapsTime {
+    fn from(dt: DateTime<Utc>) -> Self {
+        Self::DateTime(dt.into())
+    }
+}
+
+impl From<NaiveDateTime> for DatePerhapsTime {
+    fn from(dt: NaiveDateTime) -> Self {
+        Self::DateTime(dt.into())
+    }
+}
+
+impl From<NaiveDate> for DatePerhapsTime {
+    fn from(date: NaiveDate) -> Self {
+        Self::Date(date)
     }
 }

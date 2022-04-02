@@ -4,6 +4,7 @@ use uuid::Uuid;
 use std::{collections::BTreeMap, fmt, mem};
 
 use crate::properties::*;
+use date_time::NAIVE_DATE_FORMAT;
 
 mod date_time;
 mod event;
@@ -11,8 +12,7 @@ mod other;
 mod todo;
 mod venue;
 
-pub use date_time::CalendarDateTime;
-use date_time::NAIVE_DATE_FORMAT;
+pub use date_time::{CalendarDateTime, DatePerhapsTime};
 pub use event::*;
 pub use other::*;
 pub use todo::*;
@@ -127,6 +127,21 @@ pub trait Component {
         let calendar_dt = dt.into();
         self.add_property("DTSTAMP", &calendar_dt.to_string());
         self
+    }
+
+    /// Gets the [`DTSTAMP`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.2) property.
+    fn get_timestamp(&self) -> Option<CalendarDateTime> {
+        CalendarDateTime::from_str(self.property_value("DTSTAMP")?)
+    }
+
+    /// Gets the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
+    fn get_start(&self) -> Option<DatePerhapsTime> {
+        DatePerhapsTime::from_property(self.properties().get("DTSTART")?)
+    }
+
+    /// Gets the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`]
+    fn get_end(&self) -> Option<DatePerhapsTime> {
+        DatePerhapsTime::from_property(self.properties().get("DTEND")?)
     }
 
     /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
@@ -362,6 +377,7 @@ mod tests {
         assert_eq!(event.get_location(), None);
         assert_eq!(event.get_uid(), None);
         assert_eq!(event.get_class(), None);
+        assert_eq!(event.get_timestamp(), None);
     }
 
     #[test]
@@ -380,5 +396,42 @@ mod tests {
         assert_eq!(event.get_location(), Some("location"));
         assert_eq!(event.get_uid(), Some("uid"));
         assert_eq!(event.get_class(), Some(Class::Private));
+    }
+
+    #[test]
+    fn get_date_times_naive() {
+        let naive_date_time = NaiveDate::from_ymd(2001, 3, 13).and_hms(14, 15, 16);
+        let event = Event::new()
+            .timestamp(naive_date_time)
+            .starts(naive_date_time)
+            .ends(naive_date_time)
+            .done();
+        assert_eq!(event.get_timestamp(), Some(naive_date_time.into()));
+        assert_eq!(event.get_start(), Some(naive_date_time.into()));
+        assert_eq!(event.get_end(), Some(naive_date_time.into()));
+    }
+
+    #[test]
+    fn get_date_times_utc() {
+        let utc_date_time = Utc.ymd(2001, 3, 13).and_hms(14, 15, 16);
+        let event = Event::new()
+            .timestamp(utc_date_time)
+            .starts(utc_date_time)
+            .ends(utc_date_time)
+            .done();
+        assert_eq!(event.get_timestamp(), Some(utc_date_time.into()));
+        assert_eq!(event.get_start(), Some(utc_date_time.into()));
+        assert_eq!(event.get_end(), Some(utc_date_time.into()));
+    }
+
+    #[test]
+    fn get_dates_naive() {
+        let naive_date = NaiveDate::from_ymd(2001, 3, 13);
+        let event = Event::new()
+            .start_date(Utc.from_utc_date(&naive_date))
+            .end_date(Utc.from_utc_date(&naive_date))
+            .done();
+        assert_eq!(event.get_start(), Some(naive_date.into()));
+        assert_eq!(event.get_end(), Some(naive_date.into()));
     }
 }

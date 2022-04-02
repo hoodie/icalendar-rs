@@ -1,5 +1,6 @@
 use chrono::*;
 
+use super::date_time::UTC_DATE_TIME_FORMAT;
 use super::*;
 
 /// VTODO  [(RFC 5545, Section 3.6.2 )](https://tools.ietf.org/html/rfc5545#section-3.6.2)
@@ -46,6 +47,11 @@ impl Todo {
         self
     }
 
+    /// Gets the [`DUE`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.3) property
+    pub fn get_due(&self) -> Option<DatePerhapsTime> {
+        DatePerhapsTime::from_property(self.properties().get("DUE")?)
+    }
+
     /// Set the [`COMPLETED`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.1) property
     ///
     /// Per [RFC 5545, Section 3.8.2.1](https://tools.ietf.org/html/rfc5545#section-3.8.2.1), this
@@ -53,6 +59,15 @@ impl Todo {
     pub fn completed(&mut self, dt: DateTime<Utc>) -> &mut Self {
         self.add_property("COMPLETED", &CalendarDateTime::Utc(dt).to_string());
         self
+    }
+
+    /// Gets the [`COMPLETED`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.1) property
+    ///
+    /// Per [RFC 5545, Section 3.8.2.1](https://tools.ietf.org/html/rfc5545#section-3.8.2.1), this
+    /// must be a date-time in UTC format.
+    pub fn get_completed(&self) -> Option<DateTime<Utc>> {
+        let completed = self.property_value("COMPLETED")?;
+        Utc.datetime_from_str(completed, UTC_DATE_TIME_FORMAT).ok()
     }
 
     /// Defines the overall status or confirmation
@@ -80,15 +95,38 @@ mod tests {
         let todo = Todo::new();
         assert_eq!(todo.get_percent_complete(), None);
         assert_eq!(todo.get_status(), None);
+        assert_eq!(todo.get_completed(), None);
+        assert_eq!(todo.get_due(), None);
     }
 
     #[test]
     fn get_properties_set() {
+        let completed = Utc.ymd(2001, 3, 13).and_hms(14, 15, 16);
         let todo = Todo::new()
             .percent_complete(42)
             .status(TodoStatus::NeedsAction)
+            .completed(completed)
             .done();
         assert_eq!(todo.get_percent_complete(), Some(42));
         assert_eq!(todo.get_status(), Some(TodoStatus::NeedsAction));
+        assert_eq!(todo.get_completed(), Some(completed))
+    }
+
+    #[test]
+    fn get_date_times_naive() {
+        let naive_date_time = NaiveDate::from_ymd(2001, 3, 13).and_hms(14, 15, 16);
+        let todo = Todo::new().due(naive_date_time).done();
+        assert_eq!(todo.get_due(), Some(naive_date_time.into()));
+    }
+
+    #[test]
+    fn get_date_times_utc() {
+        let utc_date_time = Utc.ymd(2001, 3, 13).and_hms(14, 15, 16);
+        let todo = Todo::new()
+            .due(utc_date_time)
+            .completed(utc_date_time)
+            .done();
+        assert_eq!(todo.get_due(), Some(utc_date_time.into()));
+        assert_eq!(todo.get_completed(), Some(utc_date_time));
     }
 }
