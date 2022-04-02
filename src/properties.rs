@@ -42,14 +42,19 @@ impl Property {
         }
     }
 
-    /// Clones the key field.
+    /// Returns a reference to the key field.
     pub fn key(&self) -> &str {
         &self.key
     }
 
-    /// Clones the key field.
+    /// Returns a reference to the key field.
     pub fn value(&self) -> &str {
         &self.val
+    }
+
+    /// Returns a reference to the parameters.
+    pub fn params(&self) -> &EntryParameters {
+        &self.params
     }
 
     /// Appends a new parameter.
