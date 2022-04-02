@@ -55,6 +55,11 @@ pub trait Component {
     /// Read-only access to `multi_properties`
     fn multi_properties(&self) -> &Vec<Property>;
 
+    /// Gets the value of a property.
+    fn property_value(&self, key: &str) -> Option<&str> {
+        Some(self.properties().get(key)?.value())
+    }
+
     /// Writes [`Component`] using [`std::fmt`].
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         write_crlf!(out, "BEGIN:{}", self.component_kind())?;
@@ -190,13 +195,25 @@ pub trait Component {
         self
     }
 
-    ///  Defines the relative priority.
+    /// Defines the relative priority.
     ///
-    ///  Ranges from 0 to 10, larger values will be truncated
+    /// Ranges from 0 to 10, larger values will be truncated
     fn priority(&mut self, priority: u32) -> &mut Self {
         let priority = ::std::cmp::min(priority, 10);
         self.add_property("PRIORITY", &priority.to_string());
         self
+    }
+
+    /// Gets the relative priority.
+    ///
+    /// Ranges from 0 to 10.
+    fn get_priority(&self) -> Option<u32> {
+        let priority = self.property_value("PRIORITY")?.parse().ok()?;
+        if priority <= 10 {
+            Some(priority)
+        } else {
+            None
+        }
     }
 
     /// Prints to stdout
@@ -212,9 +229,19 @@ pub trait Component {
         self.add_property("SUMMARY", desc)
     }
 
+    /// Gets the summary
+    fn get_summary(&self) -> Option<&str> {
+        self.property_value("SUMMARY")
+    }
+
     /// Set the description
     fn description(&mut self, desc: &str) -> &mut Self {
         self.add_property("DESCRIPTION", desc)
+    }
+
+    /// Gets the description
+    fn get_description(&self) -> Option<&str> {
+        self.property_value("DESCRIPTION")
     }
 
     ///// Set the description
@@ -228,6 +255,11 @@ pub trait Component {
     fn location(&mut self, location: &str) -> &mut Self {
         self.add_property("LOCATION", location);
         self
+    }
+
+    /// Gets the location
+    fn get_location(&self) -> Option<&str> {
+        self.property_value("LOCATION")
     }
 
     /// Set the LOCATION with a VVENUE UID
@@ -247,9 +279,19 @@ pub trait Component {
         self
     }
 
+    /// Gets the UID
+    fn get_uid(&self) -> Option<&str> {
+        self.property_value("UID")
+    }
+
     /// Set the visibility class
     fn class(&mut self, class: Class) -> &mut Self {
         self.append_property(class.into())
+    }
+
+    /// Gets the visibility class
+    fn get_class(&self) -> Option<Class> {
+        Class::from_str(self.property_value("CLASS")?)
     }
 }
 
@@ -299,3 +341,37 @@ macro_rules! component_impl {
 component_impl! { Event, String::from("VEVENT") }
 component_impl! { Todo , String::from("VTODO")}
 component_impl! { Venue , String::from("VVENUE")}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_properties_unset() {
+        let event = Event::new();
+        assert_eq!(event.get_priority(), None);
+        assert_eq!(event.get_summary(), None);
+        assert_eq!(event.get_description(), None);
+        assert_eq!(event.get_location(), None);
+        assert_eq!(event.get_uid(), None);
+        assert_eq!(event.get_class(), None);
+    }
+
+    #[test]
+    fn get_properties_set() {
+        let event = Event::new()
+            .priority(5)
+            .summary("summary")
+            .description("description")
+            .location("location")
+            .uid("uid")
+            .class(Class::Private)
+            .done();
+        assert_eq!(event.get_priority(), Some(5));
+        assert_eq!(event.get_summary(), Some("summary"));
+        assert_eq!(event.get_description(), Some("description"));
+        assert_eq!(event.get_location(), Some("location"));
+        assert_eq!(event.get_uid(), Some("uid"));
+        assert_eq!(event.get_class(), Some(Class::Private));
+    }
+}

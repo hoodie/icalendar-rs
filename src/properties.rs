@@ -105,6 +105,17 @@ pub enum Class {
     Confidential,
 }
 
+impl Class {
+    pub(crate) fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "PUBLIC" => Some(Self::Public),
+            "PRIVATE" => Some(Self::Private),
+            "CONFIDENTIAL" => Some(Self::Confidential),
+            _ => None,
+        }
+    }
+}
+
 impl From<Class> for Property {
     fn from(val: Class) -> Self {
         Property {
