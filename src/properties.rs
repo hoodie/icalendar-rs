@@ -57,6 +57,11 @@ impl Property {
         &self.params
     }
 
+    /// Returns the `VALUE` parameter, if any is specified.
+    pub fn value_type(&self) -> Option<ValueType> {
+        ValueType::from_str(&self.params.get("VALUE")?.val)
+    }
+
     /// Appends a new parameter.
     pub fn append_parameter<I: Into<Parameter>>(&mut self, into_parameter: I) -> &mut Self {
         let parameter = into_parameter.into();
@@ -166,6 +171,28 @@ pub enum ValueType {
     Uri,
     /// [`UtcOffset`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.14)
     UtcOffset,
+}
+
+impl ValueType {
+    pub(crate) fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "BINARY" => Some(Self::Binary),
+            "BOOLEAN" => Some(Self::Boolean),
+            "CAL-ADDRESS" => Some(Self::CalAddress),
+            "DATE" => Some(Self::Date),
+            "DATE-TIME" => Some(Self::DateTime),
+            "DURATION" => Some(Self::Duration),
+            "FLOAT" => Some(Self::Float),
+            "INTEGER" => Some(Self::Integer),
+            "PERIOD" => Some(Self::Period),
+            "RECUR" => Some(Self::Recur),
+            "TEXT" => Some(Self::Text),
+            "TIME" => Some(Self::Time),
+            "URI" => Some(Self::Uri),
+            "UTC-OFFSET" => Some(Self::UtcOffset),
+            _ => None,
+        }
+    }
 }
 
 impl From<ValueType> for Parameter {
