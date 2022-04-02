@@ -41,9 +41,9 @@ impl Todo {
     /// Set the [`DUE`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.3) property
     ///
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
-    pub fn due<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
-        let calendar_dt: CalendarDateTime = dt.into();
-        self.add_property("DUE", &calendar_dt.to_string());
+    pub fn due<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
+        let calendar_dt: DatePerhapsTime = dt.into();
+        self.append_property(calendar_dt.to_property("DUE"));
         self
     }
 
@@ -128,5 +128,12 @@ mod tests {
             .done();
         assert_eq!(todo.get_due(), Some(utc_date_time.into()));
         assert_eq!(todo.get_completed(), Some(utc_date_time));
+    }
+
+    #[test]
+    fn get_dates_naive() {
+        let naive_date = NaiveDate::from_ymd(2001, 3, 13);
+        let todo = Todo::new().due(naive_date).done();
+        assert_eq!(todo.get_due(), Some(naive_date.into()));
     }
 }

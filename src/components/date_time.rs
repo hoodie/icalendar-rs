@@ -84,6 +84,15 @@ impl DatePerhapsTime {
             Some(CalendarDateTime::from_str(property.value())?.into())
         }
     }
+
+    pub(crate) fn to_property(&self, key: &str) -> Property {
+        match self {
+            Self::DateTime(date_time) => Property::new(key, &date_time.to_string()),
+            Self::Date(date) => Property::new(key, &date.format(NAIVE_DATE_FORMAT).to_string())
+                .append_parameter(ValueType::Date)
+                .done(),
+        }
+    }
 }
 
 impl From<CalendarDateTime> for DatePerhapsTime {
