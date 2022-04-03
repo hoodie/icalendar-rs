@@ -1,5 +1,14 @@
 # Changelog
 
+### [v0.11.1](https://github.com/hoodie/icalendar-rs/compare/v0.11.0...v0.11.1) (2022-04-03)
+
+
+#### Fixes
+
+* build docs for parser feature
+ 9c2db74
+
+
 ## [v0.11.0](https://github.com/hoodie/icalendar-rs/compare/v0.10.0...v0.11.0) (2022-01-24)
 
 
