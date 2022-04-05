@@ -43,10 +43,8 @@ impl CalendarDateTime {
     pub(crate) fn from_str(s: &str) -> Option<Self> {
         if let Ok(naive_date_time) = NaiveDateTime::parse_from_str(s, NAIVE_DATE_TIME_FORMAT) {
             Some(naive_date_time.into())
-        } else if let Some(utc) = parse_utc_date_time(s) {
-            Some(utc.into())
         } else {
-            None
+            parse_utc_date_time(s).map(Into::into)
         }
     }
 }
@@ -95,10 +93,10 @@ impl DatePerhapsTime {
         }
     }
 
-    pub(crate) fn to_property(&self, key: &str) -> Property {
+    pub(crate) fn to_property(self, key: &str) -> Property {
         match self {
             Self::DateTime(date_time) => Property::new(key, &date_time.to_string()),
-            Self::Date(date) => naive_date_to_property(*date, key),
+            Self::Date(date) => naive_date_to_property(date, key),
         }
     }
 }
