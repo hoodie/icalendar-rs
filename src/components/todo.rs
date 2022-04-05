@@ -1,6 +1,6 @@
 use chrono::*;
 
-use super::date_time::UTC_DATE_TIME_FORMAT;
+use super::date_time::parse_utc_date_time;
 use super::*;
 
 /// VTODO  [(RFC 5545, Section 3.6.2 )](https://tools.ietf.org/html/rfc5545#section-3.6.2)
@@ -67,7 +67,7 @@ impl Todo {
     /// must be a date-time in UTC format.
     pub fn get_completed(&self) -> Option<DateTime<Utc>> {
         let completed = self.property_value("COMPLETED")?;
-        Utc.datetime_from_str(completed, UTC_DATE_TIME_FORMAT).ok()
+        parse_utc_date_time(completed)
     }
 
     /// Defines the overall status or confirmation

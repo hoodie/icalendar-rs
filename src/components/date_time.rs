@@ -4,8 +4,18 @@ use std::fmt;
 use crate::{Property, ValueType};
 
 const NAIVE_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%S";
-pub(crate) const UTC_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";
-pub(crate) const NAIVE_DATE_FORMAT: &str = "%Y%m%d";
+const UTC_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";
+const NAIVE_DATE_FORMAT: &str = "%Y%m%d";
+
+pub(crate) fn parse_utc_date_time(s: &str) -> Option<DateTime<Utc>> {
+    Utc.datetime_from_str(s, UTC_DATE_TIME_FORMAT).ok()
+}
+
+pub(crate) fn naive_date_to_property(date: NaiveDate, key: &str) -> Property {
+    Property::new(key, &date.format(NAIVE_DATE_FORMAT).to_string())
+        .append_parameter(ValueType::Date)
+        .done()
+}
 
 /// Representation of various forms of `DATE-TIME` per
 /// [RFC 5545, Section 3.3.5](https://tools.ietf.org/html/rfc5545#section-3.3.5)
@@ -33,7 +43,7 @@ impl CalendarDateTime {
     pub(crate) fn from_str(s: &str) -> Option<Self> {
         if let Ok(naive_date_time) = NaiveDateTime::parse_from_str(s, NAIVE_DATE_TIME_FORMAT) {
             Some(naive_date_time.into())
-        } else if let Ok(utc) = Utc.datetime_from_str(s, UTC_DATE_TIME_FORMAT) {
+        } else if let Some(utc) = parse_utc_date_time(s) {
             Some(utc.into())
         } else {
             None
@@ -88,9 +98,7 @@ impl DatePerhapsTime {
     pub(crate) fn to_property(&self, key: &str) -> Property {
         match self {
             Self::DateTime(date_time) => Property::new(key, &date_time.to_string()),
-            Self::Date(date) => Property::new(key, &date.format(NAIVE_DATE_FORMAT).to_string())
-                .append_parameter(ValueType::Date)
-                .done(),
+            Self::Date(date) => naive_date_to_property(*date, key),
         }
     }
 }

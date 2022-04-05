@@ -4,7 +4,7 @@ use uuid::Uuid;
 use std::{collections::BTreeMap, fmt, mem};
 
 use crate::properties::*;
-use date_time::NAIVE_DATE_FORMAT;
+use date_time::naive_date_to_property;
 
 mod date_time;
 mod event;
@@ -168,14 +168,7 @@ pub trait Component {
         TZ::Offset: fmt::Display,
     {
         // DTSTART
-        self.append_property(
-            Property::new(
-                "DTSTART",
-                date.format(NAIVE_DATE_FORMAT).to_string().as_ref(),
-            )
-            .append_parameter(ValueType::Date)
-            .done(),
-        );
+        self.append_property(naive_date_to_property(date.naive_local(), "DTSTART"));
         self
     }
 
@@ -184,12 +177,7 @@ pub trait Component {
     where
         TZ::Offset: fmt::Display,
     {
-        // DTSTART
-        self.append_property(
-            Property::new("DTEND", date.format(NAIVE_DATE_FORMAT).to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
-        );
+        self.append_property(naive_date_to_property(date.naive_local(), "DTEND"));
         self
     }
 
@@ -200,20 +188,8 @@ pub trait Component {
     where
         TZ::Offset: fmt::Display,
     {
-        // DTSTART
-        self.append_property(
-            Property::new(
-                "DTSTART",
-                date.format(NAIVE_DATE_FORMAT).to_string().as_ref(),
-            )
-            .append_parameter(ValueType::Date)
-            .done(),
-        )
-        .append_property(
-            Property::new("DTEND", date.format(NAIVE_DATE_FORMAT).to_string().as_ref())
-                .append_parameter(ValueType::Date)
-                .done(),
-        );
+        self.append_property(naive_date_to_property(date.naive_local(), "DTSTART"))
+            .append_property(naive_date_to_property(date.naive_local(), "DTEND"));
         self
     }
 
