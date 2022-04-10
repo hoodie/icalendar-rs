@@ -4,7 +4,7 @@ use std::{
     mem,
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// key-value pairs inside of `Property`s
 pub struct Parameter {
     key: String,
@@ -24,7 +24,7 @@ impl Parameter {
 //type EntryParameters = Vec<Parameter>;
 pub type EntryParameters = HashMap<String, Parameter>;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// key-value pairs inside of `Component`s
 pub struct Property {
     pub(crate) key: String,
@@ -95,7 +95,7 @@ impl Property {
 
 /// This property defines the access classification for a calendar component.
 /// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.3>
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Class {
     /// [`Public`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.3)
     Public,
@@ -120,7 +120,7 @@ impl From<Class> for Property {
 }
 
 /// see 8.3.4. [Value Data Types Registry](https://tools.ietf.org/html/rfc5545#section-8.3.4)
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum ValueType {
     /// [`Binary`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.1)
     Binary,
@@ -176,7 +176,7 @@ impl From<ValueType> for Parameter {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 /// Encodes the status of an `Event`
 /// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11>
 pub enum EventStatus {
@@ -189,7 +189,7 @@ pub enum EventStatus {
     //Custom(&str)
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 /// Encodes the status of a `Todo`
 /// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11>
 pub enum TodoStatus {
