@@ -76,7 +76,9 @@ impl From<NaiveDateTime> for CalendarDateTime {
 /// Either a `DATE-TIME` or a `DATE`.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DatePerhapsTime {
+    /// A `DATE-TIME` property.
     DateTime(CalendarDateTime),
+    /// A `DATE` property.
     Date(NaiveDate),
 }
 
