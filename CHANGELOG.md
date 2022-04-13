@@ -1,5 +1,38 @@
 # Changelog
 
+## [v0.12.0](https://github.com/hoodie/icalendar-rs/compare/v0.11.1...v0.12.0) (2022-04-13)
+
+
+### Features
+
+* Allow due date (without time) to be specified for TODO.
+ 2a4a451
+
+* Add getters for date-time properties.
+ 9619316
+
+* Add getter for ValueType on Property.
+ 293dc70
+
+* Add getters for calendar properties.
+ c97acaa
+
+* Add getter for property parameters.
+ 3702a20
+
+* Add getters for basic todo and event properties.
+ dad79f4
+
+* Add getters for venue properties.
+ 174947a
+
+* Add getters for basic properties.
+ 437770b
+
+* derive clone and equality traits.
+ 5d7a8a9
+
+
 ### [v0.11.1](https://github.com/hoodie/icalendar-rs/compare/v0.11.0...v0.11.1) (2022-04-03)
 
 
