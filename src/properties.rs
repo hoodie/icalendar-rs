@@ -42,14 +42,24 @@ impl Property {
         }
     }
 
-    /// Clones the key field.
+    /// Returns a reference to the key field.
     pub fn key(&self) -> &str {
         &self.key
     }
 
-    /// Clones the key field.
+    /// Returns a reference to the key field.
     pub fn value(&self) -> &str {
         &self.val
+    }
+
+    /// Returns a reference to the parameters.
+    pub fn params(&self) -> &EntryParameters {
+        &self.params
+    }
+
+    /// Returns the `VALUE` parameter, if any is specified.
+    pub fn value_type(&self) -> Option<ValueType> {
+        ValueType::from_str(&self.params.get("VALUE")?.val)
     }
 
     /// Appends a new parameter.
@@ -105,6 +115,17 @@ pub enum Class {
     Confidential,
 }
 
+impl Class {
+    pub(crate) fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "PUBLIC" => Some(Self::Public),
+            "PRIVATE" => Some(Self::Private),
+            "CONFIDENTIAL" => Some(Self::Confidential),
+            _ => None,
+        }
+    }
+}
+
 impl From<Class> for Property {
     fn from(val: Class) -> Self {
         Property {
@@ -152,6 +173,28 @@ pub enum ValueType {
     UtcOffset,
 }
 
+impl ValueType {
+    pub(crate) fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "BINARY" => Some(Self::Binary),
+            "BOOLEAN" => Some(Self::Boolean),
+            "CAL-ADDRESS" => Some(Self::CalAddress),
+            "DATE" => Some(Self::Date),
+            "DATE-TIME" => Some(Self::DateTime),
+            "DURATION" => Some(Self::Duration),
+            "FLOAT" => Some(Self::Float),
+            "INTEGER" => Some(Self::Integer),
+            "PERIOD" => Some(Self::Period),
+            "RECUR" => Some(Self::Recur),
+            "TEXT" => Some(Self::Text),
+            "TIME" => Some(Self::Time),
+            "URI" => Some(Self::Uri),
+            "UTC-OFFSET" => Some(Self::UtcOffset),
+            _ => None,
+        }
+    }
+}
+
 impl From<ValueType> for Parameter {
     fn from(val: ValueType) -> Self {
         Parameter {
@@ -189,6 +232,17 @@ pub enum EventStatus {
     //Custom(&str)
 }
 
+impl EventStatus {
+    pub(crate) fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "TENTATIVE" => Some(Self::Tentative),
+            "CONFIRMED" => Some(Self::Confirmed),
+            "CANCELLED" => Some(Self::Cancelled),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 /// Encodes the status of a `Todo`
 /// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11>
@@ -202,6 +256,18 @@ pub enum TodoStatus {
     /// Indicates to-do was cancelled.
     Cancelled,
     //Custom(&str)
+}
+
+impl TodoStatus {
+    pub(crate) fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "NEEDS-ACTION" => Some(Self::NeedsAction),
+            "COMPLETED" => Some(Self::Completed),
+            "IN-PROCESS" => Some(Self::InProcess),
+            "CANCELLED" => Some(Self::Cancelled),
+            _ => None,
+        }
+    }
 }
 
 //pub enum JournalStatuw{
