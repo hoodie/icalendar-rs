@@ -1,5 +1,4 @@
 use chrono::*;
-use std::fmt;
 
 use crate::{Property, ValueType};
 
@@ -30,7 +29,7 @@ pub(crate) fn naive_date_to_property(date: NaiveDate, key: &str) -> Property {
 /// In addition to readily implemented `FORM #1` and `FORM #2`, the RFC also specifies
 /// `FORM #3: DATE WITH LOCAL TIME AND TIME ZONE REFERENCE`. This variant is not yet implemented.
 /// Adding it will require adding support for `VTIMEZONE` and referencing it using `TZID`.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum CalendarDateTime {
     /// `FORM #1: DATE WITH LOCAL TIME`: floating, follows current time-zone of the attendee.
     ///
@@ -41,24 +40,43 @@ pub enum CalendarDateTime {
     /// Conversion from [`chrono::DateTime<Utc>`](DateTime) results in this variant. Use
     /// `date_time.with_timezone(&Utc)` to convert `date_time` from arbitrary time zone to UTC.
     Utc(DateTime<Utc>),
+    /// `FORM #3: DATE WITH LOCAL TIME AND TIME ZONE REFERENCE`: refers to a time zone definition.
+    WithTimezone {
+        /// The date and time in the given time zone.
+        date_time: NaiveDateTime,
+        /// The ID of the time zone definition in a VTIMEZONE calendar component.
+        tzid: String,
+    },
 }
 
 impl CalendarDateTime {
-    pub(crate) fn from_str(s: &str) -> Option<Self> {
-        if let Ok(naive_date_time) = NaiveDateTime::parse_from_str(s, NAIVE_DATE_TIME_FORMAT) {
+    pub(crate) fn from_property(property: &Property) -> Option<Self> {
+        let value = property.value();
+        if let Some(tzid) = property.params().get("TZID") {
+            Some(Self::WithTimezone {
+                date_time: NaiveDateTime::parse_from_str(value, NAIVE_DATE_TIME_FORMAT).ok()?,
+                tzid: tzid.value().to_owned(),
+            })
+        } else if let Ok(naive_date_time) =
+            NaiveDateTime::parse_from_str(value, NAIVE_DATE_TIME_FORMAT)
+        {
             Some(naive_date_time.into())
         } else {
-            parse_utc_date_time(s).map(Into::into)
+            parse_utc_date_time(value).map(Into::into)
         }
     }
-}
 
-impl fmt::Display for CalendarDateTime {
-    /// Format date-time in RFC 5545 compliant manner.
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+    pub(crate) fn to_property(&self, key: &str) -> Property {
         match self {
-            CalendarDateTime::Floating(naive_dt) => naive_dt.format(NAIVE_DATE_TIME_FORMAT).fmt(f),
-            CalendarDateTime::Utc(utc_dt) => utc_dt.format(UTC_DATE_TIME_FORMAT).fmt(f),
+            CalendarDateTime::Floating(naive_dt) => {
+                Property::new(key, &naive_dt.format(NAIVE_DATE_TIME_FORMAT).to_string())
+            }
+            CalendarDateTime::Utc(utc_dt) => Property::new(key, &format_utc_date_time(*utc_dt)),
+            CalendarDateTime::WithTimezone { date_time, tzid } => {
+                Property::new(key, &date_time.format(NAIVE_DATE_TIME_FORMAT).to_string())
+                    .add_parameter("TZID", tzid)
+                    .done()
+            }
         }
     }
 }
@@ -78,7 +96,7 @@ impl From<NaiveDateTime> for CalendarDateTime {
 }
 
 /// Either a `DATE-TIME` or a `DATE`.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum DatePerhapsTime {
     /// A `DATE-TIME` property.
     DateTime(CalendarDateTime),
@@ -95,14 +113,14 @@ impl DatePerhapsTime {
                     .into(),
             )
         } else {
-            Some(CalendarDateTime::from_str(property.value())?.into())
+            Some(CalendarDateTime::from_property(property)?.into())
         }
     }
 
-    pub(crate) fn to_property(self, key: &str) -> Property {
+    pub(crate) fn to_property(&self, key: &str) -> Property {
         match self {
-            Self::DateTime(date_time) => Property::new(key, &date_time.to_string()),
-            Self::Date(date) => naive_date_to_property(date, key),
+            Self::DateTime(date_time) => date_time.to_property(key),
+            Self::Date(date) => naive_date_to_property(*date, key),
         }
     }
 }
