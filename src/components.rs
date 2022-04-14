@@ -156,23 +156,6 @@ pub trait Component {
         self.append_property(calendar_dt.to_property("DTEND"))
     }
 
-    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`], date only
-    fn start_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
-    where
-        TZ::Offset: fmt::Display,
-    {
-        // DTSTART
-        self.append_property(naive_date_to_property(date.naive_local(), "DTSTART"))
-    }
-
-    /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`], date only
-    fn end_date<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
-    where
-        TZ::Offset: fmt::Display,
-    {
-        self.append_property(naive_date_to_property(date.naive_local(), "DTEND"))
-    }
-
     /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
     /// and [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`],
     /// date only

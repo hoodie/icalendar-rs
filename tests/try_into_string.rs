@@ -5,8 +5,8 @@ use std::convert::TryInto;
 #[test]
 fn try_into_string() -> Result<(), Box<dyn std::error::Error>> {
     let bday = Event::new()
-        .start_date(Utc.ymd(2016, 3, 15))
-        .end_date(Utc.ymd(2016, 3, 15))
+        .starts(NaiveDate::from_ymd(2016, 3, 15))
+        .ends(NaiveDate::from_ymd(2016, 3, 15))
         .summary("My Birthday")
         .description(
             r#"Hey, I'm gonna have a party
