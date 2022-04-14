@@ -142,18 +142,18 @@ pub trait Component {
 
     /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
     ///
-    /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
-    fn starts<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
+    /// See [`DatePerhapsTime`] for info how are different [`chrono`] types converted automatically.
+    fn starts<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
         let calendar_dt = dt.into();
-        self.add_property("DTSTART", &calendar_dt.to_string())
+        self.append_property(calendar_dt.to_property("DTSTART"))
     }
 
     /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`]
     ///
-    /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
-    fn ends<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
+    /// See [`DatePerhapsTime`] for info how are different [`chrono`] types converted automatically.
+    fn ends<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
         let calendar_dt = dt.into();
-        self.add_property("DTEND", &calendar_dt.to_string())
+        self.append_property(calendar_dt.to_property("DTEND"))
     }
 
     /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`], date only
@@ -402,10 +402,7 @@ mod tests {
     #[test]
     fn get_dates_naive() {
         let naive_date = NaiveDate::from_ymd(2001, 3, 13);
-        let event = Event::new()
-            .start_date(Utc.from_utc_date(&naive_date))
-            .end_date(Utc.from_utc_date(&naive_date))
-            .done();
+        let event = Event::new().starts(naive_date).ends(naive_date).done();
         assert_eq!(event.get_start(), Some(naive_date.into()));
         assert_eq!(event.get_end(), Some(naive_date.into()));
     }
