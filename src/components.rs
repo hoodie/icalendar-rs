@@ -380,6 +380,21 @@ mod tests {
     }
 
     #[test]
+    fn get_date_times_tzid() {
+        let date_time = NaiveDate::from_ymd(2001, 3, 13).and_hms(14, 15, 16);
+        let date_time_tzid = CalendarDateTime::WithTimezone {
+            date_time,
+            tzid: "Pacific/Auckland".to_string(),
+        };
+        let event = Event::new()
+            .starts(date_time_tzid.clone())
+            .ends(date_time_tzid.clone())
+            .done();
+        assert_eq!(event.get_start(), Some(date_time_tzid.clone().into()));
+        assert_eq!(event.get_end(), Some(date_time_tzid.clone().into()));
+    }
+
+    #[test]
     fn get_dates_naive() {
         let naive_date = NaiveDate::from_ymd(2001, 3, 13);
         let event = Event::new().starts(naive_date).ends(naive_date).done();
