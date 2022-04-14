@@ -19,6 +19,16 @@ impl Parameter {
             val: val.to_owned(),
         }
     }
+
+    /// Returns a reference to the key field.
+    pub fn key(&self) -> &str {
+        &self.key
+    }
+
+    /// Returns a reference to the value field.
+    pub fn value(&self) -> &str {
+        &self.val
+    }
 }
 
 //type EntryParameters = Vec<Parameter>;
@@ -47,7 +57,7 @@ impl Property {
         &self.key
     }
 
-    /// Returns a reference to the key field.
+    /// Returns a reference to the value field.
     pub fn value(&self) -> &str {
         &self.val
     }
