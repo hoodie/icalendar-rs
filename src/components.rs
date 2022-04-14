@@ -291,6 +291,16 @@ pub trait Component {
     fn get_class(&self) -> Option<Class> {
         Class::from_str(self.property_value("CLASS")?)
     }
+
+    /// Sets the URL.
+    fn url(&mut self, url: &str) -> &mut Self {
+        self.add_property("URL", url)
+    }
+
+    /// Gets the URL.
+    fn get_url(&self) -> Option<&str> {
+        self.property_value("URL")
+    }
 }
 
 macro_rules! component_impl {
@@ -354,6 +364,7 @@ mod tests {
         assert_eq!(event.get_uid(), None);
         assert_eq!(event.get_class(), None);
         assert_eq!(event.get_timestamp(), None);
+        assert_eq!(event.get_url(), None);
     }
 
     #[test]
@@ -365,6 +376,7 @@ mod tests {
             .location("location")
             .uid("uid")
             .class(Class::Private)
+            .url("http://some.test/url")
             .done();
         assert_eq!(event.get_priority(), Some(5));
         assert_eq!(event.get_summary(), Some("summary"));
@@ -372,6 +384,7 @@ mod tests {
         assert_eq!(event.get_location(), Some("location"));
         assert_eq!(event.get_uid(), Some("uid"));
         assert_eq!(event.get_class(), Some(Class::Private));
+        assert_eq!(event.get_url(), Some("http://some.test/url"));
     }
 
     #[test]
