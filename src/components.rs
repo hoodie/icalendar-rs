@@ -159,12 +159,9 @@ pub trait Component {
     /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
     /// and [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`],
     /// date only
-    fn all_day<TZ: TimeZone>(&mut self, date: Date<TZ>) -> &mut Self
-    where
-        TZ::Offset: fmt::Display,
-    {
-        self.append_property(naive_date_to_property(date.naive_local(), "DTSTART"))
-            .append_property(naive_date_to_property(date.naive_local(), "DTEND"))
+    fn all_day(&mut self, date: NaiveDate) -> &mut Self {
+        self.append_property(naive_date_to_property(date, "DTSTART"))
+            .append_property(naive_date_to_property(date, "DTEND"))
     }
 
     /// Defines the relative priority.

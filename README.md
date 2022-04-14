@@ -52,7 +52,7 @@ let my_calendar = Calendar::new()
     .push(
         // add an all-day event
         Event::new()
-            .all_day(Utc.ymd(2016, 3, 15))
+            .all_day(NaiveDate::from_ymd(2016, 3, 15))
             .summary("My Birthday")
             .description("Hey, I'm gonna have a party\nBYOB: Bring your own beer.\nHendrik")
             .done(),

@@ -26,7 +26,7 @@
 //!     .done();
 //!
 //! let bday = Event::new()
-//!     .all_day(Utc.ymd(2016, 3, 15))
+//!     .all_day(NaiveDate::from_ymd(2016, 3, 15))
 //!     .summary("My Birthday")
 //!     .description(
 //! r#"Hey, I'm gonna have a party
