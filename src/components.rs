@@ -4,9 +4,9 @@ use uuid::Uuid;
 use std::{collections::BTreeMap, fmt, mem};
 
 use crate::properties::*;
-use date_time::naive_date_to_property;
+use date_time::{format_utc_date_time, naive_date_to_property, parse_utc_date_time};
 
-mod date_time;
+pub(crate) mod date_time;
 mod event;
 mod other;
 mod todo;
@@ -66,8 +66,8 @@ pub trait Component {
         write_crlf!(out, "BEGIN:{}", self.component_kind())?;
 
         if !self.properties().contains_key("DTSTAMP") {
-            let now = CalendarDateTime::Utc(Utc::now());
-            write_crlf!(out, "DTSTAMP:{}", now)?;
+            let now = Utc::now();
+            write_crlf!(out, "DTSTAMP:{}", format_utc_date_time(now))?;
         }
 
         for property in self.properties().values() {
@@ -120,15 +120,14 @@ pub trait Component {
 
     /// Set the [`DTSTAMP`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.2) [`Property`]
     ///
-    /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
-    fn timestamp<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
-        let calendar_dt = dt.into();
-        self.add_property("DTSTAMP", &calendar_dt.to_string())
+    /// This must be a UTC date-time value.
+    fn timestamp(&mut self, dt: DateTime<Utc>) -> &mut Self {
+        self.add_property("DTSTAMP", &format_utc_date_time(dt))
     }
 
     /// Gets the [`DTSTAMP`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.2) property.
-    fn get_timestamp(&self) -> Option<CalendarDateTime> {
-        CalendarDateTime::from_str(self.property_value("DTSTAMP")?)
+    fn get_timestamp(&self) -> Option<DateTime<Utc>> {
+        parse_utc_date_time(self.property_value("DTSTAMP")?)
     }
 
     /// Gets the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
@@ -380,11 +379,9 @@ mod tests {
     fn get_date_times_naive() {
         let naive_date_time = NaiveDate::from_ymd(2001, 3, 13).and_hms(14, 15, 16);
         let event = Event::new()
-            .timestamp(naive_date_time)
             .starts(naive_date_time)
             .ends(naive_date_time)
             .done();
-        assert_eq!(event.get_timestamp(), Some(naive_date_time.into()));
         assert_eq!(event.get_start(), Some(naive_date_time.into()));
         assert_eq!(event.get_end(), Some(naive_date_time.into()));
     }
