@@ -110,14 +110,12 @@ pub trait Component {
 
     /// Construct and append a [`Property`]
     fn add_property(&mut self, key: &str, val: &str) -> &mut Self {
-        self.append_property(Property::new(key, val));
-        self
+        self.append_property(Property::new(key, val))
     }
 
     /// Construct and append a [`Property`]
     fn add_multi_property(&mut self, key: &str, val: &str) -> &mut Self {
-        self.append_multi_property(Property::new(key, val));
-        self
+        self.append_multi_property(Property::new(key, val))
     }
 
     /// Set the [`DTSTAMP`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.2) [`Property`]
@@ -125,8 +123,7 @@ pub trait Component {
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     fn timestamp<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
         let calendar_dt = dt.into();
-        self.add_property("DTSTAMP", &calendar_dt.to_string());
-        self
+        self.add_property("DTSTAMP", &calendar_dt.to_string())
     }
 
     /// Gets the [`DTSTAMP`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.2) property.
@@ -149,8 +146,7 @@ pub trait Component {
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     fn starts<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
         let calendar_dt = dt.into();
-        self.add_property("DTSTART", &calendar_dt.to_string());
-        self
+        self.add_property("DTSTART", &calendar_dt.to_string())
     }
 
     /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`]
@@ -158,8 +154,7 @@ pub trait Component {
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     fn ends<T: Into<CalendarDateTime>>(&mut self, dt: T) -> &mut Self {
         let calendar_dt = dt.into();
-        self.add_property("DTEND", &calendar_dt.to_string());
-        self
+        self.add_property("DTEND", &calendar_dt.to_string())
     }
 
     /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`], date only
@@ -168,8 +163,7 @@ pub trait Component {
         TZ::Offset: fmt::Display,
     {
         // DTSTART
-        self.append_property(naive_date_to_property(date.naive_local(), "DTSTART"));
-        self
+        self.append_property(naive_date_to_property(date.naive_local(), "DTSTART"))
     }
 
     /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`], date only
@@ -177,8 +171,7 @@ pub trait Component {
     where
         TZ::Offset: fmt::Display,
     {
-        self.append_property(naive_date_to_property(date.naive_local(), "DTEND"));
-        self
+        self.append_property(naive_date_to_property(date.naive_local(), "DTEND"))
     }
 
     /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
@@ -189,8 +182,7 @@ pub trait Component {
         TZ::Offset: fmt::Display,
     {
         self.append_property(naive_date_to_property(date.naive_local(), "DTSTART"))
-            .append_property(naive_date_to_property(date.naive_local(), "DTEND"));
-        self
+            .append_property(naive_date_to_property(date.naive_local(), "DTEND"))
     }
 
     /// Defines the relative priority.
@@ -198,8 +190,7 @@ pub trait Component {
     /// Ranges from 0 to 10, larger values will be truncated
     fn priority(&mut self, priority: u32) -> &mut Self {
         let priority = ::std::cmp::min(priority, 10);
-        self.add_property("PRIORITY", &priority.to_string());
-        self
+        self.add_property("PRIORITY", &priority.to_string())
     }
 
     /// Gets the relative priority.
@@ -251,8 +242,7 @@ pub trait Component {
     /// Set the LOCATION
     /// 3.8.1.7.  Location
     fn location(&mut self, location: &str) -> &mut Self {
-        self.add_property("LOCATION", location);
-        self
+        self.add_property("LOCATION", location)
     }
 
     /// Gets the location
@@ -273,8 +263,7 @@ pub trait Component {
 
     /// Set the UID
     fn uid(&mut self, uid: &str) -> &mut Self {
-        self.add_property("UID", uid);
-        self
+        self.add_property("UID", uid)
     }
 
     /// Gets the UID

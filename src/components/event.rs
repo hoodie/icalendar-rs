@@ -21,8 +21,7 @@ impl Event {
 
     /// Defines the overall status or confirmation
     pub fn status(&mut self, status: EventStatus) -> &mut Self {
-        self.append_property(status.into());
-        self
+        self.append_property(status.into())
     }
 
     /// Gets the overall status or confirmation.
