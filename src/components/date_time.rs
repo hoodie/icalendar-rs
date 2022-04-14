@@ -11,6 +11,10 @@ pub(crate) fn parse_utc_date_time(s: &str) -> Option<DateTime<Utc>> {
     Utc.datetime_from_str(s, UTC_DATE_TIME_FORMAT).ok()
 }
 
+pub(crate) fn format_utc_date_time(utc_dt: DateTime<Utc>) -> String {
+    utc_dt.format(UTC_DATE_TIME_FORMAT).to_string()
+}
+
 pub(crate) fn naive_date_to_property(date: NaiveDate, key: &str) -> Property {
     Property::new(key, &date.format(NAIVE_DATE_FORMAT).to_string())
         .append_parameter(ValueType::Date)

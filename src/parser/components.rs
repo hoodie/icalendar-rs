@@ -29,8 +29,7 @@ use pretty_assertions::assert_eq;
 
 use crate::{
     calendar::CalendarComponent,
-    components::{InnerComponent, Other},
-    CalendarDateTime,
+    components::{date_time::format_utc_date_time, InnerComponent, Other},
 };
 
 /// The parsing equivalent of [`crate::components::Component`]
@@ -68,8 +67,8 @@ pub(crate) trait LikeComponent<'a> {
                 .iter()
                 .any(|property| property.name == "DTSTAMP")
             {
-                let now = CalendarDateTime::Utc(Utc::now());
-                write_crlf!(out, "DTSTAMP:{}", now)?;
+                let now = Utc::now();
+                write_crlf!(out, "DTSTAMP:{}", format_utc_date_time(now))?;
             }
 
             if !self
