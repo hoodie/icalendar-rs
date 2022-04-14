@@ -27,8 +27,7 @@ impl Todo {
     ///
     /// Ranges between 0 - 100
     pub fn percent_complete(&mut self, percent: u8) -> &mut Self {
-        self.add_property("PERCENT-COMPLETE", &percent.to_string());
-        self
+        self.add_property("PERCENT-COMPLETE", &percent.to_string())
     }
 
     /// Gets the [`PERCENT-COMPLETE`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.8) property.
@@ -43,8 +42,7 @@ impl Todo {
     /// See [`CalendarDateTime`] for info how are different [`chrono`] types converted automatically.
     pub fn due<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
         let calendar_dt: DatePerhapsTime = dt.into();
-        self.append_property(calendar_dt.to_property("DUE"));
-        self
+        self.append_property(calendar_dt.to_property("DUE"))
     }
 
     /// Gets the [`DUE`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.3) property
@@ -57,8 +55,7 @@ impl Todo {
     /// Per [RFC 5545, Section 3.8.2.1](https://tools.ietf.org/html/rfc5545#section-3.8.2.1), this
     /// must be a date-time in UTC format.
     pub fn completed(&mut self, dt: DateTime<Utc>) -> &mut Self {
-        self.add_property("COMPLETED", &CalendarDateTime::Utc(dt).to_string());
-        self
+        self.add_property("COMPLETED", &CalendarDateTime::Utc(dt).to_string())
     }
 
     /// Gets the [`COMPLETED`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.1) property
@@ -72,8 +69,7 @@ impl Todo {
 
     /// Defines the overall status or confirmation
     pub fn status(&mut self, status: TodoStatus) -> &mut Self {
-        self.append_property(status.into());
-        self
+        self.append_property(status.into())
     }
 
     /// Gets the overall status.
