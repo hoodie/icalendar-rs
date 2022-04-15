@@ -1,5 +1,23 @@
 # Changelog
 
+## [Unreleased](https://github.com/hoodie/icalendar-rs/compare/v0.12.0...HEAD) (2022-04-15)
+
+
+### Features
+
+* Add getter and setter for URL property.
+ eb53e1a
+
+
+### Fixes
+
+* Export DatePerhapsTime type.
+ 8a46f0c
+
+* Fix typo in README.
+ 7d117b2
+
+
 ## [v0.12.0](https://github.com/hoodie/icalendar-rs/compare/v0.11.1...v0.12.0) (2022-04-13)
 
 
