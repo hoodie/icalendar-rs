@@ -1,5 +1,40 @@
 # Changelog
 
+## [v0.13.0](https://github.com/hoodie/icalendar-rs/compare/v0.12.1...v0.13.0) (2022-04-20)
+
+### ⚠ BREAKING CHANGE
+
+* Adds a new variant to `CalendarDateTime` enum.
+* Changes the type of `Component::all_day`.
+* Removes `Component::start_date` and`Component::end_date`.
+* Changes the type of `Component::starts` and`Component::ends`.
+* Changes the type of `Component::timestamp` and`Component::get_timestamp`.
+
+
+### Features
+
+* Add support for date-time with timezone.
+ e914853
+
+* Add getters for Parameter key and value.
+ 472f4ca
+
+* Accept Into<DatePerhapsTime> for starts and ends.
+ 91b1d7d
+
+
+### Fixes
+
+* Take NaiveDate for all_day.
+ 193c3cf
+
+* Remove start_date and end_date.
+ c0c67fb
+
+* According to RFC5545, DTSTAMP must be in UTC.
+ 9d2fb43
+
+
 ### [v0.12.1](https://github.com/hoodie/icalendar-rs/compare/v0.12.0...v0.12.1) (2022-04-15)
 
 
