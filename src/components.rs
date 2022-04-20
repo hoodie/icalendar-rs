@@ -215,7 +215,7 @@ pub trait Component {
     ///// Set the description
     ///// TODO `Attendee` needs to be its own type
     //fn attendee(&mut self, desc: &str) -> &mut Self {
-    //    self.add_multi_property("ATTENDEE", desc) // multi_properties should be a multimap
+    //    self.add_multi_property("ATTENDEE", desc) // multi_properties should be a multi-map
     //}
 
     /// Set the LOCATION
@@ -374,7 +374,7 @@ mod tests {
             .starts(utc_date_time)
             .ends(utc_date_time)
             .done();
-        assert_eq!(event.get_timestamp(), Some(utc_date_time.into()));
+        assert_eq!(event.get_timestamp(), Some(utc_date_time));
         assert_eq!(event.get_start(), Some(utc_date_time.into()));
         assert_eq!(event.get_end(), Some(utc_date_time.into()));
     }
@@ -391,7 +391,7 @@ mod tests {
             .ends(date_time_tzid.clone())
             .done();
         assert_eq!(event.get_start(), Some(date_time_tzid.clone().into()));
-        assert_eq!(event.get_end(), Some(date_time_tzid.clone().into()));
+        assert_eq!(event.get_end(), Some(date_time_tzid.into()));
     }
 
     #[test]

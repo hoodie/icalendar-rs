@@ -1,5 +1,5 @@
 //! # A library to generate and parse [iCalendars](http://tools.ietf.org/html/rfc5545).
-//! 
+//!
 //! Contributions are very welcome.
 //!
 //!
@@ -25,7 +25,7 @@
 //!     .done();
 //!
 //! let bday = Event::new()
-//!     .all_day(NaiveDate::from_ymd(2016, 3, 15))
+//!     .all_day(NaiveDate::from_ymd(2023, 3, 15))
 //!     .summary("My Birthday")
 //!     .description(
 //! r#"Hey, I'm gonna have a party

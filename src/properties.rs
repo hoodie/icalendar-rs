@@ -280,7 +280,7 @@ impl TodoStatus {
     }
 }
 
-//pub enum JournalStatuw{
+//pub enum JournalStatus{
 //    Draft,
 //    Final,
 //    Cancelled,
@@ -335,7 +335,7 @@ impl From<TodoStatus> for Property {
 //    cn: String,
 //    role: AttendeeRole,
 //    delegated_from: String,
-//    partstat: String,
+//    part_stat: String,
 //    sent_by: String,
 //    dir: String,
 //}

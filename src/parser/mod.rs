@@ -11,7 +11,7 @@
 //! `read_calendar()` returns a Vector of `Component`s
 //! `read_calendar_verbose()` does the same thing but produces nicer parsing errors with line numbers (referencing the normalized content).
 //!
-//! You don't have to use `normalize()` on your document if your calandar does not obey the folding rules specified in [rfc5545 3.1].
+//! You don't have to use `normalize()` on your document if your calendar does not obey the folding rules specified in [rfc5545 3.1].
 //! If it unexpectedly does, the errors might be a tad confusing.
 //!
 //!
