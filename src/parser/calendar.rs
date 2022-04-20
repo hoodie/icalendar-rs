@@ -3,7 +3,7 @@ use crate::calendar::CalendarComponent;
 use super::{components::LikeComponent, read_calendar, unfold, Component, Property};
 use core::{fmt, str::FromStr};
 
-/// Helpertype for reserialization
+/// Helper-type for reserialization
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Calendar<'a> {
@@ -20,8 +20,8 @@ impl Calendar<'_> {
 }
 impl<'a> LikeComponent<'a> for Calendar<'a> {
     fn name(&self) -> &str {
-        const CALNAME: &str = "VCALENDAR";
-        CALNAME
+        const CALENDAR_NAME: &str = "VCALENDAR";
+        CALENDAR_NAME
     }
 
     fn properties(&self) -> &[Property<'a>] {

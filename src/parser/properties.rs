@@ -213,20 +213,18 @@ fn parse_property_with_breaks() {
 
     assert_parser!(property, sample_0, expectation);
 }
-#[test]
-#[rustfmt::skip]
-fn parse_property_with_colon() {
 
+#[test]
+fn parse_property_with_colon() {
     let sample_0 = "RELATED-TO;RELTYPE=:c605e4e8-8ea3-4315-b139-19394ab3ced6\n";
-    // let sample_0 = "RELATED-TO;RELTYPE:c605e4e8-8ea3-4315-b139-19394ab3ced6\n";
 
     let expectation = Property {
         name: "RELATED-TO".into(),
         val: "c605e4e8-8ea3-4315-b139-19394ab3ced6".into(),
         params: vec![Parameter {
             key: "RELTYPE".into(),
-            val: None
-        }]
+            val: None,
+        }],
     };
 
     assert_parser!(property, sample_0, expectation);
@@ -259,14 +257,14 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                         tuple((
                             // preceded(multispace0, alpha_or_dash), // key
                             cut(context(
-                                // this must be interpretet as component by `component()`
+                                // this must be interpreted as component by `component()`
                                 // if you get here at all then the parser is in a wrong state
                                 "property can't be END or BEGIN",
                                 map(preceded(multispace0, property_key), ParseString::from),
                             )), // key
                             parameters, // params
                         )),
-                        context("property sparator", tag(":")), // separator
+                        context("property separator", tag(":")), // separator
                         context(
                             "property value",
                             map(
