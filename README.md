@@ -5,7 +5,7 @@
 [![build](https://img.shields.io/github/workflow/status/hoodie/icalendar-rs/Continuous%20Integration)](https://github.com/hoodie/icalendar-rs/actions?query=workflow%3A"Continuous+Integration")
 [![Crates.io](https://img.shields.io/crates/d/icalendar)](https://crates.io/crates/icalendar)
 [![contributors](https://img.shields.io/github/contributors/hoodie/icalendar-rs)](https://github.com/hoodie/icalendar-rs/graphs/contributors)
-![maintenance](https://img.shields.io/maintenance/yes/2021)
+![maintenance](https://img.shields.io/maintenance/yes/2022)
 
 [![version](https://img.shields.io/crates/v/icalendar)](https://crates.io/crates/icalendar/)
 [![documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://docs.rs/icalendar/)
@@ -60,6 +60,7 @@ let my_calendar = Calendar::new()
     .done();
 
 println!("{}", my_calendar);
+
 ```
 
 ## Parsing
