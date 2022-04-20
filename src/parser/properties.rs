@@ -168,7 +168,6 @@ fn test_property_with_dash() {
 }
 
 #[test]
-#[rustfmt::skip]
 fn parse_properties_from_rfc() {
     // TODO: newlines followed by spaces must be ignored
     assert_parser!(
@@ -177,10 +176,7 @@ fn parse_properties_from_rfc() {
         Property {
             name: "home.tel".into(),
             val: "+49 3581 123456".into(),
-            params: vec![Parameter ::new_ref(
-                "type",
-                Some("fax,voice,msg"),
-            )]
+            params: vec![Parameter::new_ref("type", Some("fax,voice,msg"),)]
         }
     );
     // TODO: newlines followed by spaces must be ignored
@@ -190,28 +186,48 @@ fn parse_properties_from_rfc() {
         Property {
             name: "email".into(),
             val: "mb@goerlitz.de".into(),
-            params: vec![
-                Parameter ::new_ref(
-                "internet"  ,
-                None,
-            )]
+            params: vec![Parameter::new_ref("internet", None,)]
         }
     );
 }
 
 #[test]
-#[rustfmt::skip]
 fn parse_property_with_breaks() {
-
-    let sample_0 = "DESCRIPTION:Hey, I'm gonna have a party\\n BYOB: Bring your own beer.\\n Hendrik\\n\n";
+    let sample_0 =
+        "DESCRIPTION:Hey, I'm gonna have a party\\n BYOB: Bring your own beer.\\n Hendrik\\n\n";
 
     let expectation = Property {
         name: "DESCRIPTION".into(),
         val: "Hey, I'm gonna have a party\\n BYOB: Bring your own beer.\\n Hendrik\\n".into(),
-        params: vec![]
+        params: vec![],
     };
 
     assert_parser!(property, sample_0, expectation);
+}
+
+#[test]
+fn parse_invalid_property() {
+    let sample_0 = "END;RELTYPE=:c605e4e8-8ea3-4315-b139-19394ab3ced6\n";
+    use nom::error::{ErrorKind::*, VerboseErrorKind::*};
+    pretty_assertions::assert_eq!(
+        property::<VerboseError<&str>>(sample_0),
+        Err(nom::Err::Failure(VerboseError {
+            errors: vec![
+                (
+                    "END;RELTYPE=:c605e4e8-8ea3-4315-b139-19394ab3ced6\n",
+                    Nom(Satisfy)
+                ),
+                (
+                    "END;RELTYPE=:c605e4e8-8ea3-4315-b139-19394ab3ced6\n",
+                    Context("property cannot be END or BEGIN")
+                ),
+                (
+                    "END;RELTYPE=:c605e4e8-8ea3-4315-b139-19394ab3ced6\n",
+                    Context("property")
+                )
+            ]
+        }))
+    );
 }
 
 #[test]
@@ -231,15 +247,13 @@ fn parse_property_with_colon() {
 }
 
 #[test]
-#[rustfmt::skip]
 fn parse_property_with_no_value() {
-
     let sample_0 = "X-NO-VALUE";
 
     let expectation = Property {
         name: "X-NO-VALUE".into(),
         val: "".into(),
-        params: vec![]
+        params: vec![],
     };
 
     assert_parser!(property, sample_0, expectation);
@@ -259,7 +273,7 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                             cut(context(
                                 // this must be interpreted as component by `component()`
                                 // if you get here at all then the parser is in a wrong state
-                                "property can't be END or BEGIN",
+                                "property cannot be END or BEGIN",
                                 map(preceded(multispace0, property_key), ParseString::from),
                             )), // key
                             parameters, // params
