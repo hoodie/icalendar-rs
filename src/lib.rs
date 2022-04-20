@@ -1,7 +1,6 @@
-//! A library (far from anything) to generate icalendars
-//! This implementation is still far from complete, I haven't even read the entire [spec](http://tools.ietf.org/html/rfc5545) yet.
-//! Instead I implemented the parts I needed first.
-//! More to come, contributions very welcome.
+//! # A library to generate and parse [iCalendars](http://tools.ietf.org/html/rfc5545).
+//! 
+//! Contributions are very welcome.
 //!
 //!
 //! ## Structure
