@@ -26,7 +26,7 @@ optional = true
 
 [dependencies.uuid]
 features = ["v4"]
-version = "0.8"
+version = "1"
 
 [dev-dependencies]
 pretty_assertions = "1"
