@@ -232,7 +232,7 @@ pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                     map(line_separated(property), ComponentChild::Property),
                 )),
             )),
-            line("END:", cut(context("MISMATCHING END", tag(name.as_str())))),
+            line("END:", cut(context("mismatching end", tag(name.as_str())))),
         ),
         |(body_elements, _)| {
             let mut properties = Vec::new();
@@ -413,16 +413,13 @@ END:VEVENT
 }
 
 #[test]
-#[should_panic]
 fn test_faulty_component() {
-    assert_parser!(
-        component,
-        "BEGIN:FOO\nEND:F0O",
-        Component {
-            name: "FOO".into(),
-            properties: vec![],
-            components: vec![]
-        }
+    use nom::error::{ErrorKind::*, VerboseErrorKind::*};
+    pretty_assertions::assert_eq!(
+        component::<VerboseError<&str>>("BEGIN:FOO\nEND:F0O"),
+        Err(nom::Err::Failure(VerboseError {
+            errors: vec![("F0O", Nom(Tag,),), ("F0O", Context("mismatching end",),),]
+        }))
     );
 }
 
