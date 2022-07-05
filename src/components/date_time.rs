@@ -41,6 +41,7 @@ pub enum CalendarDateTime {
     /// `date_time.with_timezone(&Utc)` to convert `date_time` from arbitrary time zone to UTC.
     Utc(DateTime<Utc>),
     /// `FORM #3: DATE WITH LOCAL TIME AND TIME ZONE REFERENCE`: refers to a time zone definition.
+    /// Not yet implemented (see docstring for [`chrono::CalendarDateTime`](CalendarDateTime)).
     WithTimezone {
         /// The date and time in the given time zone.
         date_time: NaiveDateTime,
@@ -53,6 +54,7 @@ impl CalendarDateTime {
     pub(crate) fn from_property(property: &Property) -> Option<Self> {
         let value = property.value();
         if let Some(tzid) = property.params().get("TZID") {
+            unimplemented!("`CalendarDateTime::WithTimezone` isn't implemented yet");
             Some(Self::WithTimezone {
                 date_time: NaiveDateTime::parse_from_str(value, NAIVE_DATE_TIME_FORMAT).ok()?,
                 tzid: tzid.value().to_owned(),
@@ -73,6 +75,7 @@ impl CalendarDateTime {
             }
             CalendarDateTime::Utc(utc_dt) => Property::new(key, &format_utc_date_time(*utc_dt)),
             CalendarDateTime::WithTimezone { date_time, tzid } => {
+                unimplemented!("`CalendarDateTime::WithTimezone` isn't implemented yet");
                 Property::new(key, &date_time.format(NAIVE_DATE_TIME_FORMAT).to_string())
                     .add_parameter("TZID", tzid)
                     .done()
