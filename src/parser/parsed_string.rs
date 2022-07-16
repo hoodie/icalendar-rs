@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+/// A zero-copy string parsed from an iCal input.
 #[derive(Debug, Eq, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ParseString<'a>(Cow<'a, str>);
