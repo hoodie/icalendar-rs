@@ -67,7 +67,7 @@ impl<'a> From<Vec<Component<'a>>> for crate::Calendar {
     }
 }
 
-impl<'a> FromStr for crate::Calendar {
+impl FromStr for crate::Calendar {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {

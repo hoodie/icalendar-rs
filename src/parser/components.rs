@@ -142,7 +142,7 @@ impl<'a> From<Component<'a>> for CalendarComponent {
     }
 }
 
-impl<'a> FromStr for CalendarComponent {
+impl FromStr for CalendarComponent {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
