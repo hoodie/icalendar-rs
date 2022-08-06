@@ -1,5 +1,20 @@
 # Changelog
 
+### [v0.13.1](https://github.com/hoodie/icalendar-rs/compare/v0.13.0...v0.13.1) (2022-08-06)
+
+
+#### Features
+
+* convert parsed properties into DatePerhapsTime
+ c0ffee9
+
+
+#### Fixes
+
+* update uuid to 1.0
+ c27ac42
+
+
 ## [v0.13.0](https://github.com/hoodie/icalendar-rs/compare/v0.12.1...v0.13.0) (2022-04-20)
 
 ### ⚠ BREAKING CHANGE
