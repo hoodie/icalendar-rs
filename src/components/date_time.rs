@@ -148,3 +148,167 @@ impl From<NaiveDate> for DatePerhapsTime {
         Self::Date(date)
     }
 }
+
+#[cfg(feature = "parser")]
+impl TryFrom<&crate::parser::Property<'_>> for DatePerhapsTime {
+    type Error = &'static str;
+
+    fn try_from(value: &crate::parser::Property) -> Result<Self, Self::Error> {
+        let val = value.val.as_ref();
+
+        // UTC is here first because lots of fields MUST be UTC, so it should,
+        // in practice, be more common that others.
+        if let Ok(utc_dt) = Utc.datetime_from_str(val, "%Y%m%dT%H%M%SZ") {
+            return Ok(Self::DateTime(CalendarDateTime::Utc(utc_dt)));
+        };
+
+        if let Ok(naive_date) = NaiveDate::parse_from_str(val, "%Y%m%d") {
+            return Ok(Self::Date(naive_date));
+        };
+
+        if let Ok(naive_dt) = NaiveDateTime::parse_from_str(val, "%Y%m%dT%H%M%S") {
+            if let Some(tz_param) = value.params.iter().find(|p| p.key == "TZID") {
+                if let Some(tzid) = &tz_param.val {
+                    return Ok(Self::DateTime(CalendarDateTime::WithTimezone {
+                        date_time: naive_dt,
+                        tzid: tzid.as_ref().to_string(),
+                    }));
+                } else {
+                    return Err("Found empty TZID param.");
+                }
+            } else {
+                return Ok(Self::DateTime(CalendarDateTime::Floating(naive_dt)));
+            };
+        };
+
+        Err("Value does not look like a known DATE-TIME")
+    }
+}
+
+#[cfg(all(test, feature = "parser"))]
+mod try_from_tests {
+    use super::*;
+
+    #[test]
+    fn try_from_utc_dt() {
+        let prop = crate::parser::Property {
+            name: "TRIGGER".into(),
+            val: "20220716T141500Z".into(),
+            params: vec![crate::parser::Parameter {
+                key: "VALUE".into(),
+                val: Some("DATE-TIME".into()),
+            }],
+        };
+
+        let result = DatePerhapsTime::try_from(&prop);
+        let expected = Utc.ymd(2022, 7, 16).and_hms(14, 15, 0);
+
+        assert_eq!(
+            result,
+            Ok(DatePerhapsTime::DateTime(CalendarDateTime::Utc(expected)))
+        );
+    }
+
+    #[test]
+    fn try_from_naive_date() {
+        let prop = crate::parser::Property {
+            name: "TRIGGER".into(),
+            val: "19970714".into(),
+            params: vec![crate::parser::Parameter {
+                key: "VALUE".into(),
+                val: Some("DATE-TIME".into()),
+            }],
+        };
+
+        let result = DatePerhapsTime::try_from(&prop);
+        let expected = NaiveDate::from_ymd(1997, 7, 14);
+
+        assert_eq!(result, Ok(DatePerhapsTime::Date(expected)));
+    }
+
+    #[test]
+    fn try_from_dt_with_tz() {
+        let prop = crate::parser::Property {
+            name: "TRIGGER".into(),
+            val: "20220716T141500".into(),
+            params: vec![
+                crate::parser::Parameter {
+                    key: "VALUE".into(),
+                    val: Some("DATE-TIME".into()),
+                },
+                crate::parser::Parameter {
+                    key: "TZID".into(),
+                    val: Some("MY-TZ-ID".into()),
+                },
+            ],
+        };
+
+        let result = DatePerhapsTime::try_from(&prop);
+        let expected = NaiveDate::from_ymd(2022, 7, 16).and_hms(14, 15, 0);
+
+        assert_eq!(
+            result,
+            Ok(DatePerhapsTime::DateTime(CalendarDateTime::WithTimezone {
+                date_time: expected,
+                tzid: "MY-TZ-ID".into(),
+            }))
+        );
+    }
+
+    #[test]
+    fn try_from_dt_with_empty_tz() {
+        let prop = crate::parser::Property {
+            name: "TRIGGER".into(),
+            val: "20220716T141500".into(),
+            params: vec![
+                crate::parser::Parameter {
+                    key: "VALUE".into(),
+                    val: Some("DATE-TIME".into()),
+                },
+                crate::parser::Parameter {
+                    key: "TZID".into(),
+                    val: None,
+                },
+            ],
+        };
+
+        let result = DatePerhapsTime::try_from(&prop);
+
+        assert_eq!(result, Err("Found empty TZID param."));
+    }
+
+    #[test]
+    fn try_from_floating_dt() {
+        let prop = crate::parser::Property {
+            name: "TRIGGER".into(),
+            val: "20220716T141500".into(),
+            params: vec![crate::parser::Parameter {
+                key: "VALUE".into(),
+                val: Some("DATE-TIME".into()),
+            }],
+        };
+
+        let result = DatePerhapsTime::try_from(&prop);
+        let expected = NaiveDate::from_ymd(2022, 7, 16).and_hms(14, 15, 0);
+
+        assert_eq!(
+            result,
+            Ok(DatePerhapsTime::DateTime(CalendarDateTime::Floating(
+                expected
+            )))
+        );
+    }
+
+    #[test]
+    fn try_from_non_dt_prop() {
+        let prop = crate::parser::Property {
+            name: "TZNAME".into(),
+            val: "CET".into(),
+            params: vec![],
+        };
+
+        let result = DatePerhapsTime::try_from(&prop);
+
+        assert_eq!(result, Err("Value does not look like a known DATE-TIME"));
+    }
+}
