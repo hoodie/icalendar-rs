@@ -50,6 +50,10 @@ impl<'a> Component<'a> {
             components: Default::default(),
         }
     }
+
+    pub fn find_prop(&self, name: &str) -> Option<&Property> {
+        self.properties.iter().find(|prop| prop.name == name)
+    }
 }
 
 pub(crate) trait LikeComponent<'a> {
