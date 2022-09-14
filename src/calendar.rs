@@ -62,8 +62,10 @@ pub use calendar_component::CalendarComponent;
 ///
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct Calendar {
-    properties: Vec<Property>,
-    components: Vec<CalendarComponent>,
+    /// Top-level calendar properties
+    pub properties: Vec<Property>,
+    /// Events, Todos and Venues defined in the calendar
+    pub components: Vec<CalendarComponent>,
 }
 
 impl Calendar {
