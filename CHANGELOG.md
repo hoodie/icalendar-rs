@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.13.3](https://github.com/hoodie/icalendar-rs/compare/v0.13.2...v0.13.3) (2022-10-25)
+
+#### Fixes
+
+* disable oldtime feature of chrono
+  ([de14149](https://github.com/hoodie/icalendar-rs/commit/de14149f69a0666825712bceca031fdebd8a1524))
+
 ### [v0.13.2](https://github.com/hoodie/icalendar-rs/compare/v0.13.1...v0.13.2) (2022-10-18)
 
 #### Features
