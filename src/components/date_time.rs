@@ -137,6 +137,12 @@ impl From<DateTime<Utc>> for DatePerhapsTime {
     }
 }
 
+impl From<Date<Utc>> for DatePerhapsTime {
+    fn from(dt: Date<Utc>) -> Self {
+        Self::Date(dt.naive_utc())
+    }
+}
+
 impl From<NaiveDateTime> for DatePerhapsTime {
     fn from(dt: NaiveDateTime) -> Self {
         Self::DateTime(dt.into())
