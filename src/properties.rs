@@ -52,6 +52,15 @@ impl Property {
         }
     }
 
+    /// if you already have `String`s I'll gladly take
+    pub fn new_pre_alloc(key: String, val: String) -> Self {
+        Property {
+            key,
+            val: val.replace('\n', "\\n"),
+            params: HashMap::new(),
+        }
+    }
+
     /// Returns a reference to the key field.
     pub fn key(&self) -> &str {
         &self.key
@@ -303,20 +312,24 @@ impl From<EventStatus> for Property {
 
 impl From<TodoStatus> for Property {
     fn from(val: TodoStatus) -> Self {
-        Property {
-            key: String::from("STATUS"),
-            val: String::from(match val {
+        Property::new_pre_alloc(
+            String::from("STATUS"),
+            String::from(match val {
                 TodoStatus::NeedsAction => "NEEDS-ACTION",
                 TodoStatus::Completed => "COMPLETED",
                 TodoStatus::InProcess => "IN-PROCESS",
                 TodoStatus::Cancelled => "CANCELLED",
                 //TodoStatus::Custom(s)   => "CU",
             }),
-            params: HashMap::new(),
-        }
+        )
     }
 }
 
+impl From<chrono::Duration> for Property {
+    fn from(duration: chrono::Duration) -> Self {
+        Property::new_pre_alloc(String::from("DURATION"), duration.to_string())
+    }
+}
 //pub enum AttendeeRole {
 //    /// CHAIR           (RFC 5545, Section 3.2.16)
 //    Chair,

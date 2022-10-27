@@ -22,6 +22,13 @@ pub use venue::*;
 pub(crate) struct InnerComponent {
     pub properties: BTreeMap<String, Property>,
     pub multi_properties: Vec<Property>,
+    pub components: Vec<Other>,
+}
+
+impl From<Other> for InnerComponent {
+    fn from(val: Other) -> Self {
+        val.inner
+    }
 }
 
 //impl<'a> Into<InnerComponent> for parser::Component<'a> {
@@ -37,6 +44,7 @@ impl InnerComponent {
         InnerComponent {
             properties: mem::take(&mut self.properties),
             multi_properties: mem::take(&mut self.multi_properties),
+            components: mem::take(&mut self.components),
         }
     }
 }
@@ -52,6 +60,9 @@ pub trait Component {
 
     /// Allows access to the inner properties map.
     fn properties(&self) -> &BTreeMap<String, Property>;
+
+    /// Allows access to the inner's child components.
+    fn components(&self) -> &[Other];
 
     /// Read-only access to `multi_properties`
     fn multi_properties(&self) -> &Vec<Property>;
@@ -82,6 +93,10 @@ pub trait Component {
             property.fmt_write(out)?;
         }
 
+        for component in self.components() {
+            component.fmt_write(out)?;
+        }
+
         write_crlf!(out, "END:{}", self.component_kind())?;
         Ok(())
     }
@@ -105,12 +120,20 @@ pub trait Component {
     /// Append a given [`Property`]
     fn append_property(&mut self, property: Property) -> &mut Self;
 
+    /// Append a given [`Component`]
+    fn append_component(&mut self, child: impl Into<Other>) -> &mut Self;
+
     /// Adds a [`Property`] of which there may be many
     fn append_multi_property(&mut self, property: Property) -> &mut Self;
 
     /// Construct and append a [`Property`]
     fn add_property(&mut self, key: &str, val: &str) -> &mut Self {
         self.append_property(Property::new(key, val))
+    }
+
+    /// Construct and append a [`Property`]
+    fn add_property_pre_alloc(&mut self, key: String, val: String) -> &mut Self {
+        self.append_property(Property::new_pre_alloc(key, val))
     }
 
     /// Construct and append a [`Property`]
@@ -295,6 +318,11 @@ macro_rules! component_impl {
                 &self.inner.properties
             }
 
+            /// Read-only access to `properties`
+            fn components(&self) -> &[Other] {
+                &self.inner.components
+            }
+
             /// Read-only access to `multi_properties`
             fn multi_properties(&self) -> &Vec<Property> {
                 &self.inner.multi_properties
@@ -308,6 +336,11 @@ macro_rules! component_impl {
                 self
             }
 
+            fn append_component(&mut self, child: impl Into<Other>) -> &mut Self {
+                self.inner.components.push(child.into());
+                self
+            }
+
             /// Adds a [`Property`] of which there may be many
             fn append_multi_property(&mut self, property: Property) -> &mut Self {
                 self.inner.multi_properties.push(property);
@@ -318,6 +351,11 @@ macro_rules! component_impl {
         impl From<InnerComponent> for $t {
             fn from(inner: InnerComponent) -> $t {
                 Self { inner }
+            }
+        }
+        impl From<$t> for Other {
+            fn from(val: $t) -> Self {
+                (val.component_kind(), val.inner).into()
             }
         }
     };
