@@ -227,6 +227,16 @@ pub trait Component {
         self.property_value("UID")
     }
 
+    /// Set the sequence
+    fn sequence(&mut self, sequence: u32) -> &mut Self {
+        self.add_property_pre_alloc("SEQUENCE".into(), sequence.to_string())
+    }
+
+    /// Gets the SEQUENCE
+    fn get_sequence(&self) -> Option<u32> {
+        self.property_value("SEQUENCE").and_then(|s| s.parse().ok())
+    }
+
     /// Set the visibility class
     fn class(&mut self, class: Class) -> &mut Self {
         self.append_property(class.into())
