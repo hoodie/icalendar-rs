@@ -140,30 +140,6 @@ pub trait Component {
         DatePerhapsTime::from_property(self.properties().get("DTEND")?)
     }
 
-    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
-    ///
-    /// See [`DatePerhapsTime`] for info how are different [`chrono`] types converted automatically.
-    fn starts<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
-        let calendar_dt = dt.into();
-        self.append_property(calendar_dt.to_property("DTSTART"))
-    }
-
-    /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`]
-    ///
-    /// See [`DatePerhapsTime`] for info how are different [`chrono`] types converted automatically.
-    fn ends<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
-        let calendar_dt = dt.into();
-        self.append_property(calendar_dt.to_property("DTEND"))
-    }
-
-    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
-    /// and [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`],
-    /// date only
-    fn all_day(&mut self, date: NaiveDate) -> &mut Self {
-        self.append_property(naive_date_to_property(date, "DTSTART"))
-            .append_property(naive_date_to_property(date, "DTEND"))
-    }
-
     /// Defines the relative priority.
     ///
     /// Ranges from 0 to 10, larger values will be truncated
@@ -218,28 +194,6 @@ pub trait Component {
     //    self.add_multi_property("ATTENDEE", desc) // multi_properties should be a multi-map
     //}
 
-    /// Set the LOCATION
-    /// 3.8.1.7.  Location
-    fn location(&mut self, location: &str) -> &mut Self {
-        self.add_property("LOCATION", location)
-    }
-
-    /// Gets the location
-    fn get_location(&self) -> Option<&str> {
-        self.property_value("LOCATION")
-    }
-
-    /// Set the LOCATION with a VVENUE UID
-    /// iCalender venue draft
-    fn venue(&mut self, location: &str, venue_uid: &str) -> &mut Self {
-        self.append_property(
-            Property::new("LOCATION", location)
-                .append_parameter(Parameter::new("VVENUE", venue_uid))
-                .done(),
-        );
-        self
-    }
-
     /// Set the UID
     fn uid(&mut self, uid: &str) -> &mut Self {
         self.add_property("UID", uid)
@@ -269,6 +223,61 @@ pub trait Component {
     fn get_url(&self) -> Option<&str> {
         self.property_value("URL")
     }
+}
+
+/// Common trait of [`Event`] and [`Todo`]
+pub trait EventLike: Component {
+    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
+    ///
+    /// See [`DatePerhapsTime`] for info how are different [`chrono`] types converted automatically.
+    fn starts<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
+        let calendar_dt = dt.into();
+        self.append_property(calendar_dt.to_property("DTSTART"))
+    }
+
+    /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`]
+    ///
+    /// See [`DatePerhapsTime`] for info how are different [`chrono`] types converted automatically.
+    fn ends<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
+        let calendar_dt = dt.into();
+        self.append_property(calendar_dt.to_property("DTEND"))
+    }
+
+    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
+    /// and [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`],
+    /// date only
+    fn all_day(&mut self, date: NaiveDate) -> &mut Self {
+        self.append_property(naive_date_to_property(date, "DTSTART"))
+            .append_property(naive_date_to_property(date, "DTEND"))
+    }
+
+    /// Set the LOCATION with a VVENUE UID
+    /// iCalender venue draft
+    fn venue(&mut self, location: &str, venue_uid: &str) -> &mut Self {
+        self.append_property(
+            Property::new("LOCATION", location)
+                .append_parameter(Parameter::new("VVENUE", venue_uid))
+                .done(),
+        );
+        self
+    }
+
+    /// Set the LOCATION
+    /// 3.8.1.7.  Location
+    fn location(&mut self, location: &str) -> &mut Self {
+        self.add_property("LOCATION", location)
+    }
+
+    /// Gets the location
+    fn get_location(&self) -> Option<&str> {
+        self.property_value("LOCATION")
+    }
+}
+
+macro_rules! event_impl {
+    ($t:ty) => {
+        impl EventLike for $t {}
+    };
 }
 
 macro_rules! component_impl {
@@ -315,7 +324,11 @@ macro_rules! component_impl {
 }
 
 component_impl! { Event, String::from("VEVENT") }
+event_impl! { Event }
+
 component_impl! { Todo , String::from("VTODO")}
+event_impl! { Todo}
+
 component_impl! { Venue , String::from("VVENUE")}
 
 #[cfg(test)]
