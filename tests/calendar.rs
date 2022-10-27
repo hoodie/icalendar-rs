@@ -1,5 +1,5 @@
-use chrono::prelude::*;
-use icalendar::{Calendar, Class, Component, Event, EventStatus, Todo};
+use chrono::*;
+use icalendar::*;
 use pretty_assertions::assert_eq;
 
 const EXPECTED_CAL_CONTENT: &str = "\
