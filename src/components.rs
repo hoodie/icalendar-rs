@@ -6,12 +6,14 @@ use std::{collections::BTreeMap, fmt, mem};
 use crate::properties::*;
 use date_time::{format_utc_date_time, naive_date_to_property, parse_utc_date_time};
 
+pub mod alarm;
 pub(crate) mod date_time;
 mod event;
 mod other;
 mod todo;
 mod venue;
 
+use alarm::*;
 pub use date_time::{CalendarDateTime, DatePerhapsTime};
 pub use event::*;
 pub use other::*;
@@ -305,6 +307,12 @@ pub trait EventLike: Component {
     fn get_location(&self) -> Option<&str> {
         self.property_value("LOCATION")
     }
+
+    /// Set the ALARM for this event
+    /// [3.6.6.  Alarm Component](https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.6)
+    fn alarm(&mut self, trigger: impl Into<Trigger>, action: Action) -> &mut Self {
+        self.append_component(Alarm::with_trigger(trigger.into()).and_action(action))
+    }
 }
 
 macro_rules! event_impl {
@@ -378,6 +386,7 @@ component_impl! { Todo , String::from("VTODO")}
 event_impl! { Todo}
 
 component_impl! { Venue , String::from("VVENUE")}
+component_impl! { Alarm, String::from("VALARM") }
 
 #[cfg(test)]
 mod tests {
