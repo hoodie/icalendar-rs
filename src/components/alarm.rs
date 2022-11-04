@@ -15,20 +15,20 @@ impl Alarm {
     /// see also [Alarm Trigger Relationship](https://datatracker.ietf.org/doc/html/rfc5545#section-3.2.14)
     pub fn with_trigger<T: Into<Trigger>>(trigger: T) -> Self {
         let trigger: Trigger = trigger.into();
-        Alarm::default().append_property(trigger.into()).done()
+        Alarm::default().append_property(trigger).done()
     }
 
     /// add the [`ACTION`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.1) property
     pub fn and_action(&mut self, action: Action) -> Self {
         // self.add_property("ACTION", action.as_str());
-        self.append_property(action.into());
+        self.append_property(action);
         self.done()
     }
 
     /// add the [`ACTION`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.1) property
     pub fn action(&mut self, action: Action) -> &mut Self {
         // self.add_property("ACTION", action.as_str());
-        self.append_property(action.into());
+        self.append_property(action);
         self
     }
 
@@ -36,14 +36,14 @@ impl Alarm {
     /// TODO: add this to Event and Venue as well
     pub fn duration(&mut self, duration: Duration) -> &mut Self {
         // self.add_property("ACTION", action.as_str());
-        self.append_property(duration.into());
+        self.append_property(duration);
         self
     }
 
     /// add the [`REPEAT`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.2) property
     pub fn repeat<T: Copy + Clone + Into<Repeat>>(&mut self, repeat_count: T) -> &mut Self {
         let repeat: Repeat = repeat_count.into();
-        self.append_property(repeat.into());
+        self.append_property(repeat);
         self
     }
 

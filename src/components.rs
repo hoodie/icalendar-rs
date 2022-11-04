@@ -120,13 +120,13 @@ pub trait Component {
     }
 
     /// Append a given [`Property`]
-    fn append_property(&mut self, property: Property) -> &mut Self;
+    fn append_property(&mut self, property: impl Into<Property>) -> &mut Self;
 
     /// Append a given [`Component`]
     fn append_component(&mut self, child: impl Into<Other>) -> &mut Self;
 
     /// Adds a [`Property`] of which there may be many
-    fn append_multi_property(&mut self, property: Property) -> &mut Self;
+    fn append_multi_property(&mut self, property: impl Into<Property>) -> &mut Self;
 
     /// Construct and append a [`Property`]
     fn add_property(&mut self, key: &str, val: &str) -> &mut Self {
@@ -241,7 +241,7 @@ pub trait Component {
 
     /// Set the visibility class
     fn class(&mut self, class: Class) -> &mut Self {
-        self.append_property(class.into())
+        self.append_property(class)
     }
 
     /// Gets the visibility class
@@ -310,8 +310,9 @@ pub trait EventLike: Component {
 
     /// Set the ALARM for this event
     /// [3.6.6.  Alarm Component](https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.6)
-    fn alarm(&mut self, trigger: impl Into<Trigger>, action: Action) -> &mut Self {
-        self.append_component(Alarm::with_trigger(trigger.into()).and_action(action))
+    fn alarm<A: Into<Alarm>>(&mut self, alarm: A) -> &mut Self {
+        let alarm: Alarm = alarm.into();
+        self.append_component(alarm)
     }
 }
 
@@ -347,7 +348,8 @@ macro_rules! component_impl {
             }
 
             /// Adds a [`Property`]
-            fn append_property(&mut self, property: Property) -> &mut Self {
+            fn append_property(&mut self, property: impl Into<Property>) -> &mut Self {
+                let property = property.into();
                 self.inner
                     .properties
                     .insert(property.key().to_owned(), property);
@@ -360,8 +362,8 @@ macro_rules! component_impl {
             }
 
             /// Adds a [`Property`] of which there may be many
-            fn append_multi_property(&mut self, property: Property) -> &mut Self {
-                self.inner.multi_properties.push(property);
+            fn append_multi_property(&mut self, property: impl Into<Property>) -> &mut Self {
+                self.inner.multi_properties.push(property.into());
                 self
             }
         }
@@ -374,6 +376,14 @@ macro_rules! component_impl {
         impl From<$t> for Other {
             fn from(val: $t) -> Self {
                 (val.component_kind(), val.inner).into()
+            }
+        }
+
+        impl TryInto<String> for $t {
+            type Error = std::fmt::Error;
+
+            fn try_into(self) -> Result<String, Self::Error> {
+                self.try_into_string()
             }
         }
     };

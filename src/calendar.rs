@@ -86,8 +86,8 @@ impl Calendar {
     }
 
     /// Append a given `Property` to the `Calendar`
-    pub fn append_property(&mut self, property: Property) -> &mut Self {
-        self.properties.push(property);
+    pub fn append_property(&mut self, property: impl Into<Property>) -> &mut Self {
+        self.properties.push(property.into());
         self
     }
 

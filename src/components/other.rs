@@ -31,7 +31,8 @@ impl Component for Other {
     }
 
     /// Adds a `Property`
-    fn append_property(&mut self, property: Property) -> &mut Self {
+    fn append_property(&mut self, property: impl Into<Property>) -> &mut Self {
+        let property = property.into();
         self.inner
             .properties
             .insert(property.key().to_owned(), property);
@@ -39,8 +40,8 @@ impl Component for Other {
     }
 
     /// Adds a `Property` of which there may be many
-    fn append_multi_property(&mut self, property: Property) -> &mut Self {
-        self.inner.multi_properties.push(property);
+    fn append_multi_property(&mut self, property: impl Into<Property>) -> &mut Self {
+        self.inner.multi_properties.push(property.into());
         self
     }
 
