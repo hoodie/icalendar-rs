@@ -6,7 +6,6 @@ pub struct Other {
     pub(super) inner: InnerComponent,
 }
 
-
 impl Component for Other {
     /// Tells you what kind of `Component` this is
     ///

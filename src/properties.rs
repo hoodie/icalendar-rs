@@ -122,6 +122,16 @@ impl Property {
     }
 }
 
+impl TryInto<String> for Property {
+    type Error = std::fmt::Error;
+
+    fn try_into(self) -> Result<String, Self::Error> {
+        let mut out_string = String::new();
+        self.fmt_write(&mut out_string)?;
+        Ok(out_string)
+    }
+}
+
 /// This property defines the access classification for a calendar component.
 /// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.3>
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
