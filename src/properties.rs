@@ -81,6 +81,32 @@ impl Property {
         ValueType::from_str(&self.params.get("VALUE")?.val)
     }
 
+    // /// Returns the value as a certain type
+    // pub fn get_value<T>(&self) -> Result<T, E>
+    // where
+    //     T: std::str::FromStr,
+    //     E: std::error::Error,
+    //     <T as std::str::FromStr::Err>: E
+    // {
+    //     T::from_str(&self.val).ok()
+    // }
+
+    /// Returns the value as a certain type
+    pub fn get_value_as<F, T>(&self, converter: F) -> Option<T>
+    where
+        F: Fn(&str) -> Option<T>,
+    {
+        converter(&self.val)
+    }
+
+    /// Returns the value of a parameter as a certain type
+    pub fn get_param_as<F, T>(&self, key: &str, converter: F) -> Option<T>
+    where
+        F: Fn(&str) -> Option<T>,
+    {
+        self.params.get(key).and_then(|param| converter(&param.val))
+    }
+
     /// Appends a new parameter.
     pub fn append_parameter<I: Into<Parameter>>(&mut self, into_parameter: I) -> &mut Self {
         let parameter = into_parameter.into();

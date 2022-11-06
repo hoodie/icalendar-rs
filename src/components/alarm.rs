@@ -5,13 +5,22 @@ use self::properties::*;
 use super::*;
 
 /// VALARM [(RFC 5545, Section 3.6.6 )](https://tools.ietf.org/html/rfc5545#section-3.6.6)
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Alarm {
     pub(crate) inner: InnerComponent,
     // pub(crate) action: Option<Action>,
 }
 
 impl Alarm {
+    /// You are not supposed to create an empty Alarm by yourself since
+    /// this would allow leaving out certain fields that are required,
+    /// hench creating incompliant Alarms.
+    pub(self) fn default() -> Self {
+        Self {
+            inner: Default::default(),
+        }
+    }
+
     /// Creates a new Audio-
     /// [Alarm Component](https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.6)
     ///
@@ -132,9 +141,19 @@ impl Alarm {
     }
 
     /// Returns the get action of this [`Alarm`].
-    pub(crate) fn get_action(&self) -> Option<Action> {
+    #[cfg(test)]
+    pub(self) fn get_action(&self) -> Option<Action> {
         self.property_value("ACTION")
             .and_then(|p| Action::from_str(p).ok())
+    }
+
+    /// Returns the get action of this [`Alarm`].
+    #[cfg(test)]
+    pub(self) fn get_trigger(&self) -> Option<Trigger> {
+        self.inner
+            .properties
+            .get("TRIGGER")
+            .and_then(|prop| Trigger::try_from(prop).ok())
     }
 
     /// End of builder pattern.
@@ -155,11 +174,18 @@ impl Alarm {
 fn test_audio() {
     let alarm = dbg!(Alarm::audio((Duration::minutes(15), Related::Start)).done());
     assert_eq!(alarm.get_action(), Some(Action::Audio));
+    assert_eq!(
+        alarm.get_trigger(),
+        Some(Trigger::Duration(
+            Duration::minutes(15),
+            Related::Start.into()
+        ))
+    );
     // assert_eq!(alarm.get_trigger(), Some(_));
     // alarm.trigger= duration
     // alarm.trigger.related = start
     // alarm.trigger.repeat = 0
-    alarm.print();
+    alarm.print().unwrap();
 }
 
 #[test]
@@ -172,6 +198,9 @@ fn test_email() {
 }
 
 pub mod properties {
+
+    use crate::components::{alarm::properties::Parameter, date_time::parse_duration};
+
     use super::*;
 
     /// [rfc5545#section-3.8.6.1](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.1)
@@ -191,7 +220,7 @@ pub mod properties {
         Other(String),
     }
 
-    impl std::str::FromStr for Action {
+    impl FromStr for Action {
         type Err = ();
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -244,6 +273,14 @@ pub mod properties {
         }
     }
 
+    impl FromStr for Repeat {
+        type Err = ();
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            todo!()
+        }
+    }
+
     /// Alarm Trigger Relationship[rfc5545#section-3.2.14](https://datatracker.ietf.org/doc/html/rfc5545#section-3.2.14)
     #[derive(Copy, Clone, Debug, PartialEq, Eq)]
     pub enum Related {
@@ -258,6 +295,18 @@ pub mod properties {
             match related {
                 Related::Start => Parameter::new("RELATED", "START"),
                 Related::End => Parameter::new("RELATED", "END"),
+            }
+        }
+    }
+
+    impl FromStr for Related {
+        type Err = ();
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            match s {
+                "START" => Ok(Related::Start),
+                "END" => Ok(Related::End),
+                _ => Err(()),
             }
         }
     }
@@ -278,7 +327,7 @@ pub mod properties {
         /// Duration in relation to either Start or End of the event
         Duration(Duration, Option<Related>),
         /// Absolute DateTime of the Trigger
-        DateTime(DatePerhapsTime),
+        DateTime(CalendarDateTime),
     }
 
     impl From<Duration> for Trigger {
@@ -287,18 +336,58 @@ pub mod properties {
         }
     }
 
+    impl FromStr for Trigger {
+        type Err = ();
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            dbg!(s);
+            todo!()
+        }
+    }
+
     impl<T> From<T> for Trigger
     where
-        DatePerhapsTime: From<T>,
+        CalendarDateTime: From<T>,
     {
         fn from(dt: T) -> Self {
-            Trigger::DateTime(DatePerhapsTime::from(dt))
+            Trigger::DateTime(CalendarDateTime::from(dt))
         }
     }
 
     impl From<(Duration, Related)> for Trigger {
         fn from((duration, related): (Duration, Related)) -> Self {
             Trigger::Duration(duration, Some(related))
+        }
+    }
+
+    impl TryFrom<&Property> for Trigger {
+        type Error = ();
+        fn try_from(prop: &Property) -> Result<Self, Self::Error> {
+            match (prop.key(), prop.params().get("VALUE").map(Parameter::value)) {
+                ("TRIGGER", Some("DATE-TIME")) => {
+                    // date-time needs to be qualified "VALUE=DATE-TIME"
+                    if let Some(dt) = parse_utc_date_time(prop.value()) {
+                        Ok(Trigger::from(dt))
+                    } else {
+                        Err(())
+                    }
+                }
+                ("TRIGGER", Some("DURATION") | None) => {
+                    // duration is the assumed default or "VALUE=DURATION"
+                    let param_related = prop.get_param_as("RELATED", |s| Related::from_str(s).ok());
+
+                    // TODO: improve error handling here
+                    // TODO: yes I found icalendar-duration, let's find a way to integrate this if possible
+                    let parsed_duration = prop.get_value_as(parse_duration);
+
+                    if let Some(duration) = parsed_duration {
+                        Ok(Trigger::Duration(duration, param_related))
+                    } else {
+                        Err(())
+                    }
+                }
+                _ => Err(()),
+            }
         }
     }
 
@@ -315,7 +404,10 @@ pub mod properties {
                     Property::new_pre_alloc("TRIGGER".into(), duration.to_string())
                 }
 
-                Trigger::DateTime(dt) => dt.to_property("TRIGGER"),
+                Trigger::DateTime(dt) => dt
+                    .to_property("TRIGGER")
+                    .add_parameter("VALUE", "DATE-TIME")
+                    .done(),
             }
         }
     }
@@ -326,5 +418,44 @@ pub mod properties {
         let mut out = String::new();
         prop.fmt_write(&mut out).unwrap();
         dbg!(out);
+    }
+
+    /// adding triggers to Alarm component serializes them and so we need to re-parse to read them
+    /// I know this sucks, but let's do the refactoring of the internal representation elsewhere
+    #[test]
+    fn test_trigger_abs_from_str() {
+        let now: CalendarDateTime = Utc::now().into();
+
+        let alarm_with_abs_trigger = Alarm::default()
+            .append_property(Trigger::from(now.clone()))
+            .done();
+
+        alarm_with_abs_trigger.print().unwrap();
+
+        assert_eq!(
+            alarm_with_abs_trigger.get_trigger(),
+            Some(Trigger::DateTime(now))
+        );
+    }
+    
+    #[test]
+    fn test_trigger_dur_from_str() {
+        let dur = Duration::minutes(15);
+
+        let alarm_with_rel_trigger = Alarm::default()
+            .append_property(Trigger::from((Duration::minutes(15), Related::Start)))
+            .done();
+        let alarm_with_rel_start_trigger = Alarm::default()
+            .append_property(Trigger::from((dur, Related::Start)))
+            .done();
+
+        assert_eq!(
+            alarm_with_rel_trigger.get_trigger(),
+            Some(Trigger::Duration(dur, None))
+        );
+        assert_eq!(
+            alarm_with_rel_start_trigger.get_trigger(),
+            Some(Trigger::Duration(dur, Some(Related::Start)))
+        );
     }
 }
