@@ -363,14 +363,13 @@ pub mod properties {
     impl TryFrom<&Property> for Trigger {
         type Error = ();
         fn try_from(prop: &Property) -> Result<Self, Self::Error> {
-            match (prop.key(), prop.params().get("VALUE").map(Parameter::value)) {
+            match (
+                dbg!(prop.key()),
+                dbg!(prop.params().get("VALUE").map(Parameter::value)),
+            ) {
                 ("TRIGGER", Some("DATE-TIME")) => {
                     // date-time needs to be qualified "VALUE=DATE-TIME"
-                    if let Some(dt) = parse_utc_date_time(prop.value()) {
-                        Ok(Trigger::from(dt))
-                    } else {
-                        Err(())
-                    }
+                    CalendarDateTime::from_str(prop.value()).map(Trigger::from)
                 }
                 ("TRIGGER", Some("DURATION") | None) => {
                     // duration is the assumed default or "VALUE=DURATION"
@@ -424,7 +423,7 @@ pub mod properties {
     /// I know this sucks, but let's do the refactoring of the internal representation elsewhere
     #[test]
     fn test_trigger_abs_from_str() {
-        let now: CalendarDateTime = Utc::now().into();
+        let now: CalendarDateTime = Utc.ymd(2022, 11, 17).and_hms(21, 32, 45).into();
 
         let alarm_with_abs_trigger = Alarm::default()
             .append_property(Trigger::from(now.clone()))
@@ -432,12 +431,28 @@ pub mod properties {
 
         alarm_with_abs_trigger.print().unwrap();
 
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             alarm_with_abs_trigger.get_trigger(),
             Some(Trigger::DateTime(now))
         );
     }
-    
+
+    #[test]
+    fn test_trigger_abs_from_str_naive() {
+        let now: CalendarDateTime = NaiveDate::from_ymd(2022, 11, 17).and_hms(21, 32, 45).into();
+
+        let alarm_with_abs_trigger = Alarm::default()
+            .append_property(Trigger::from(now.clone()))
+            .done();
+
+        alarm_with_abs_trigger.print().unwrap();
+
+        pretty_assertions::assert_eq!(
+            alarm_with_abs_trigger.get_trigger(),
+            Some(Trigger::DateTime(now))
+        );
+    }
+
     #[test]
     fn test_trigger_dur_from_str() {
         let dur = Duration::minutes(15);
@@ -449,11 +464,11 @@ pub mod properties {
             .append_property(Trigger::from((dur, Related::Start)))
             .done();
 
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             alarm_with_rel_trigger.get_trigger(),
             Some(Trigger::Duration(dur, None))
         );
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             alarm_with_rel_start_trigger.get_trigger(),
             Some(Trigger::Duration(dur, Some(Related::Start)))
         );
