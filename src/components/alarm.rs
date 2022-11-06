@@ -457,17 +457,23 @@ pub mod properties {
     fn test_trigger_dur_from_str() {
         let dur = Duration::minutes(15);
 
-        let alarm_with_rel_trigger = Alarm::default()
-            .append_property(Trigger::from((Duration::minutes(15), Related::Start)))
-            .done();
-        let alarm_with_rel_start_trigger = Alarm::default()
-            .append_property(Trigger::from((dur, Related::Start)))
-            .done();
+        let alarm_with_rel_trigger = Alarm::default().append_property(Trigger::from(dur)).done();
+        alarm_with_rel_trigger.print().unwrap();
 
         pretty_assertions::assert_eq!(
             alarm_with_rel_trigger.get_trigger(),
             Some(Trigger::Duration(dur, None))
         );
+    }
+
+    #[test]
+    fn test_trigger_dur_from_str_start() {
+        let dur = Duration::minutes(15);
+        let alarm_with_rel_start_trigger = Alarm::default()
+            .append_property(Trigger::from((dur, Related::Start)))
+            .done();
+
+        alarm_with_rel_start_trigger.print().unwrap();
         pretty_assertions::assert_eq!(
             alarm_with_rel_start_trigger.get_trigger(),
             Some(Trigger::Duration(dur, Some(Related::Start)))
