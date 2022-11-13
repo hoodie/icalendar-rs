@@ -357,7 +357,10 @@ mod tests {
 
     #[test]
     fn get_date_times_naive() {
-        let naive_date_time = NaiveDate::from_ymd(2001, 3, 13).and_hms(14, 15, 16);
+        let naive_date_time = NaiveDate::from_ymd_opt(2001, 3, 13)
+            .unwrap()
+            .and_hms_opt(14, 15, 16)
+            .unwrap();
         let event = Event::new()
             .starts(naive_date_time)
             .ends(naive_date_time)
@@ -368,7 +371,7 @@ mod tests {
 
     #[test]
     fn get_date_times_utc() {
-        let utc_date_time = Utc.ymd(2001, 3, 13).and_hms(14, 15, 16);
+        let utc_date_time = Utc.with_ymd_and_hms(2001, 3, 13, 14, 15, 16).unwrap();
         let event = Event::new()
             .timestamp(utc_date_time)
             .starts(utc_date_time)
@@ -381,7 +384,10 @@ mod tests {
 
     #[test]
     fn get_date_times_tzid() {
-        let date_time = NaiveDate::from_ymd(2001, 3, 13).and_hms(14, 15, 16);
+        let date_time = NaiveDate::from_ymd_opt(2001, 3, 13)
+            .unwrap()
+            .and_hms_opt(14, 15, 16)
+            .unwrap();
         let date_time_tzid = CalendarDateTime::WithTimezone {
             date_time,
             tzid: "Pacific/Auckland".to_string(),
@@ -396,7 +402,7 @@ mod tests {
 
     #[test]
     fn get_dates_naive() {
-        let naive_date = NaiveDate::from_ymd(2001, 3, 13);
+        let naive_date = NaiveDate::from_ymd_opt(2001, 3, 13).unwrap();
         let event = Event::new().starts(naive_date).ends(naive_date).done();
         assert_eq!(event.get_start(), Some(naive_date.into()));
         assert_eq!(event.get_end(), Some(naive_date.into()));

@@ -33,10 +33,11 @@ END:VCALENDAR\r
 #[test]
 fn test_calendar_to_string() {
     let mut calendar = Calendar::new();
-    let cest_date = FixedOffset::east(2 * 3600)
-        .ymd(2014, 7, 8)
-        .and_hms(9, 10, 11);
-    let utc_date = Utc.ymd(2014, 7, 9).and_hms(9, 10, 11);
+    let cest_date = FixedOffset::east_opt(2 * 3600)
+        .unwrap()
+        .with_ymd_and_hms(2014, 7, 8, 9, 10, 11)
+        .unwrap();
+    let utc_date = Utc.with_ymd_and_hms(2014, 7, 9, 9, 10, 11).unwrap();
     let event = Event::new()
         .status(EventStatus::Tentative)
         .starts(cest_date.with_timezone(&Utc))

@@ -97,7 +97,7 @@ mod tests {
 
     #[test]
     fn get_properties_set() {
-        let completed = Utc.ymd(2001, 3, 13).and_hms(14, 15, 16);
+        let completed = Utc.with_ymd_and_hms(2001, 3, 13, 14, 15, 16).unwrap();
         let todo = Todo::new()
             .percent_complete(42)
             .status(TodoStatus::NeedsAction)
@@ -110,14 +110,17 @@ mod tests {
 
     #[test]
     fn get_date_times_naive() {
-        let naive_date_time = NaiveDate::from_ymd(2001, 3, 13).and_hms(14, 15, 16);
+        let naive_date_time = NaiveDate::from_ymd_opt(2001, 3, 13)
+            .unwrap()
+            .and_hms_opt(14, 15, 16)
+            .unwrap();
         let todo = Todo::new().due(naive_date_time).done();
         assert_eq!(todo.get_due(), Some(naive_date_time.into()));
     }
 
     #[test]
     fn get_date_times_utc() {
-        let utc_date_time = Utc.ymd(2001, 3, 13).and_hms(14, 15, 16);
+        let utc_date_time = Utc.with_ymd_and_hms(2001, 3, 13, 14, 15, 16).unwrap();
         let todo = Todo::new()
             .due(utc_date_time)
             .completed(utc_date_time)
@@ -128,7 +131,7 @@ mod tests {
 
     #[test]
     fn get_dates_naive() {
-        let naive_date = NaiveDate::from_ymd(2001, 3, 13);
+        let naive_date = NaiveDate::from_ymd_opt(2001, 3, 13).unwrap();
         let todo = Todo::new().due(naive_date).done();
         assert_eq!(todo.get_due(), Some(naive_date.into()));
     }
