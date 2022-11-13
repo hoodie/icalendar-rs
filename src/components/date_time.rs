@@ -8,7 +8,7 @@ const NAIVE_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%S";
 const UTC_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";
 const NAIVE_DATE_FORMAT: &str = "%Y%m%d";
 
-#[deprecated(note = "use `CalendarDateTime::from_str` if you can")]
+// #[deprecated(note = "use `CalendarDateTime::from_str` if you can")]
 pub(crate) fn parse_utc_date_time(s: &str) -> Option<DateTime<Utc>> {
     Utc.datetime_from_str(s, UTC_DATE_TIME_FORMAT).ok()
 }
@@ -98,6 +98,7 @@ impl CalendarDateTime {
     pub(crate) fn from_utc_string(s: &str) -> Option<Self> {
         parse_utc_date_time(s).map(CalendarDateTime::Utc)
     }
+
     pub(crate) fn from_naive_string(s: &str) -> Option<Self> {
         parse_naive_date_time(s).map(CalendarDateTime::Floating)
     }
@@ -169,6 +170,7 @@ impl From<DateTime<Utc>> for DatePerhapsTime {
     }
 }
 
+#[allow(deprecated)]
 impl From<Date<Utc>> for DatePerhapsTime {
     fn from(dt: Date<Utc>) -> Self {
         Self::Date(dt.naive_utc())

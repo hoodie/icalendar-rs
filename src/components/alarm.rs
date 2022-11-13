@@ -120,10 +120,10 @@ impl Alarm {
     /// [`REPEAT`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.2) and
     /// [`DURATION`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.5) property,
     /// which must not occur independent from one another
-    pub fn duration_and_repeat<T: Copy + Clone + Into<Repeat>>(
+    pub fn duration_and_repeat<R: Copy + Clone + Into<Repeat>>(
         &mut self,
         duration: Duration,
-        repeat_count: T,
+        repeat_count: R,
     ) -> &mut Self {
         // self.add_property("ACTION", action.as_str());
         self.append_property(duration);
@@ -147,13 +147,22 @@ impl Alarm {
             .and_then(|p| Action::from_str(p).ok())
     }
 
-    /// Returns the get action of this [`Alarm`].
+    /// Returns the trigger of this [`Alarm`].
     #[cfg(test)]
     pub(self) fn get_trigger(&self) -> Option<Trigger> {
         self.inner
             .properties
             .get("TRIGGER")
             .and_then(|prop| Trigger::try_from(prop).ok())
+    }
+
+    /// Returns the repeat count of this [`Alarm`].
+    #[cfg(test)]
+    pub(self) fn get_repeat(&self) -> usize {
+        self.inner
+            .property_value("REPEAT")
+            .and_then(|repeat| repeat.parse().ok())
+            .unwrap_or(0)
     }
 
     /// End of builder pattern.
@@ -172,7 +181,9 @@ impl Alarm {
 
 #[test]
 fn test_audio() {
-    let alarm = dbg!(Alarm::audio((Duration::minutes(15), Related::Start)).done());
+    let alarm = Alarm::audio((Duration::minutes(15), Related::Start))
+        .duration_and_repeat(Duration::minutes(5), 3)
+        .done();
     assert_eq!(alarm.get_action(), Some(Action::Audio));
     assert_eq!(
         alarm.get_trigger(),
@@ -181,10 +192,12 @@ fn test_audio() {
             Related::Start.into()
         ))
     );
-    // assert_eq!(alarm.get_trigger(), Some(_));
-    // alarm.trigger= duration
-    // alarm.trigger.related = start
-    // alarm.trigger.repeat = 0
+    assert_eq!(
+        alarm.get_trigger().unwrap().as_duration(),
+        Some(&Duration::minutes(15))
+    );
+    assert_eq!(alarm.get_trigger().unwrap().related(), Some(Related::Start));
+    assert_eq!(alarm.get_repeat(), 3);
     alarm.print().unwrap();
 }
 
@@ -192,6 +205,7 @@ fn test_audio() {
 fn test_display() {
     todo!()
 }
+
 #[test]
 fn test_email() {
     todo!()
@@ -330,6 +344,27 @@ pub mod properties {
         DateTime(CalendarDateTime),
     }
 
+    impl Trigger {
+        pub fn related(&self) -> Option<Related> {
+            match self {
+                Trigger::Duration(_, related) => *related,
+                Trigger::DateTime(_) => None,
+            }
+        }
+        pub fn as_duration(&self) -> Option<&Duration> {
+            match self {
+                Trigger::Duration(duration, _) => Some(duration),
+                Trigger::DateTime(_) => None,
+            }
+        }
+        pub fn as_date_time(&self) -> Option<&CalendarDateTime> {
+            match self {
+                Trigger::Duration(duration, _) => None,
+                Trigger::DateTime(dt) => Some(dt),
+            }
+        }
+    }
+
     impl From<Duration> for Trigger {
         fn from(duration: Duration) -> Self {
             Trigger::Duration(duration, None)
@@ -413,7 +448,7 @@ pub mod properties {
 
     #[test]
     fn test_trigger() {
-        let prop: Property = dbg!(Trigger::from(Duration::weeks(14)).into());
+        let prop: Property = Trigger::from(Duration::weeks(14)).into();
         let mut out = String::new();
         prop.fmt_write(&mut out).unwrap();
         dbg!(out);
@@ -423,7 +458,11 @@ pub mod properties {
     /// I know this sucks, but let's do the refactoring of the internal representation elsewhere
     #[test]
     fn test_trigger_abs_from_str() {
-        let now: CalendarDateTime = Utc.ymd(2022, 11, 17).and_hms(21, 32, 45).into();
+        let now: CalendarDateTime = NaiveDate::from_ymd_opt(2022, 11, 17)
+            .unwrap()
+            .and_hms_opt(21, 32, 45)
+            .unwrap()
+            .into();
 
         let alarm_with_abs_trigger = Alarm::default()
             .append_property(Trigger::from(now.clone()))
@@ -439,7 +478,11 @@ pub mod properties {
 
     #[test]
     fn test_trigger_abs_from_str_naive() {
-        let now: CalendarDateTime = NaiveDate::from_ymd(2022, 11, 17).and_hms(21, 32, 45).into();
+        let now: CalendarDateTime = NaiveDate::from_ymd_opt(2022, 11, 17)
+            .unwrap()
+            .and_hms_opt(21, 32, 45)
+            .unwrap()
+            .into();
 
         let alarm_with_abs_trigger = Alarm::default()
             .append_property(Trigger::from(now.clone()))
