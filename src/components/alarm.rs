@@ -377,7 +377,7 @@ pub mod properties {
 
                     // TODO: improve error handling here
                     // TODO: yes I found icalendar-duration, let's find a way to integrate this if possible
-                    let parsed_duration = prop.get_value_as(parse_duration);
+                    let parsed_duration = dbg!(prop.get_value_as(parse_duration));
 
                     if let Some(duration) = parsed_duration {
                         Ok(Trigger::Duration(duration, param_related))

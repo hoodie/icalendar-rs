@@ -43,16 +43,17 @@ fn test_alarm_to_string() {
         //.repeat(4)
         .status(TodoStatus::NeedsAction)
         .summary("Submit Income Taxes")
-        .append_component(
-            Alarm::with_trigger(Trigger::from(Utc.ymd(1998, 4, 3).and_hms(12, 0, 0)))
-                .duration(chrono::Duration::hours(1))
-                .uid("OverwriteForConsistency")
-                .action(Action::Audio)
-                .repeat(4)
-                .add_property("DTSTAMP", "19980130T134500Z")
-                .done(),
-        )
+        // .append_component(
+        //     Alarm::with_trigger(Trigger::from(Utc.ymd(1998, 4, 3).and_hms(12, 0, 0)))
+        //         .duration(chrono::Duration::hours(1))
+        //         .uid("OverwriteForConsistency")
+        //         .action(Action::Audio)
+        //         .repeat(4)
+        //         .add_property("DTSTAMP", "19980130T134500Z")
+        //         .done(),
+        // )
         .done();
+        todo!();
     calendar.push(todo);
     assert_eq!(calendar.to_string(), EXPECTED_CAL_CONTENT);
 }

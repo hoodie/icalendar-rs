@@ -22,9 +22,9 @@ pub(crate) fn format_utc_date_time(utc_dt: DateTime<Utc>) -> String {
 }
 
 pub(crate) fn parse_duration(s: &str) -> Option<Duration> {
-    iso8601::duration(s)
+    iso8601::duration(dbg!(s))
         .ok()
-        .and_then(|iso| Duration::from_std(iso.into()).ok())
+        .and_then(|iso| Duration::from_std(dbg!(iso).into()).ok())
 }
 
 pub(crate) fn naive_date_to_property(date: NaiveDate, key: &str) -> Property {
@@ -77,7 +77,7 @@ impl CalendarDateTime {
         {
             Some(naive_date_time.into())
         } else {
-            parse_utc_date_time(value).map(Into::into)
+            Self::from_str(value).ok()
         }
     }
 
