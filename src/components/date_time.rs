@@ -65,6 +65,15 @@ pub enum CalendarDateTime {
 }
 
 impl CalendarDateTime {
+    /// this is not actually now, just a fixed date for testing
+    pub(crate) fn now() -> Self {
+        NaiveDate::from_ymd_opt(2015, 10, 26)
+            .unwrap()
+            .and_hms_opt(1, 22, 00)
+            .unwrap()
+            .into()
+    }
+
     pub(crate) fn from_property(property: &Property) -> Option<Self> {
         let value = property.value();
         if let Some(tzid) = property.params().get("TZID") {

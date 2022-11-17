@@ -50,11 +50,7 @@ impl InnerComponent {
         }
     }
     pub fn property_value(&self, key: &str) -> Option<&str> {
-        Some(
-            self.properties
-                .get(key)?
-                .value(),
-        )
+        Some(self.properties.get(key)?.value())
     }
 }
 

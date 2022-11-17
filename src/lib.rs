@@ -55,6 +55,7 @@
 //!   [`chrono::DateTime<Utc>`](chrono::DateTime) are provided for ergonomics, the latter also restoring API
 //!   compatibility in case of UTC date-times.
 
+#![allow(deprecated)]
 #![warn(
     missing_docs,
     missing_copy_implementations,

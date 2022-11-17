@@ -12,7 +12,6 @@ fn main() {
                 // .starts(Utc::now())
                 // .class(Class::Confidential)
                 // .ends(Utc::now() + Duration::days(1))
-
                 // .alarm((Duration::days(1), Related::End), Action::Audio)
                 // .alarm(Utc::now(), Action::Audio)
                 .alarm(Alarm::audio((Duration::minutes(15), Related::Start)))

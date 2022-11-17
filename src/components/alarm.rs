@@ -73,9 +73,11 @@ impl Alarm {
     ///  and MAY occur more than once.
     ///
     /// `x-prop / iana-prop`
-    pub fn display(description: String, trigger: impl Into<Trigger>) -> Self {
+    // TODO: make descript `impl ToString`
+    pub fn display(description: &str, trigger: impl Into<Trigger>) -> Self {
         let trigger: Trigger = trigger.into();
         Alarm::default()
+            .add_property("DESCRIPTION", description)
             .append_property(Action::Display)
             .append_property(trigger)
             .done()
@@ -156,6 +158,12 @@ impl Alarm {
             .and_then(|prop| Trigger::try_from(prop).ok())
     }
 
+    /// Returns the description of this [`Alarm`].
+    #[cfg(test)]
+    pub(self) fn get_description(&self) -> Option<&str> {
+        self.inner.property_value("DESCRIPTION")
+    }
+
     /// Returns the repeat count of this [`Alarm`].
     #[cfg(test)]
     pub(self) fn get_repeat(&self) -> usize {
@@ -203,7 +211,12 @@ fn test_audio() {
 
 #[test]
 fn test_display() {
-    todo!()
+    let now = CalendarDateTime::now();
+
+    let alarm = Alarm::display("test alarm with display", now.clone());
+    assert_eq!(alarm.get_action(), Some(Action::Display));
+    assert_eq!(alarm.get_trigger().unwrap().as_date_time().unwrap(), &now);
+    assert_eq!(alarm.get_description(), Some("test alarm with display"));
 }
 
 #[test]
