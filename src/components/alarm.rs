@@ -77,9 +77,9 @@ impl Alarm {
     pub fn display(description: &str, trigger: impl Into<Trigger>) -> Self {
         let trigger: Trigger = trigger.into();
         Alarm::default()
-            .add_property("DESCRIPTION", description)
             .append_property(Action::Display)
             .append_property(trigger)
+            .add_property("DESCRIPTION", description)
             .done()
     }
 
@@ -108,13 +108,13 @@ impl Alarm {
     ///  and MAY occur more than once.
     ///
     /// `attach / x-prop / iana-prop`
-    pub fn email(description: String, trigger: impl Into<Trigger>, summary: String) -> Self {
+    pub fn email(description: &str, trigger: impl Into<Trigger>, summary: &str) -> Self {
         let trigger: Trigger = trigger.into();
         Alarm::default()
             .append_property(Action::Email)
             .append_property(trigger)
-            // .append_property(("DESCRIPTION", description))
-            // .append_property(("SUMMARY", summary))
+            .add_property("DESCRIPTION", description)
+            .add_property("SUMMARY", summary)
             .done()
     }
 
@@ -178,7 +178,6 @@ impl Alarm {
     pub fn done(&mut self) -> Self {
         Alarm {
             inner: self.inner.done(),
-            // TODO: add default action = None
         }
     }
 
@@ -221,7 +220,15 @@ fn test_display() {
 
 #[test]
 fn test_email() {
-    todo!()
+    let now = CalendarDateTime::now();
+
+    let alarm = Alarm::email("test alarm with email", now.clone(), "important email");
+    assert_eq!(alarm.get_action(), Some(Action::Email));
+    assert_eq!(alarm.get_trigger().unwrap().as_date_time().unwrap(), &now);
+    assert_eq!(alarm.get_description(), Some("test alarm with email"));
+    assert_eq!(alarm.get_summary(), Some("important email"));
+    todo!("add attendee handling");
+    // assert_eq!(alarm.get_attendees(), Vec(todo!()));
 }
 
 pub mod properties {
@@ -534,5 +541,58 @@ pub mod properties {
             alarm_with_rel_start_trigger.get_trigger(),
             Some(Trigger::Duration(dur, Some(Related::Start)))
         );
+    }
+
+    pub mod attendee {
+
+        pub enum CuType {
+            Group,
+            Resouce,
+            Room,
+            Unknown,
+            Other(String)
+        }
+
+        /// [rfc5545#section-3.8.4.1](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.4.1)
+        /// 
+        /// ```
+        ///   Format Definition:  This property is defined by the following
+        ///      notation:
+        ///
+        ///       attendee   = "ATTENDEE" attparam ":" cal-address CRLF
+        ///
+        ///       attparam   = *(
+        ///                  ;
+        ///                  ; The following are OPTIONAL,
+        ///                  ; but MUST NOT occur more than once.
+        ///                  ;
+        ///                  (";" cutypeparam) / (";" memberparam) /
+        ///                  (";" roleparam) / (";" partstatparam) /
+        ///                  (";" rsvpparam) / (";" deltoparam) /
+        ///                  (";" delfromparam) / (";" sentbyparam) /
+        ///                  (";" cnparam) / (";" dirparam) /
+        ///                  (";" languageparam) /
+        ///                  ;
+        ///                  ; The following is OPTIONAL,
+        ///                  ; and MAY occur more than once.
+        ///                  ;
+        ///                  (";" other-param)
+        ///                  ;
+        /// ```
+        pub struct Attendee {
+            /// calendar user type
+            /// <https://www.rfc-editor.org/rfc/rfc5545#section-3.2.3>
+            cutype: Option<()>,
+            member: Option<()>,
+            role: Option<()>,
+            partsat: Option<()>,
+            rsvp: Option<()>,
+            delto: Option<()>,
+            delfrom: Option<()>,
+            sendby: Option<()>,
+            cn: Option<()>,
+            dir: Option<()>,
+            dinguager: Option<()>,
+        }
     }
 }
