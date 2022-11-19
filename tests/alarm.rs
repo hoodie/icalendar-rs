@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use chrono::*;
 use icalendar::*;
 use pretty_assertions::assert_eq;
