@@ -38,7 +38,7 @@ version = "1"
 pretty_assertions = "1"
 
 [features]
-default = []
+default = ["parser"]
 parser = ["nom"]
 
 [package.metadata.docs.rs]

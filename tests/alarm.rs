@@ -22,7 +22,7 @@ ACTION:AUDIO\r
 DTSTAMP:19980130T134500Z\r
 DURATION:PT3600S\r
 REPEAT:4\r
-TRIGGER:19980403T120000Z\r
+TRIGGER;VALUE=DATE-TIME:19980403T120000Z\r
 UID:OverwriteForConsistency\r
 END:VALARM\r
 END:VTODO\r
@@ -46,19 +46,27 @@ fn test_alarm_to_string() {
                 .and_hms_opt(0, 0, 0)
                 .unwrap(),
         )
-        //.repeat(4)
         .status(TodoStatus::NeedsAction)
         .summary("Submit Income Taxes")
-        // .append_component(
-        //     Alarm::with_trigger(Trigger::from(Utc.ymd(1998, 4, 3).and_hms(12, 0, 0)))
-        //         .duration(chrono::Duration::hours(1))
-        //         .uid("OverwriteForConsistency")
-        //         .action(Action::Audio)
-        //         .repeat(4)
-        //         .add_property("DTSTAMP", "19980130T134500Z")
-        //         .done(),
-        // )
+        .append_component(
+            Alarm::audio(
+                Utc.ymd_opt(1998, 4, 3)
+                    .unwrap()
+                    .and_hms_opt(12, 0, 0)
+                    .unwrap(),
+            )
+            .duration_and_repeat(chrono::Duration::hours(1), 4)
+            .uid("OverwriteForConsistency")
+            .add_property("DTSTAMP", "19980130T134500Z")
+            .done(),
+        )
         .done();
     calendar.push(todo);
     assert_eq!(calendar.to_string(), EXPECTED_CAL_CONTENT);
+
+    #[cfg(feature = "parser")]
+    {
+        let reparse = Calendar::from_str(&calendar.to_string()).unwrap();
+        println!("{:?}", reparse);
+    }
 }

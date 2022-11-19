@@ -131,6 +131,12 @@ impl From<Component<'_>> for InnerComponent {
                 .into_iter()
                 .map(|p| (p.name.clone().into_owned().into(), p.into()))
                 .collect(),
+            components: component
+                .components
+                .into_iter()
+                .map(|c| InnerComponent::from(c))
+                .map(|c| Other::from(c))
+                .collect(),
             multi_properties: Default::default(),
         }
     }

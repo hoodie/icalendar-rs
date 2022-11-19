@@ -77,14 +77,17 @@ impl Alarm {
     pub fn display(description: &str, trigger: impl Into<Trigger>) -> Self {
         let trigger: Trigger = trigger.into();
         Alarm::default()
-            .add_property("DESCRIPTION", description)
             .append_property(Action::Display)
             .append_property(trigger)
+            .add_property("DESCRIPTION", description)
             .done()
     }
 
     /// Creates a new Email-
+    ///
     /// [Alarm Component](https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.6)
+    ///
+    /// TODO: this requires [Attendee support](https://www.rfc-editor.org/rfc/rfc5545#section-3.8.4.1)
     ///
     /// ## Definition
     ///
@@ -108,13 +111,13 @@ impl Alarm {
     ///  and MAY occur more than once.
     ///
     /// `attach / x-prop / iana-prop`
-    pub fn email(description: String, trigger: impl Into<Trigger>, summary: String) -> Self {
+    fn email(description: &str, trigger: impl Into<Trigger>, summary: &str) -> Self {
         let trigger: Trigger = trigger.into();
         Alarm::default()
             .append_property(Action::Email)
             .append_property(trigger)
-            // .append_property(("DESCRIPTION", description))
-            // .append_property(("SUMMARY", summary))
+            .add_property("DESCRIPTION", description)
+            .add_property("SUMMARY", summary)
             .done()
     }
 
@@ -178,7 +181,6 @@ impl Alarm {
     pub fn done(&mut self) -> Self {
         Alarm {
             inner: self.inner.done(),
-            // TODO: add default action = None
         }
     }
 
@@ -220,8 +222,17 @@ fn test_display() {
 }
 
 #[test]
+#[ignore]
 fn test_email() {
-    todo!()
+    let now = CalendarDateTime::now();
+
+    let alarm = Alarm::email("test alarm with email", now.clone(), "important email");
+    assert_eq!(alarm.get_action(), Some(Action::Email));
+    assert_eq!(alarm.get_trigger().unwrap().as_date_time().unwrap(), &now);
+    assert_eq!(alarm.get_description(), Some("test alarm with email"));
+    assert_eq!(alarm.get_summary(), Some("important email"));
+    todo!("add attendee handling");
+    // assert_eq!(alarm.get_attendees(), Vec(todo!()));
 }
 
 pub mod properties {

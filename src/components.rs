@@ -24,7 +24,8 @@ pub use venue::*;
 pub(crate) struct InnerComponent {
     pub properties: BTreeMap<String, Property>,
     pub multi_properties: Vec<Property>,
-    pub components: Vec<Other>,
+    // pub components: Vec<InnerComponent>,
+    pub components: Vec<Other>, // TODO: maybe also a BTreeMap?
 }
 
 impl From<Other> for InnerComponent {
