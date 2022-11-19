@@ -111,6 +111,7 @@ impl Alarm {
     ///  and MAY occur more than once.
     ///
     /// `attach / x-prop / iana-prop`
+    #[allow(dead_code)]
     fn email(description: &str, trigger: impl Into<Trigger>, summary: &str) -> Self {
         let trigger: Trigger = trigger.into();
         Alarm::default()
@@ -369,18 +370,23 @@ pub mod properties {
     }
 
     impl Trigger {
+        /// Returns the containing [`Related`] if the [`Trigger`] contains one
         pub fn related(&self) -> Option<Related> {
             match self {
                 Trigger::Duration(_, related) => *related,
                 Trigger::DateTime(_) => None,
             }
         }
+
+        /// Returns the containing [`Duration`] if the [`Trigger`] contains one
         pub fn as_duration(&self) -> Option<&Duration> {
             match self {
                 Trigger::Duration(duration, _) => Some(duration),
                 Trigger::DateTime(_) => None,
             }
         }
+
+        /// Returns the containing [`CalendarDateTime`] if the [`Trigger`] contains one
         pub fn as_date_time(&self) -> Option<&CalendarDateTime> {
             match self {
                 Trigger::Duration(duration, _) => None,

@@ -135,7 +135,7 @@ impl From<Component<'_>> for InnerComponent {
                 .components
                 .into_iter()
                 .map(|c| InnerComponent::from(c))
-                .map(|c| Other::from(c))
+                //.map(|c| Other::from(c))
                 .collect(),
             multi_properties: Default::default(),
         }

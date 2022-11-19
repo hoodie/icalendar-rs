@@ -66,6 +66,7 @@ pub enum CalendarDateTime {
 
 impl CalendarDateTime {
     /// this is not actually now, just a fixed date for testing
+    #[cfg(test)]
     pub(crate) fn now() -> Self {
         NaiveDate::from_ymd_opt(2015, 10, 26)
             .unwrap()

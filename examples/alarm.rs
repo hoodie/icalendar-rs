@@ -3,35 +3,87 @@ use icalendar::*;
 
 fn main() {
     let mut calendar = Calendar::new();
-    let todo = Todo::new()
-        .uid("uid4@example.com")
-        .add_property("DTSTAMP", "19980130T134500Z")
-        .sequence(2)
+
+    let now = Utc::now();
+    let soon = Utc::now() + Duration::minutes(12);
+    let tomorrow = Utc::now() + Duration::days(1);
+
+    let todo_test_audio = Todo::new()
+        .summary("TODO with audio alarm -15min")
+        .uid("todo_test_audio")
+        .sequence(1)
         //.organizer("")
-        .starts(Utc.with_ymd_and_hms(1998, 1, 30, 13, 45, 0).unwrap())
-        // .due(Utc.ymd(1998, 4, 15).and_hms(0, 0, 0))
-        .due(
-            NaiveDate::from_ymd_opt(1998, 4, 15)
-                .unwrap()
-                .and_hms_opt(0, 0, 0)
-                .unwrap(),
-        )
+        .starts(now)
+        .due(soon)
         .status(TodoStatus::NeedsAction)
-        .summary("Submit Income Taxes")
+        .percent_complete(98)
         .append_component(
-            Alarm::audio(
-                Utc.ymd_opt(1998, 4, 3)
-                    .unwrap()
-                    .and_hms_opt(12, 0, 0)
-                    .unwrap(),
+            Alarm::audio(-Duration::minutes(10))
+                .duration_and_repeat(chrono::Duration::minutes(1), 4)
+                .uid("todo_test_audio_alarm")
+                .done(),
+        )
+        .done();
+
+    let event_test_display = Event::new()
+        .summary("test event")
+        .description("here I have something really important to do")
+        .starts(Utc::now() + Duration::minutes(5))
+        .class(Class::Confidential)
+        .ends(Utc::now() + Duration::hours(1))
+        .append_component(
+            Alarm::display(
+                "you should test your implementation",
+                Utc::now() + Duration::minutes(1)
             )
-            .duration_and_repeat(chrono::Duration::hours(1), 4)
-            .uid("OverwriteForConsistency")
-            .add_property("DTSTAMP", "19980130T134500Z")
+            .duration_and_repeat(chrono::Duration::minutes(1), 4)
+            .uid("todo_test_display_alarm")
             .done(),
         )
         .done();
-    calendar.push(todo);
+
+    let todo_test_display = Todo::new()
+        .summary("TODO with display alarm now + 1 min")
+        .uid("todo_test_display")
+        .sequence(3)
+        //.organizer("")
+        .starts(now)
+        .due(soon)
+        .status(TodoStatus::NeedsAction)
+        .percent_complete(98)
+        .append_component(
+            Alarm::display(
+                "you should test your implementation",
+                -Duration::minutes(10),
+            )
+            .duration_and_repeat(chrono::Duration::minutes(1), 4)
+            .uid("todo_test_display_alarm")
+            .done(),
+        )
+        .done();
+
+    let todo_taxes = Todo::new()
+        .summary("Submit Income Taxes")
+        .uid("todo_taxes")
+        .sequence(4)
+        //.organizer("")
+        .starts(now)
+        .due(tomorrow)
+        .status(TodoStatus::NeedsAction)
+        .append_component(
+            Alarm::audio(now + Duration::minutes(1))
+                .duration_and_repeat(chrono::Duration::minutes(1), 4)
+                .uid("todo_taxes_alarm")
+                .done(),
+        )
+        .done();
+
+    calendar.push(event_test_display);
+    calendar.push(todo_test_audio);
+    calendar.push(todo_test_display);
+    calendar.push(todo_taxes);
+
+    println!("{calendar}");
 
     #[cfg(feature = "parser")]
     {
