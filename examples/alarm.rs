@@ -34,7 +34,7 @@ fn main() {
         .append_component(
             Alarm::display(
                 "you should test your implementation",
-                Utc::now() + Duration::minutes(1)
+                Utc::now() + Duration::minutes(1),
             )
             .duration_and_repeat(chrono::Duration::minutes(1), 4)
             .uid("todo_test_display_alarm")
