@@ -178,6 +178,13 @@ pub trait Component {
         self.add_property("PRIORITY", &priority.to_string())
     }
 
+    // /// Add the [`ATTACH`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.1) property
+    // /// TODO: might have to move to Component
+    // pub fn attach(&mut self, attachment: ) -> &mut Self {
+    //     todo!()
+    //     // self.append_multi_property(todo!())
+    // }
+
     /// Gets the relative priority.
     ///
     /// Ranges from 0 to 10.
