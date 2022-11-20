@@ -3,6 +3,11 @@ on: [push, pull_request]
 name: Continuous Integration
 
 jobs:
+  semver-check:
+    name: Check semver
+    steps:
+      - uses: obi1kenobi/cargo-semver-checks-action@v1
+
   check:
     name: Check
     runs-on: ubuntu-latest
