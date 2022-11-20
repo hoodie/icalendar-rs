@@ -1,7 +1,8 @@
 #![allow(unused_variables)]
 use std::{collections::HashMap, fmt::Debug, str::FromStr};
 
-pub use self::properties::Related;
+pub use self::properties::{Related, Trigger};
+
 use self::properties::*;
 use super::*;
 
@@ -400,6 +401,9 @@ pub mod properties {
             Ok(String::from("REPEAT:0\r\n"))
         )
     }
+
+    /// Describes when an alarm is supposed to occure.
+    ///
     /// [RFC 5545, Section 3.8.6.3](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.6.3),
     /// see also [Alarm Trigger Relationship](https://datatracker.ietf.org/doc/html/rfc5545#section-3.2.14)
     /// This property specifies when an alarm will trigger.
@@ -412,6 +416,58 @@ pub mod properties {
     }
 
     impl Trigger {
+        /// ```
+        /// # use icalendar::*;
+        /// # use chrono::*;
+        /// assert_eq!(
+        ///     Trigger::after_start(Duration::hours(1)),
+        ///     Trigger::Duration(Duration::hours(1), Some(Related::Start))
+        /// )
+        /// ```
+        /// please don't supply negative durations, you'll just confuse everybody
+        pub fn after_start(duration: Duration) -> Trigger {
+            Trigger::Duration(duration, Some(Related::Start))
+        }
+
+        /// ```
+        /// # use icalendar::*;
+        /// # use chrono::*;
+        /// assert_eq!(
+        ///     Trigger::after_end(Duration::hours(1)),
+        ///     Trigger::Duration(Duration::hours(1), Some(Related::End))
+        /// )
+        /// ```
+        /// please don't supply negative durations, you'll just confuse everybody
+        pub fn after_end(duration: Duration) -> Trigger {
+            Trigger::Duration(duration, Some(Related::End))
+        }
+
+        /// ```
+        /// # use icalendar::*;
+        /// # use chrono::*;
+        /// assert_eq!(
+        ///     Trigger::before_start(Duration::hours(1)),
+        ///     Trigger::Duration(-Duration::hours(1), Some(Related::Start))
+        /// )
+        /// ```
+        /// please don't supply negative durations, you'll just confuse everybody
+        pub fn before_start(duration: Duration) -> Trigger {
+            Trigger::Duration(-duration, Some(Related::Start))
+        }
+
+        /// ```
+        /// # use icalendar::*;
+        /// # use chrono::*;
+        /// assert_eq!(
+        ///     Trigger::before_end(Duration::hours(1)),
+        ///     Trigger::Duration(-Duration::hours(1), Some(Related::End))
+        /// )
+        /// ```
+        /// please don't supply negative durations, you'll just confuse everybody
+        pub fn before_end(duration: Duration) -> Trigger {
+            Trigger::Duration(-duration, Some(Related::End))
+        }
+
         /// Returns the containing [`Related`] if the [`Trigger`] contains one
         pub fn related(&self) -> Option<Related> {
             match self {
