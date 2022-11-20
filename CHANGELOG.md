@@ -1,5 +1,22 @@
 # Changelog
 
+## [v0.14.0](https://github.com/hoodie/icalendar-rs/compare/v0.13.3...v0.14.0) (2022-11-20)
+
+### ⚠ BREAKING CHANGE
+
+* pulled certain component methods into `EventLike` trait
+
+### Features
+
+* add support for Alarm component
+  ([0b04255](https://github.com/hoodie/icalendar-rs/commit/0b04255098a927bd035946deec7b505d07799356))
+* add support for Alarms
+  ([eb4a1bd](https://github.com/hoodie/icalendar-rs/commit/eb4a1bd9c7b012869e139c03fee39337e3d69930))
+* add support for sequence properties
+  ([ce57466](https://github.com/hoodie/icalendar-rs/commit/ce57466ca091490be4cff53c869b01943f901487))
+* add From<Date> impl to DatePerhapsTime
+  ([30b041a](https://github.com/hoodie/icalendar-rs/commit/30b041a0d83d60ad8653651f857d4b04f56e822c))
+
 ### [v0.13.3](https://github.com/hoodie/icalendar-rs/compare/v0.13.2...v0.13.3) (2022-10-25)
 
 #### Fixes
