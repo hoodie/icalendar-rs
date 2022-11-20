@@ -17,8 +17,7 @@ fn main() {
         .percent_complete(98)
         .alarm(
             Alarm::audio(-Duration::minutes(10))
-                .duration_and_repeat(chrono::Duration::minutes(1), 4)
-                .done(),
+                .duration_and_repeat(chrono::Duration::minutes(1), 4),
         )
         .done();
 
@@ -33,8 +32,7 @@ fn main() {
                 "you should test your implementation",
                 Utc::now() + Duration::minutes(1),
             )
-            .duration_and_repeat(chrono::Duration::minutes(1), 4)
-            .done(),
+            .duration_and_repeat(chrono::Duration::minutes(1), 4),
         )
         .done();
 
@@ -49,8 +47,7 @@ fn main() {
                 "you should test your implementation",
                 (-Duration::minutes(10), Related::End),
             )
-            .duration_and_repeat(chrono::Duration::minutes(1), 4)
-            .done(),
+            .duration_and_repeat(chrono::Duration::minutes(1), 4),
         )
         .done();
 
@@ -62,8 +59,7 @@ fn main() {
         .status(TodoStatus::NeedsAction)
         .alarm(
             Alarm::audio(now + Duration::minutes(1))
-                .duration_and_repeat(chrono::Duration::minutes(1), 4)
-                .done(),
+                .duration_and_repeat(chrono::Duration::minutes(1), 4),
         )
         .done();
 

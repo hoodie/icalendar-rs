@@ -37,7 +37,6 @@ use super::*;
 ///      .alarm(
 ///          Alarm::audio(Utc::now() + Duration::minutes(1))
 ///          .duration_and_repeat(Duration::minutes(1), 4)
-///          .done(),
 ///      )
 ///      .done();
 ///
@@ -46,7 +45,6 @@ use super::*;
 ///      .alarm(
 ///          Alarm::display("ALARM! ALARM!", -Duration::minutes(1))
 ///          .duration_and_repeat(Duration::minutes(1), 4)
-///          .done(),
 ///      )
 ///      .done();
 ///
@@ -55,7 +53,6 @@ use super::*;
 ///      .alarm(
 ///          Alarm::display("ALARM! ALARM!", (-Duration::minutes(1), Related::End))
 ///          .duration_and_repeat(Duration::minutes(1), 4)
-///          .done(),
 ///      )
 ///      .done();
 /// ```
@@ -180,10 +177,10 @@ impl Alarm {
     /// [`DURATION`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.5) property,
     /// which must not occur independent from one another
     pub fn duration_and_repeat<R: Copy + Clone + Into<Repeat>>(
-        &mut self,
+        mut self,
         duration: Duration,
         repeat_count: R,
-    ) -> &mut Self {
+    ) -> Self {
         // self.add_property("ACTION", action.as_str());
         self.append_property(duration);
 
