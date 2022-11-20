@@ -1,14 +1,67 @@
 #![allow(unused_variables)]
 use std::{collections::HashMap, fmt::Debug, str::FromStr};
 
+pub use self::properties::Related;
 use self::properties::*;
 use super::*;
 
 /// VALARM [(RFC 5545, Section 3.6.6 )](https://tools.ietf.org/html/rfc5545#section-3.6.6)
+///
+/// Alarms can be added to [`Event`]s and [`Todo`]s.
+/// An alarm always has a **Trigger** and an **Action**.
+/// The Trigger describes when the alarm should happen
+/// and the Action describes what should happen.
+///
+/// ## Triggers
+///
+/// An alarm can either be triggered at an absolute time or in relation to its event,
+/// so the Trigger can either be an absolute [`CalendarDateTime`] or a [`Duration`] plus a
+/// [relation tag](`Related`), which defines wether the duration is related to the events start or
+/// end.
+///
+/// ## Action
+///
+/// When it is time for the Alarm to occur we have to define what is actually supposed to happen.
+/// The RFC5545 know three different actions, two of which are currently implemented.
+///
+/// 1. Display  
+/// 2. Audio
+/// 3. Email (not yet implemented)
+///
+/// ```rust
+///  # use chrono::*;
+///  # use icalendar::*;
+///
+///  // alarm will occur one minute from now
+///  let event_with_absolute_audio_alarm = Event::new()
+///      .append_component(
+///          Alarm::audio(Utc::now() + Duration::minutes(1))
+///          .duration_and_repeat(Duration::minutes(1), 4)
+///          .done(),
+///      )
+///      .done();
+///
+///  // alarm will occur one minute before the start
+///  let event_with_relative_display_alarm = Event::new()
+///      .append_component(
+///          Alarm::display("ALARM! ALARM!", -Duration::minutes(1))
+///          .duration_and_repeat(Duration::minutes(1), 4)
+///          .done(),
+///      )
+///      .done();
+///
+///  // alarm will occur one minute before the end
+///  let event_with_relative_display_alarm_end = Event::new()
+///      .append_component(
+///          Alarm::display("ALARM! ALARM!", (-Duration::minutes(1), Related::End))
+///          .duration_and_repeat(Duration::minutes(1), 4)
+///          .done(),
+///      )
+///      .done();
+/// ```
 #[derive(Debug, PartialEq, Eq)]
 pub struct Alarm {
     pub(crate) inner: InnerComponent,
-    // pub(crate) action: Option<Action>,
 }
 
 impl Alarm {
