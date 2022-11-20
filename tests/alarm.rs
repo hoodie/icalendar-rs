@@ -22,7 +22,7 @@ ACTION:AUDIO\r
 DTSTAMP:19980130T134500Z\r
 DURATION:PT3600S\r
 REPEAT:4\r
-TRIGGER:19980403T120000Z\r
+TRIGGER;VALUE=DATE-TIME:19980403T120000Z\r
 UID:OverwriteForConsistency\r
 END:VALARM\r
 END:VTODO\r
@@ -36,23 +36,31 @@ fn test_alarm_to_string() {
         .uid("uid4@example.com")
         .add_property("DTSTAMP", "19980130T134500Z")
         .sequence(2)
-        //.organizer("")
-        .starts(Utc.ymd(1998, 1, 30).and_hms(13, 45, 0))
-        // .due(Utc.ymd(1998, 4, 15).and_hms(0, 0, 0))
-        .due(NaiveDate::from_ymd(1998, 4, 15).and_hms(0, 0, 0))
-        //.repeat(4)
+        .starts(Utc.with_ymd_and_hms(1998, 1, 30, 13, 45, 0).unwrap())
+        .due(
+            NaiveDate::from_ymd_opt(1998, 4, 15)
+                .unwrap()
+                .and_hms_opt(0, 0, 0)
+                .unwrap(),
+        )
         .status(TodoStatus::NeedsAction)
         .summary("Submit Income Taxes")
         .append_component(
-            Alarm::with_trigger(Trigger::from(Utc.ymd(1998, 4, 3).and_hms(12, 0, 0)))
-                .duration(chrono::Duration::hours(1))
+            Alarm::audio(Utc.with_ymd_and_hms(1998, 4, 3, 12, 0, 0).unwrap())
+                .duration_and_repeat(chrono::Duration::hours(1), 4)
                 .uid("OverwriteForConsistency")
-                .action(Action::Audio)
-                .repeat(4)
                 .add_property("DTSTAMP", "19980130T134500Z")
                 .done(),
         )
         .done();
     calendar.push(todo);
     assert_eq!(calendar.to_string(), EXPECTED_CAL_CONTENT);
+
+    #[cfg(feature = "parser")]
+    {
+        use std::str::FromStr;
+
+        let reparse = Calendar::from_str(&calendar.to_string()).unwrap();
+        println!("{:?}", reparse);
+    }
 }

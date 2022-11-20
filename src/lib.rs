@@ -49,12 +49,13 @@
 //!   reference
 //! - [`Todo::completed`] now requires its [`chrono::DateTime`] argument to have exactly [`chrono::Utc`]
 //!   specified as its time zone as mandated by the RFC.
-//! - [`Component::starts`], [`Component::ends`] and [`Todo::due`] now take newly introduced
+//! - [`EventLike::starts`], [`EventLike::ends`] and [`Todo::due`] now take newly introduced
 //!   [`CalendarDateTime`] (through [`Into<CalendarDateTime>`] indirection). This allows callers to
 //!   define time zone handling. Conversions from [`chrono::NaiveDateTime`] and
 //!   [`chrono::DateTime<Utc>`](chrono::DateTime) are provided for ergonomics, the latter also restoring API
 //!   compatibility in case of UTC date-times.
 
+#![allow(deprecated)]
 #![warn(
     missing_docs,
     missing_copy_implementations,
@@ -101,8 +102,7 @@ mod properties;
 pub use crate::{
     calendar::{Calendar, CalendarComponent},
     components::{
-        alarm::{Action, Alarm, Trigger},
-        CalendarDateTime, Component, DatePerhapsTime, Event, EventLike, Todo, Venue,
+        alarm::Alarm, CalendarDateTime, Component, DatePerhapsTime, Event, EventLike, Todo, Venue,
     },
     properties::{Class, EventStatus, Parameter, Property, TodoStatus, ValueType},
 };

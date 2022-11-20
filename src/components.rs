@@ -49,6 +49,11 @@ impl InnerComponent {
             components: mem::take(&mut self.components),
         }
     }
+
+    #[cfg(test)]
+    pub fn property_value(&self, key: &str) -> Option<&str> {
+        Some(self.properties.get(key)?.value())
+    }
 }
 
 /// Implemented by everything that goes into a `Calendar`
