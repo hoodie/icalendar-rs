@@ -33,15 +33,12 @@ END:VCALENDAR\r
 
 #[test]
 fn test_alarm_to_string() {
-    // todo!();
     let mut calendar = Calendar::new();
     let todo = Todo::new()
         .uid("uid4@example.com")
         .add_property("DTSTAMP", "19980130T134500Z")
         .sequence(2)
-        //.organizer("")
         .starts(Utc.with_ymd_and_hms(1998, 1, 30, 13, 45, 0).unwrap())
-        // .due(Utc.ymd(1998, 4, 15).and_hms(0, 0, 0))
         .due(
             NaiveDate::from_ymd_opt(1998, 4, 15)
                 .unwrap()
@@ -52,9 +49,7 @@ fn test_alarm_to_string() {
         .summary("Submit Income Taxes")
         .append_component(
             Alarm::audio(
-                Utc.ymd_opt(1998, 4, 3)
-                    .unwrap()
-                    .and_hms_opt(12, 0, 0)
+                Utc.with_ymd_and_hms(1998, 4, 3,12, 0, 0)
                     .unwrap(),
             )
             .duration_and_repeat(chrono::Duration::hours(1), 4)
