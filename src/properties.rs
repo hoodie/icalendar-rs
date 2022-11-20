@@ -52,6 +52,15 @@ impl Property {
         }
     }
 
+    /// if you already have `String`s I'll gladly take
+    pub fn new_pre_alloc(key: String, val: String) -> Self {
+        Property {
+            key,
+            val: val.replace('\n', "\\n"),
+            params: HashMap::new(),
+        }
+    }
+
     /// Returns a reference to the key field.
     pub fn key(&self) -> &str {
         &self.key
@@ -70,6 +79,32 @@ impl Property {
     /// Returns the `VALUE` parameter, if any is specified.
     pub fn value_type(&self) -> Option<ValueType> {
         ValueType::from_str(&self.params.get("VALUE")?.val)
+    }
+
+    // /// Returns the value as a certain type
+    // pub fn get_value<T>(&self) -> Result<T, E>
+    // where
+    //     T: std::str::FromStr,
+    //     E: std::error::Error,
+    //     <T as std::str::FromStr::Err>: E
+    // {
+    //     T::from_str(&self.val).ok()
+    // }
+
+    /// Returns the value as a certain type
+    pub fn get_value_as<F, T>(&self, converter: F) -> Option<T>
+    where
+        F: Fn(&str) -> Option<T>,
+    {
+        converter(&self.val)
+    }
+
+    /// Returns the value of a parameter as a certain type
+    pub fn get_param_as<F, T>(&self, key: &str, converter: F) -> Option<T>
+    where
+        F: Fn(&str) -> Option<T>,
+    {
+        self.params.get(key).and_then(|param| converter(&param.val))
     }
 
     /// Appends a new parameter.
@@ -113,8 +148,18 @@ impl Property {
     }
 }
 
+impl TryInto<String> for Property {
+    type Error = std::fmt::Error;
+
+    fn try_into(self) -> Result<String, Self::Error> {
+        let mut out_string = String::new();
+        self.fmt_write(&mut out_string)?;
+        Ok(out_string)
+    }
+}
+
 /// This property defines the access classification for a calendar component.
-/// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.3>
+/// [RFC 5545, Section 3.8.1.3](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.3)
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Class {
     /// [`Public`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.3)
@@ -231,7 +276,7 @@ impl From<ValueType> for Parameter {
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 /// Encodes the status of an `Event`
-/// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11>
+/// [RFC 5545, Section 3.8.1.11](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11)
 pub enum EventStatus {
     /// Indicates event is tentative.
     Tentative,
@@ -255,7 +300,7 @@ impl EventStatus {
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 /// Encodes the status of a `Todo`
-/// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11>
+/// [RFC 5545, Section 3.8.1.11](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.11)
 pub enum TodoStatus {
     /// Indicates to-do needs action.
     NeedsAction,
@@ -303,20 +348,24 @@ impl From<EventStatus> for Property {
 
 impl From<TodoStatus> for Property {
     fn from(val: TodoStatus) -> Self {
-        Property {
-            key: String::from("STATUS"),
-            val: String::from(match val {
+        Property::new_pre_alloc(
+            String::from("STATUS"),
+            String::from(match val {
                 TodoStatus::NeedsAction => "NEEDS-ACTION",
                 TodoStatus::Completed => "COMPLETED",
                 TodoStatus::InProcess => "IN-PROCESS",
                 TodoStatus::Cancelled => "CANCELLED",
                 //TodoStatus::Custom(s)   => "CU",
             }),
-            params: HashMap::new(),
-        }
+        )
     }
 }
 
+impl From<chrono::Duration> for Property {
+    fn from(duration: chrono::Duration) -> Self {
+        Property::new_pre_alloc(String::from("DURATION"), duration.to_string())
+    }
+}
 //pub enum AttendeeRole {
 //    /// CHAIR           (RFC 5545, Section 3.2.16)
 //    Chair,

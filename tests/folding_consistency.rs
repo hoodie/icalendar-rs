@@ -1,6 +1,6 @@
 #![cfg(feature = "parser")]
 use chrono::{Duration, Utc};
-use icalendar::{Calendar, Class, Component, Event};
+use icalendar::*;
 use pretty_assertions::assert_eq;
 
 #[test]

@@ -123,6 +123,12 @@ impl<'a> TryFrom<&'a str> for Component<'a> {
     }
 }
 
+impl From<Component<'_>> for Other {
+    fn from(component: Component) -> Self {
+        Other::from((component.name.to_string(), InnerComponent::from(component)))
+    }
+}
+
 impl From<Component<'_>> for InnerComponent {
     fn from(component: Component) -> Self {
         Self {
@@ -130,6 +136,11 @@ impl From<Component<'_>> for InnerComponent {
                 .properties
                 .into_iter()
                 .map(|p| (p.name.clone().into_owned().into(), p.into()))
+                .collect(),
+            components: component
+                .components
+                .into_iter()
+                .map(|c| Other::from(c))
                 .collect(),
             multi_properties: Default::default(),
         }

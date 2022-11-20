@@ -6,12 +6,14 @@ use std::{collections::BTreeMap, fmt, mem};
 use crate::properties::*;
 use date_time::{format_utc_date_time, naive_date_to_property, parse_utc_date_time};
 
+pub mod alarm;
 pub(crate) mod date_time;
 mod event;
 mod other;
 mod todo;
 mod venue;
 
+use alarm::*;
 pub use date_time::{CalendarDateTime, DatePerhapsTime};
 pub use event::*;
 pub use other::*;
@@ -22,6 +24,13 @@ pub use venue::*;
 pub(crate) struct InnerComponent {
     pub properties: BTreeMap<String, Property>,
     pub multi_properties: Vec<Property>,
+    pub components: Vec<Other>,
+}
+
+impl From<Other> for InnerComponent {
+    fn from(val: Other) -> Self {
+        val.inner
+    }
 }
 
 //impl<'a> Into<InnerComponent> for parser::Component<'a> {
@@ -37,7 +46,13 @@ impl InnerComponent {
         InnerComponent {
             properties: mem::take(&mut self.properties),
             multi_properties: mem::take(&mut self.multi_properties),
+            components: mem::take(&mut self.components),
         }
+    }
+
+    #[cfg(test)]
+    pub fn property_value(&self, key: &str) -> Option<&str> {
+        Some(self.properties.get(key)?.value())
     }
 }
 
@@ -52,6 +67,9 @@ pub trait Component {
 
     /// Allows access to the inner properties map.
     fn properties(&self) -> &BTreeMap<String, Property>;
+
+    /// Allows access to the inner's child components.
+    fn components(&self) -> &[Other];
 
     /// Read-only access to `multi_properties`
     fn multi_properties(&self) -> &Vec<Property>;
@@ -82,6 +100,10 @@ pub trait Component {
             property.fmt_write(out)?;
         }
 
+        for component in self.components() {
+            component.fmt_write(out)?;
+        }
+
         write_crlf!(out, "END:{}", self.component_kind())?;
         Ok(())
     }
@@ -103,14 +125,22 @@ pub trait Component {
     }
 
     /// Append a given [`Property`]
-    fn append_property(&mut self, property: Property) -> &mut Self;
+    fn append_property(&mut self, property: impl Into<Property>) -> &mut Self;
+
+    /// Append a given [`Component`]
+    fn append_component(&mut self, child: impl Into<Other>) -> &mut Self;
 
     /// Adds a [`Property`] of which there may be many
-    fn append_multi_property(&mut self, property: Property) -> &mut Self;
+    fn append_multi_property(&mut self, property: impl Into<Property>) -> &mut Self;
 
     /// Construct and append a [`Property`]
     fn add_property(&mut self, key: &str, val: &str) -> &mut Self {
         self.append_property(Property::new(key, val))
+    }
+
+    /// Construct and append a [`Property`]
+    fn add_property_pre_alloc(&mut self, key: String, val: String) -> &mut Self {
+        self.append_property(Property::new_pre_alloc(key, val))
     }
 
     /// Construct and append a [`Property`]
@@ -140,30 +170,6 @@ pub trait Component {
         DatePerhapsTime::from_property(self.properties().get("DTEND")?)
     }
 
-    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
-    ///
-    /// See [`DatePerhapsTime`] for info how are different [`chrono`] types converted automatically.
-    fn starts<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
-        let calendar_dt = dt.into();
-        self.append_property(calendar_dt.to_property("DTSTART"))
-    }
-
-    /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`]
-    ///
-    /// See [`DatePerhapsTime`] for info how are different [`chrono`] types converted automatically.
-    fn ends<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
-        let calendar_dt = dt.into();
-        self.append_property(calendar_dt.to_property("DTEND"))
-    }
-
-    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
-    /// and [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`],
-    /// date only
-    fn all_day(&mut self, date: NaiveDate) -> &mut Self {
-        self.append_property(naive_date_to_property(date, "DTSTART"))
-            .append_property(naive_date_to_property(date, "DTEND"))
-    }
-
     /// Defines the relative priority.
     ///
     /// Ranges from 0 to 10, larger values will be truncated
@@ -171,6 +177,13 @@ pub trait Component {
         let priority = ::std::cmp::min(priority, 10);
         self.add_property("PRIORITY", &priority.to_string())
     }
+
+    // /// Add the [`ATTACH`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.1) property
+    // /// TODO: might have to move to Component
+    // pub fn attach(&mut self, attachment: ) -> &mut Self {
+    //     todo!()
+    //     // self.append_multi_property(todo!())
+    // }
 
     /// Gets the relative priority.
     ///
@@ -218,28 +231,6 @@ pub trait Component {
     //    self.add_multi_property("ATTENDEE", desc) // multi_properties should be a multi-map
     //}
 
-    /// Set the LOCATION
-    /// 3.8.1.7.  Location
-    fn location(&mut self, location: &str) -> &mut Self {
-        self.add_property("LOCATION", location)
-    }
-
-    /// Gets the location
-    fn get_location(&self) -> Option<&str> {
-        self.property_value("LOCATION")
-    }
-
-    /// Set the LOCATION with a VVENUE UID
-    /// iCalender venue draft
-    fn venue(&mut self, location: &str, venue_uid: &str) -> &mut Self {
-        self.append_property(
-            Property::new("LOCATION", location)
-                .append_parameter(Parameter::new("VVENUE", venue_uid))
-                .done(),
-        );
-        self
-    }
-
     /// Set the UID
     fn uid(&mut self, uid: &str) -> &mut Self {
         self.add_property("UID", uid)
@@ -250,9 +241,19 @@ pub trait Component {
         self.property_value("UID")
     }
 
+    /// Set the sequence
+    fn sequence(&mut self, sequence: u32) -> &mut Self {
+        self.add_property_pre_alloc("SEQUENCE".into(), sequence.to_string())
+    }
+
+    /// Gets the SEQUENCE
+    fn get_sequence(&self) -> Option<u32> {
+        self.property_value("SEQUENCE").and_then(|s| s.parse().ok())
+    }
+
     /// Set the visibility class
     fn class(&mut self, class: Class) -> &mut Self {
-        self.append_property(class.into())
+        self.append_property(class)
     }
 
     /// Gets the visibility class
@@ -271,6 +272,68 @@ pub trait Component {
     }
 }
 
+/// Common trait of [`Event`] and [`Todo`]
+pub trait EventLike: Component {
+    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
+    ///
+    /// See [`DatePerhapsTime`] for info how are different [`chrono`] types converted automatically.
+    fn starts<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
+        let calendar_dt = dt.into();
+        self.append_property(calendar_dt.to_property("DTSTART"))
+    }
+
+    /// Set the [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`]
+    ///
+    /// See [`DatePerhapsTime`] for info how are different [`chrono`] types converted automatically.
+    fn ends<T: Into<DatePerhapsTime>>(&mut self, dt: T) -> &mut Self {
+        let calendar_dt = dt.into();
+        self.append_property(calendar_dt.to_property("DTEND"))
+    }
+
+    /// Set the [`DTSTART`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4) [`Property`]
+    /// and [`DTEND`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2) [`Property`],
+    /// date only
+    fn all_day(&mut self, date: NaiveDate) -> &mut Self {
+        self.append_property(naive_date_to_property(date, "DTSTART"))
+            .append_property(naive_date_to_property(date, "DTEND"))
+    }
+
+    /// Set the LOCATION with a VVENUE UID
+    /// iCalender venue draft
+    fn venue(&mut self, location: &str, venue_uid: &str) -> &mut Self {
+        self.append_property(
+            Property::new("LOCATION", location)
+                .append_parameter(Parameter::new("VVENUE", venue_uid))
+                .done(),
+        );
+        self
+    }
+
+    /// Set the LOCATION
+    /// 3.8.1.7.  Location
+    fn location(&mut self, location: &str) -> &mut Self {
+        self.add_property("LOCATION", location)
+    }
+
+    /// Gets the location
+    fn get_location(&self) -> Option<&str> {
+        self.property_value("LOCATION")
+    }
+
+    /// Set the ALARM for this event
+    /// [3.6.6.  Alarm Component](https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.6)
+    fn alarm<A: Into<Alarm>>(&mut self, alarm: A) -> &mut Self {
+        let alarm: Alarm = alarm.into();
+        self.append_component(alarm)
+    }
+}
+
+macro_rules! event_impl {
+    ($t:ty) => {
+        impl EventLike for $t {}
+    };
+}
+
 macro_rules! component_impl {
     ($t:ty, $kind:expr) => {
         impl Component for $t {
@@ -286,22 +349,33 @@ macro_rules! component_impl {
                 &self.inner.properties
             }
 
+            /// Read-only access to `properties`
+            fn components(&self) -> &[Other] {
+                &self.inner.components
+            }
+
             /// Read-only access to `multi_properties`
             fn multi_properties(&self) -> &Vec<Property> {
                 &self.inner.multi_properties
             }
 
             /// Adds a [`Property`]
-            fn append_property(&mut self, property: Property) -> &mut Self {
+            fn append_property(&mut self, property: impl Into<Property>) -> &mut Self {
+                let property = property.into();
                 self.inner
                     .properties
                     .insert(property.key().to_owned(), property);
                 self
             }
 
+            fn append_component(&mut self, child: impl Into<Other>) -> &mut Self {
+                self.inner.components.push(child.into());
+                self
+            }
+
             /// Adds a [`Property`] of which there may be many
-            fn append_multi_property(&mut self, property: Property) -> &mut Self {
-                self.inner.multi_properties.push(property);
+            fn append_multi_property(&mut self, property: impl Into<Property>) -> &mut Self {
+                self.inner.multi_properties.push(property.into());
                 self
             }
         }
@@ -311,12 +385,30 @@ macro_rules! component_impl {
                 Self { inner }
             }
         }
+        impl From<$t> for Other {
+            fn from(val: $t) -> Self {
+                (val.component_kind(), val.inner).into()
+            }
+        }
+
+        impl TryInto<String> for $t {
+            type Error = std::fmt::Error;
+
+            fn try_into(self) -> Result<String, Self::Error> {
+                self.try_into_string()
+            }
+        }
     };
 }
 
 component_impl! { Event, String::from("VEVENT") }
+event_impl! { Event }
+
 component_impl! { Todo , String::from("VTODO")}
+event_impl! { Todo}
+
 component_impl! { Venue , String::from("VVENUE")}
+component_impl! { Alarm, String::from("VALARM") }
 
 #[cfg(test)]
 mod tests {

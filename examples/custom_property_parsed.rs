@@ -6,7 +6,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .summary("test event")
         .append_property(
             "TEST;IMPORTANCE=very;DUE=tomorrow:FOOBAR\n"
-                .parse()
+                .parse::<Property>()
                 .unwrap(),
         )
         // .uid("my.own.id")

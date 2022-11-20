@@ -2,10 +2,8 @@
 use std::str::FromStr;
 
 use chrono::*;
-use icalendar::{
-    parser::{read_calendar, unfold},
-    Calendar, Class, Component, Event, Property, Todo,
-};
+use icalendar::parser;
+use icalendar::*;
 
 fn main() {
     let event = Event::new()
@@ -39,5 +37,8 @@ fn main() {
     println!("{}", from_parsed); // print what parsed
     println!("{:#?}", built_calendar); // inner representation of what we built
     println!("{:#?}", from_parsed); // inner representation of what we built and then parsed
-    println!("{:#?}", read_calendar(&unfold(&ical)).unwrap()); // inner presentation of the parser's data structure
+    println!(
+        "{:#?}",
+        parser::read_calendar(&parser::unfold(&ical)).unwrap()
+    ); // inner presentation of the parser's data structure
 }

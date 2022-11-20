@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use chrono::*;
 
 use crate::{Property, ValueType};
@@ -6,12 +8,23 @@ const NAIVE_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%S";
 const UTC_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";
 const NAIVE_DATE_FORMAT: &str = "%Y%m%d";
 
+// #[deprecated(note = "use `CalendarDateTime::from_str` if you can")]
 pub(crate) fn parse_utc_date_time(s: &str) -> Option<DateTime<Utc>> {
     Utc.datetime_from_str(s, UTC_DATE_TIME_FORMAT).ok()
 }
 
+pub(crate) fn parse_naive_date_time(s: &str) -> Option<NaiveDateTime> {
+    NaiveDateTime::parse_from_str(s, NAIVE_DATE_TIME_FORMAT).ok()
+}
+
 pub(crate) fn format_utc_date_time(utc_dt: DateTime<Utc>) -> String {
     utc_dt.format(UTC_DATE_TIME_FORMAT).to_string()
+}
+
+pub(crate) fn parse_duration(s: &str) -> Option<Duration> {
+    iso8601::duration(s)
+        .ok()
+        .and_then(|iso| Duration::from_std(iso.into()).ok())
 }
 
 pub(crate) fn naive_date_to_property(date: NaiveDate, key: &str) -> Property {
@@ -35,11 +48,13 @@ pub enum CalendarDateTime {
     ///
     /// Conversion from [`chrono::NaiveDateTime`] results in this variant.
     Floating(NaiveDateTime),
+
     /// `FORM #2: DATE WITH UTC TIME`: rendered with Z suffix character.
     ///
     /// Conversion from [`chrono::DateTime<Utc>`](DateTime) results in this variant. Use
     /// `date_time.with_timezone(&Utc)` to convert `date_time` from arbitrary time zone to UTC.
     Utc(DateTime<Utc>),
+
     /// `FORM #3: DATE WITH LOCAL TIME AND TIME ZONE REFERENCE`: refers to a time zone definition.
     WithTimezone {
         /// The date and time in the given time zone.
@@ -50,6 +65,16 @@ pub enum CalendarDateTime {
 }
 
 impl CalendarDateTime {
+    /// this is not actually now, just a fixed date for testing
+    #[cfg(test)]
+    pub(crate) fn now() -> Self {
+        NaiveDate::from_ymd_opt(2015, 10, 26)
+            .unwrap()
+            .and_hms_opt(1, 22, 00)
+            .unwrap()
+            .into()
+    }
+
     pub(crate) fn from_property(property: &Property) -> Option<Self> {
         let value = property.value();
         if let Some(tzid) = property.params().get("TZID") {
@@ -62,7 +87,7 @@ impl CalendarDateTime {
         {
             Some(naive_date_time.into())
         } else {
-            parse_utc_date_time(value).map(Into::into)
+            Self::from_str(value).ok()
         }
     }
 
@@ -79,6 +104,14 @@ impl CalendarDateTime {
             }
         }
     }
+
+    pub(crate) fn from_utc_string(s: &str) -> Option<Self> {
+        parse_utc_date_time(s).map(CalendarDateTime::Utc)
+    }
+
+    pub(crate) fn from_naive_string(s: &str) -> Option<Self> {
+        parse_naive_date_time(s).map(CalendarDateTime::Floating)
+    }
 }
 
 /// Converts from time zone-aware UTC date-time to [`CalendarDateTime::Utc`].
@@ -92,6 +125,16 @@ impl From<DateTime<Utc>> for CalendarDateTime {
 impl From<NaiveDateTime> for CalendarDateTime {
     fn from(dt: NaiveDateTime) -> Self {
         Self::Floating(dt)
+    }
+}
+
+impl FromStr for CalendarDateTime {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        CalendarDateTime::from_utc_string(s)
+            .or_else(|| CalendarDateTime::from_naive_string(s))
+            .ok_or(())
     }
 }
 
@@ -134,6 +177,13 @@ impl From<CalendarDateTime> for DatePerhapsTime {
 impl From<DateTime<Utc>> for DatePerhapsTime {
     fn from(dt: DateTime<Utc>) -> Self {
         Self::DateTime(dt.into())
+    }
+}
+
+#[allow(deprecated)]
+impl From<Date<Utc>> for DatePerhapsTime {
+    fn from(dt: Date<Utc>) -> Self {
+        Self::Date(dt.naive_utc())
     }
 }
 

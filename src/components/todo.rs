@@ -69,7 +69,7 @@ impl Todo {
 
     /// Defines the overall status or confirmation
     pub fn status(&mut self, status: TodoStatus) -> &mut Self {
-        self.append_property(status.into())
+        self.append_property(status)
     }
 
     /// Gets the overall status.
