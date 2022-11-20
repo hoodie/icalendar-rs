@@ -4,7 +4,7 @@ use icalendar::*;
 fn main() {
     // alarm will occur one minute from now
     let event_with_absolute_audio_alarm = Event::new()
-        .append_component(
+        .alarm(
             Alarm::audio(Utc::now() + Duration::minutes(1))
                 .duration_and_repeat(Duration::minutes(1), 4)
                 .done(),
@@ -13,7 +13,7 @@ fn main() {
 
     // alarm will occur one minute before the start
     let event_with_relative_display_alarm = Event::new()
-        .append_component(
+        .alarm(
             Alarm::display("ALARM! ALARM!", -Duration::minutes(1))
                 .duration_and_repeat(Duration::minutes(1), 4)
                 .done(),
@@ -21,7 +21,7 @@ fn main() {
         .done();
     // alarm will occur one minute before the end
     let event_with_relative_display_alarm_end = Event::new()
-        .append_component(
+        .alarm(
             Alarm::display("ALARM! ALARM!", (-Duration::minutes(1), Related::End))
                 .duration_and_repeat(Duration::minutes(1), 4)
                 .done(),
