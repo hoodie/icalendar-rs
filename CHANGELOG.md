@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.14.1](https://github.com/hoodie/icalendar-rs/compare/v0.14.0...v0.14.1) (2022-12-14)
+
+#### Fixes
+
+* remove pretty_assertions dependency
+  ([eb501d9](https://github.com/hoodie/icalendar-rs/commit/eb501d9e9c12bec30ca20b63169a2dbeb74cab38))
+
 ## [v0.14.0](https://github.com/hoodie/icalendar-rs/compare/v0.13.3...v0.14.0) (2022-11-20)
 
 ### ⚠ BREAKING CHANGE
