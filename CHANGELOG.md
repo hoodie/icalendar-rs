@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.14.2](https://github.com/hoodie/icalendar-rs/compare/v0.14.1...v0.14.2) (2022-12-15)
+
+#### Features
+
+* Make Calendar::property_value() publicly accessible
+  ([ec6ae2f](https://github.com/hoodie/icalendar-rs/commit/ec6ae2f0580a01e1e27476bb3e379697de7e872d))
+
 ### [v0.14.1](https://github.com/hoodie/icalendar-rs/compare/v0.14.0...v0.14.1) (2022-12-14)
 
 #### Fixes
