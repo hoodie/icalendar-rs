@@ -2,7 +2,8 @@
 
 # iCalendar in Rust
 
-[![build](https://img.shields.io/github/workflow/status/hoodie/icalendar-rs/Continuous%20Integration)](https://github.com/hoodie/icalendar-rs/actions?query=workflow%3A"Continuous+Integration")
+[![build](https://img.shields.io/github/actions/workflow/status/hoodie/icalendar-rs/ci.yml?branch=main)](https://github.com/hoodie/icalendar-rs/actions?query=workflow%3A"Continuous+Integration")
+
 [![Crates.io](https://img.shields.io/crates/d/icalendar)](https://crates.io/crates/icalendar)
 [![contributors](https://img.shields.io/github/contributors/hoodie/icalendar-rs)](https://github.com/hoodie/icalendar-rs/graphs/contributors)
 ![maintenance](https://img.shields.io/maintenance/yes/2022)
