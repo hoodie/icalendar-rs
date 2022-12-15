@@ -92,7 +92,7 @@ impl Calendar {
     }
 
     /// Gets the value of a property.
-    fn property_value(&self, key: &str) -> Option<&str> {
+    pub fn property_value(&self, key: &str) -> Option<&str> {
         Some(
             self.properties
                 .iter()
