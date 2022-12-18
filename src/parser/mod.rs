@@ -47,9 +47,7 @@ pub use utils::unfold;
 /// Parse iCalendar file content into an array of [`Component`]s
 ///
 /// This version produces very simple Errors for simplicity's sake.
-pub fn read_calendar_simple<'a>(
-    input: &'a str,
-) -> Result<Vec<Component<'_>>, nom::error::Error<&'a str>> {
+pub fn read_calendar_simple(input: &str) -> Result<Vec<Component<'_>>, nom::error::Error<&str>> {
     components(input).finish().map(|(_, components)| components)
 }
 

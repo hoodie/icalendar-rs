@@ -137,11 +137,7 @@ impl From<Component<'_>> for InnerComponent {
                 .into_iter()
                 .map(|p| (p.name.clone().into_owned().into(), p.into()))
                 .collect(),
-            components: component
-                .components
-                .into_iter()
-                .map(|c| Other::from(c))
-                .collect(),
+            components: component.components.into_iter().map(Other::from).collect(),
             multi_properties: Default::default(),
         }
     }
