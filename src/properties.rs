@@ -42,6 +42,12 @@ pub struct Property {
     pub(crate) params: EntryParameters,
 }
 
+impl From<(&str, &str)> for Property {
+    fn from((key, val): (&str, &str)) -> Self {
+        Property::new(key, val)
+    }
+}
+
 impl Property {
     /// Guess what this does :D
     pub fn new(key: &str, val: &str) -> Self {

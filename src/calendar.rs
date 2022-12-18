@@ -60,7 +60,7 @@ pub use calendar_component::CalendarComponent;
 /// ```
 ///
 ///
-#[derive(Default, Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Calendar {
     /// Top-level calendar properties
     pub properties: Vec<Property>,
@@ -68,10 +68,37 @@ pub struct Calendar {
     pub components: Vec<CalendarComponent>,
 }
 
+impl Default for Calendar {
+    fn default() -> Self {
+        Self {
+            properties: [
+                ("VERSION", "2.0").into(),
+                ("PRODID", "ICALENDAR-RS").into(),
+                ("CALSCALE", "GREGORIAN").into(),
+            ]
+            .into(),
+            components: Default::default(),
+        }
+    }
+}
+
 impl Calendar {
     /// Creates a new Calendar.
     pub fn new() -> Self {
         Default::default()
+    }
+
+    /// Produces a calendar without any default properties.
+    ///
+    /// [`Calendar::new()`] and [`Calendar::default()`] will prefill the properties `VERSION`, `PRODID` and `CALSCALE`, this method does not.
+    /// ```
+    /// assert_eq!(icalendar::Calendar::empty().properties.len(), 0);
+    /// ```
+    pub fn empty() -> Self {
+        Self {
+            properties: Default::default(),
+            components: Default::default(),
+        }
     }
 
     #[deprecated(note = "Use .push() instead")]
@@ -181,10 +208,6 @@ impl Calendar {
     /// Writes `Calendar` into a `Writer` using `std::fmt`.
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         write_crlf!(out, "BEGIN:VCALENDAR")?;
-        write_crlf!(out, "VERSION:2.0")?;
-        write_crlf!(out, "PRODID:ICALENDAR-RS")?;
-        write_crlf!(out, "CALSCALE:GREGORIAN")?;
-
         for property in &self.properties {
             property.fmt_write(out)?;
         }
@@ -251,7 +274,7 @@ impl<C: Into<CalendarComponent>> FromIterator<C> for Calendar {
     fn from_iter<T: IntoIterator<Item = C>>(iter: T) -> Self {
         Calendar {
             components: iter.into_iter().map(Into::into).collect(),
-            ..Default::default()
+            properties: Default::default(),
         }
     }
 }
