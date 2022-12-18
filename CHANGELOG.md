@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased](https://github.com/hoodie/icalendar-rs/compare/v0.14.2...HEAD) (2022-12-18)
+
+### ⚠ BREAKING CHANGE
+
+* Calendar::default() will now contain basic properties (VERSION, CALSCALE,PRODID) which were before added during serialization.
+
+### Features
+
+* add basic properties to calendar in default() instead at serialization time"
+  ([30da2d4](https://github.com/hoodie/icalendar-rs/commit/30da2d455f8114c9a8b56a51b1fa16c388b8cd2f))
+
+### Fixes
+
+* retain properties in parsed calendar
+  ([9403dbf](https://github.com/hoodie/icalendar-rs/commit/9403dbf4c651206c3bef691f5b5b43a3bbe28d2d)),
+  closes [#61](https://github.com/hoodie/icalendar-rs/issues/61)
+
 ### [v0.14.2](https://github.com/hoodie/icalendar-rs/compare/v0.14.1...v0.14.2) (2022-12-15)
 
 #### Features
