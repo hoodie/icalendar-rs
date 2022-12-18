@@ -41,7 +41,11 @@ impl fmt::Display for Calendar<'_> {
 
 impl From<Calendar<'_>> for crate::Calendar {
     fn from(parsed: Calendar) -> Self {
-        parsed.components.into()
+        let mut calendar: Self = parsed.components.into();
+        for property in parsed.properties {
+            calendar.append_property(property);
+        }
+        calendar
     }
 }
 
