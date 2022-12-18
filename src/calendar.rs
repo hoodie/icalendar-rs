@@ -310,4 +310,21 @@ mod tests {
         assert_eq!(calendar.get_description(), Some("description"));
         assert_eq!(calendar.get_timezone(), Some("timezone"));
     }
+
+    #[test]
+    #[cfg(feature = "parser")]
+    fn emit_parse_icalendar() {
+        use std::str::FromStr;
+
+        let mut original = Calendar::new();
+        original.append_property(Property::new("FOOBAR", "foobar"));
+
+        let emitted = original.to_string();
+        let parsed = dbg!(Calendar::from_str(&emitted).unwrap());
+
+        pretty_assertions::assert_eq!(parsed.property_value("FOOBAR"), Some("foobar"));
+
+        // this would not pass because icalendar-rs adds certain properties like CALSCALE or PRODID
+        // pretty_assertions::assert_eq!(parsed, original)
+    }
 }
