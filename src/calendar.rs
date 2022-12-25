@@ -60,7 +60,7 @@ pub use calendar_component::CalendarComponent;
 /// ```
 ///
 ///
-#[derive(Default, Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Calendar {
     /// Top-level calendar properties
     pub properties: Vec<Property>,
@@ -68,10 +68,36 @@ pub struct Calendar {
     pub components: Vec<CalendarComponent>,
 }
 
+impl Default for Calendar {
+    fn default() -> Self {
+        Self {
+            properties: Property::from_array([
+                ("VERSION", "2.0"),
+                ("PRODID", "ICALENDAR-RS"),
+                ("CALSCALE", "GREGORIAN"),
+            ]),
+            components: Default::default(),
+        }
+    }
+}
+
 impl Calendar {
     /// Creates a new Calendar.
     pub fn new() -> Self {
         Default::default()
+    }
+
+    /// Produces a calendar without any default properties.
+    ///
+    /// [`Calendar::new()`] and [`Calendar::default()`] will prefill the properties `VERSION`, `PRODID` and `CALSCALE`, this method does not.
+    /// ```
+    /// assert_eq!(icalendar::Calendar::empty().properties.len(), 0);
+    /// ```
+    pub fn empty() -> Self {
+        Self {
+            properties: Default::default(),
+            components: Default::default(),
+        }
     }
 
     #[deprecated(note = "Use .push() instead")]
@@ -181,10 +207,6 @@ impl Calendar {
     /// Writes `Calendar` into a `Writer` using `std::fmt`.
     fn fmt_write<W: fmt::Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         write_crlf!(out, "BEGIN:VCALENDAR")?;
-        write_crlf!(out, "VERSION:2.0")?;
-        write_crlf!(out, "PRODID:ICALENDAR-RS")?;
-        write_crlf!(out, "CALSCALE:GREGORIAN")?;
-
         for property in &self.properties {
             property.fmt_write(out)?;
         }
@@ -251,7 +273,7 @@ impl<C: Into<CalendarComponent>> FromIterator<C> for Calendar {
     fn from_iter<T: IntoIterator<Item = C>>(iter: T) -> Self {
         Calendar {
             components: iter.into_iter().map(Into::into).collect(),
-            ..Default::default()
+            properties: Default::default(),
         }
     }
 }
@@ -309,5 +331,22 @@ mod tests {
         assert_eq!(calendar.get_name(), Some("name"));
         assert_eq!(calendar.get_description(), Some("description"));
         assert_eq!(calendar.get_timezone(), Some("timezone"));
+    }
+
+    #[test]
+    #[cfg(feature = "parser")]
+    fn emit_parse_icalendar() {
+        use std::str::FromStr;
+
+        let mut original = Calendar::new();
+        original.append_property(Property::new("FOOBAR", "foobar"));
+
+        let emitted = original.to_string();
+        let parsed = Calendar::from_str(&emitted).unwrap();
+
+        pretty_assertions::assert_eq!(parsed.property_value("FOOBAR"), Some("foobar"));
+
+        // this would not pass because icalendar-rs adds certain properties like CALSCALE or PRODID
+        // pretty_assertions::assert_eq!(parsed, original)
     }
 }

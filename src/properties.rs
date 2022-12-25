@@ -42,6 +42,12 @@ pub struct Property {
     pub(crate) params: EntryParameters,
 }
 
+impl From<(&str, &str)> for Property {
+    fn from((key, val): (&str, &str)) -> Self {
+        Property::new(key, val)
+    }
+}
+
 impl Property {
     /// Guess what this does :D
     pub fn new(key: &str, val: &str) -> Self {
@@ -74,6 +80,11 @@ impl Property {
     /// Returns a reference to the parameters.
     pub fn params(&self) -> &EntryParameters {
         &self.params
+    }
+
+    /// Produces a `Vec` of `Property` from an array of other types.
+    pub fn from_array<P: Into<Property>, const N: usize>(array: [P; N]) -> Vec<Property> {
+        array.into_iter().map(Into::into).collect::<Vec<_>>()
     }
 
     /// Returns the `VALUE` parameter, if any is specified.

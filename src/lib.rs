@@ -66,6 +66,7 @@
     unused_import_braces,
     unused_qualifications,
     missing_debug_implementations,
+    clippy::dbg_macro,
     clippy::doc_markdown,
     clippy::redundant_closure_for_method_calls
 )]
