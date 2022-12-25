@@ -6,7 +6,7 @@
 
 [![Crates.io](https://img.shields.io/crates/d/icalendar)](https://crates.io/crates/icalendar)
 [![contributors](https://img.shields.io/github/contributors/hoodie/icalendar-rs)](https://github.com/hoodie/icalendar-rs/graphs/contributors)
-![maintenance](https://img.shields.io/maintenance/yes/2022)
+![maintenance](https://img.shields.io/maintenance/yes/2023)
 
 [![version](https://img.shields.io/crates/v/icalendar)](https://crates.io/crates/icalendar/)
 [![documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://docs.rs/icalendar/)
