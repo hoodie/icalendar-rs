@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/hoodie/icalendar-rs/compare/v0.14.2...HEAD) (2022-12-18)
+## [v0.15.0](https://github.com/hoodie/icalendar-rs/compare/v0.14.2...v0.15.0) (2022-12-25)
 
 ### ⚠ BREAKING CHANGE
 
@@ -9,7 +9,7 @@
 ### Features
 
 * add basic properties to calendar in default() instead at serialization time"
-  ([30da2d4](https://github.com/hoodie/icalendar-rs/commit/30da2d455f8114c9a8b56a51b1fa16c388b8cd2f))
+  ([f065258](https://github.com/hoodie/icalendar-rs/commit/f0652583a73509c7fa0646588628a81bc9f92cfa))
 
 ### Fixes
 
