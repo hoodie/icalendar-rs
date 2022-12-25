@@ -343,7 +343,7 @@ mod tests {
         original.append_property(Property::new("FOOBAR", "foobar"));
 
         let emitted = original.to_string();
-        let parsed = dbg!(Calendar::from_str(&emitted).unwrap());
+        let parsed = Calendar::from_str(&emitted).unwrap();
 
         pretty_assertions::assert_eq!(parsed.property_value("FOOBAR"), Some("foobar"));
 

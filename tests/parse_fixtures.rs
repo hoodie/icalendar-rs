@@ -33,7 +33,7 @@ where
 #[test]
 fn parse_fixtures_root() {
     with_all_fixtures("", |path| {
-        let fixture = std::fs::read_to_string(&path).unwrap();
+        let fixture = std::fs::read_to_string(path).unwrap();
         if let Err(error) = read_calendar(&unfold(&fixture)) {
             println!("{}", error);
 
@@ -46,7 +46,7 @@ fn parse_fixtures_root() {
 #[test]
 fn parse_fixtures_icalendar_rb() {
     with_all_fixtures("icalendar-rb", |path| {
-        let fixture = std::fs::read_to_string(&path).unwrap();
+        let fixture = std::fs::read_to_string(path).unwrap();
         if let Err(error) = read_calendar(&unfold(&fixture)) {
             println!("{}", error);
 

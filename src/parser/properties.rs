@@ -24,7 +24,7 @@ use nom::{
 use nom::error::ErrorKind;
 
 /// Zero-copy version of [`crate::properties::Property`]
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Property<'a> {
     pub name: ParseString<'a>,
