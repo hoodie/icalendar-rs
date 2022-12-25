@@ -82,6 +82,11 @@ impl Property {
         &self.params
     }
 
+    /// Produces a `Vec` of `Property` from an array of other types.
+    pub fn from_array<P: Into<Property>, const N: usize>(array: [P; N]) -> Vec<Property> {
+        array.into_iter().map(Into::into).collect::<Vec<_>>()
+    }
+
     /// Returns the `VALUE` parameter, if any is specified.
     pub fn value_type(&self) -> Option<ValueType> {
         ValueType::from_str(&self.params.get("VALUE")?.val)

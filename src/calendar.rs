@@ -71,12 +71,11 @@ pub struct Calendar {
 impl Default for Calendar {
     fn default() -> Self {
         Self {
-            properties: [
-                ("VERSION", "2.0").into(),
-                ("PRODID", "ICALENDAR-RS").into(),
-                ("CALSCALE", "GREGORIAN").into(),
-            ]
-            .into(),
+            properties: Property::from_array([
+                ("VERSION", "2.0"),
+                ("PRODID", "ICALENDAR-RS"),
+                ("CALSCALE", "GREGORIAN"),
+            ]),
             components: Default::default(),
         }
     }
