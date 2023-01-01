@@ -7,6 +7,10 @@ mod calendar_component;
 
 pub use calendar_component::CalendarComponent;
 
+const VERSION_PROPERTY_NAME: &str = "VERSION";
+const PRODID_PROPERTY_NAME: &str = "PRODID";
+const CALSCALE_PROPERTY_NAME: &str = "CALSCALE";
+
 /// Represents a calendar
 ///
 ///
@@ -72,9 +76,9 @@ impl Default for Calendar {
     fn default() -> Self {
         Self {
             properties: Property::from_array([
-                ("VERSION", "2.0"),
-                ("PRODID", "ICALENDAR-RS"),
-                ("CALSCALE", "GREGORIAN"),
+                (VERSION_PROPERTY_NAME, "2.0"),
+                (PRODID_PROPERTY_NAME, "ICALENDAR-RS"),
+                (CALSCALE_PROPERTY_NAME, "GREGORIAN"),
             ]),
             components: Default::default(),
         }
@@ -281,6 +285,36 @@ impl<C: Into<CalendarComponent>> FromIterator<C> for Calendar {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Check that a default [`Calendar`] has certain properties set.
+    #[test]
+    fn calender_default_properties() {
+      let calendar = Calendar::default();
+      assert!(calendar.property_value(VERSION_PROPERTY_NAME).is_some());
+      assert!(calendar.property_value(PRODID_PROPERTY_NAME).is_some());
+      assert!(calendar.property_value(CALSCALE_PROPERTY_NAME).is_some());
+    }
+
+    /// Check that a [`Calendar`] created from a single
+    /// [`CalendarComponent`] has default properties set.
+    #[test]
+    fn calender_from_component_properties() {
+      let calendar = Calendar::from(Todo::new());
+      assert!(calendar.property_value(VERSION_PROPERTY_NAME).is_some());
+      assert!(calendar.property_value(PRODID_PROPERTY_NAME).is_some());
+      assert!(calendar.property_value(CALSCALE_PROPERTY_NAME).is_some());
+    }
+
+    /// Check that a [`Calendar`] created from a list of
+    /// [`CalendarComponent`] objects has default properties set.
+    #[test]
+    fn calender_from_components_properties() {
+      let todos = [Todo::new(); 0];
+      let calendar = Calendar::from(todos);
+      assert!(calendar.property_value(VERSION_PROPERTY_NAME).is_some());
+      assert!(calendar.property_value(PRODID_PROPERTY_NAME).is_some());
+      assert!(calendar.property_value(CALSCALE_PROPERTY_NAME).is_some());
+    }
 
     #[test]
     fn calendar_extend_components() {
