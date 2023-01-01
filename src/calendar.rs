@@ -273,9 +273,23 @@ impl<C: Into<CalendarComponent>> FromIterator<C> for Calendar {
     fn from_iter<T: IntoIterator<Item = C>>(iter: T) -> Self {
         Calendar {
             components: iter.into_iter().map(Into::into).collect(),
-            properties: Default::default(),
+            ..Default::default()
         }
     }
+}
+#[test]
+fn from_adds_default_properties() {
+    let todo = crate::Todo::default();
+    let cal = dbg!(Calendar::from([todo]));
+    assert!(cal.property_value("VERSION").is_some());
+    assert!(cal.property_value("CALSCALE").is_some());
+    assert!(cal.property_value("PRODID").is_some());
+
+    assert!(cal
+        .property_value("VERSION")
+        .and(cal.property_value("PRODID"))
+        .and(cal.property_value("CALSCALE"))
+        .is_some());
 }
 
 #[cfg(test)]
