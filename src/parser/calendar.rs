@@ -42,11 +42,10 @@ impl fmt::Display for Calendar<'_> {
 
 impl From<Calendar<'_>> for crate::Calendar {
     fn from(parsed: Calendar) -> Self {
-        let mut calendar: Self = parsed.components.into();
-        for property in parsed.properties {
-            calendar.append_property(property);
+        Self {
+            components: parsed.components.into_iter().map(Into::into).collect(),
+            properties: parsed.properties.into_iter().map(Into::into).collect(),
         }
-        calendar
     }
 }
 
@@ -58,7 +57,7 @@ fn test_calendar_from_parse_calendar() {
 BEGIN:VCALENDAR
 VERSION:3.0
 PRODID:MANUAL
-CALSCALE:HENDRIKIAN
+X-CALSCALE:HENDRIKIAN
 END:VCALENDAR
 "#;
     let parsed = read_calendar(input).unwrap();
@@ -66,8 +65,8 @@ END:VCALENDAR
     let count_prop = |name: &str| calendar.properties.iter().filter(|p| p.key == name).count();
 
     assert_eq!(count_prop("VERSION"), 1);
-    assert_eq!(count_prop("CALSCALE"), 1);
     assert_eq!(count_prop("PRODID"), 1);
+    assert_eq!(count_prop("CALSCALE"), 0);
 }
 
 impl<'a> From<Vec<Component<'a>>> for crate::Calendar {
