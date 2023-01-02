@@ -1,5 +1,14 @@
 # Changelog
 
+### [v0.15.1](https://github.com/hoodie/icalendar-rs/compare/v0.15.0...v0.15.1) (2023-01-02)
+
+#### Fixes
+
+* do not duplicate default properties when parsing
+  ([d6b42d8](https://github.com/hoodie/icalendar-rs/commit/d6b42d86fe63d2e33b41672978bb34853387b418))
+* add default calendar properties in From impl
+  ([ba44631](https://github.com/hoodie/icalendar-rs/commit/ba44631fda4bacd8b104acc57de2b01eb384429a))
+
 ## [v0.15.0](https://github.com/hoodie/icalendar-rs/compare/v0.14.2...v0.15.0) (2022-12-25)
 
 ### ⚠ BREAKING CHANGE
