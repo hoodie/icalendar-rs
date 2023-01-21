@@ -1,4 +1,4 @@
-#![allow(unused_variables)]
+use chrono::Duration;
 use std::{collections::HashMap, fmt::Debug, str::FromStr};
 
 pub use self::properties::{Related, Trigger};
