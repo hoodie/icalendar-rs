@@ -104,9 +104,13 @@ pub use crate::{
     calendar::{Calendar, CalendarComponent},
     components::{
         alarm::{Alarm, Related, Trigger},
-        CalendarDateTime, Component, DatePerhapsTime, Event, EventLike, Todo, Venue,
+        date_time::{CalendarDateTime, DatePerhapsTime},
+        Component, Event, EventLike, Todo, Venue,
     },
     properties::{Class, EventStatus, Parameter, Property, TodoStatus, ValueType},
 };
+
+#[cfg(feature = "chrono-tz")]
+pub use crate::components::date_time::ymd_hm_tzid;
 
 // TODO Calendar TimeZone VTIMEZONE STANDARD DAYLIGHT (see thunderbird exports)
