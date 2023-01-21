@@ -359,7 +359,7 @@ pub mod properties {
     impl FromStr for Repeat {
         type Err = ();
 
-        fn from_str(s: &str) -> Result<Self, Self::Err> {
+        fn from_str(_: &str) -> Result<Self, Self::Err> {
             todo!()
         }
     }
@@ -487,7 +487,7 @@ pub mod properties {
         /// Returns the containing [`CalendarDateTime`] if the [`Trigger`] contains one
         pub fn as_date_time(&self) -> Option<&CalendarDateTime> {
             match self {
-                Trigger::Duration(duration, _) => None,
+                Trigger::Duration(..) => None,
                 Trigger::DateTime(dt) => Some(dt),
             }
         }
