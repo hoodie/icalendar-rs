@@ -412,6 +412,8 @@ component_impl! { Alarm, String::from("VALARM") }
 
 #[cfg(test)]
 mod tests {
+    use chrono::TimeZone;
+
     use super::*;
 
     #[test]
