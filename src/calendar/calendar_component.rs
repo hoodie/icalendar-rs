@@ -6,7 +6,7 @@ use std::fmt;
 /// Wrapper for [`Todo`], [`Event`] or [`Venue`]
 #[allow(missing_docs)]
 #[non_exhaustive]
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum CalendarComponent {
     Todo(Todo),
     Event(Event),

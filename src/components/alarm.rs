@@ -57,7 +57,7 @@ use super::*;
 ///      )
 ///      .done();
 /// ```
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Alarm {
     pub(crate) inner: InnerComponent,
 }
