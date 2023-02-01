@@ -146,11 +146,7 @@ impl Property {
         let mut line = String::with_capacity(150);
 
         write!(line, "{}", self.key)?;
-        for &Parameter {
-            ref key,
-            val: ref value,
-        } in self.params.values()
-        {
+        for Parameter { key, val: value } in self.params.values() {
             write!(line, ";{}={}", key, value)?;
         }
         write!(line, ":{}", self.val)?;

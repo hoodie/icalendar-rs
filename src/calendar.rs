@@ -280,7 +280,7 @@ impl<C: Into<CalendarComponent>> FromIterator<C> for Calendar {
 #[test]
 fn from_adds_default_properties() {
     let todo = crate::Todo::default();
-    let cal = dbg!(Calendar::from([todo]));
+    let cal = Calendar::from([todo]);
     assert!(cal.property_value("VERSION").is_some());
     assert!(cal.property_value("CALSCALE").is_some());
     assert!(cal.property_value("PRODID").is_some());

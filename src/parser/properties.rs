@@ -48,7 +48,7 @@ impl Property<'_> {
         let mut line = String::with_capacity(150);
 
         write!(line, "{}", self.name.as_str())?;
-        for &Parameter { ref key, ref val } in &self.params {
+        for Parameter { key, val } in &self.params {
             if let Some(val) = val {
                 write!(line, ";{}={}", key.as_str(), val.as_str())?;
             } else {
