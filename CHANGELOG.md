@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.15.2](https://github.com/hoodie/icalendar-rs/compare/v0.15.1...v0.15.2) (2023-02-01)
+
+#### Features
+
+* derive clone for several types
+  ([c62d679](https://github.com/hoodie/icalendar-rs/commit/c62d679234d74c33958d3a0aafa46fcd5e0cd73f))
+
 ### [v0.15.1](https://github.com/hoodie/icalendar-rs/compare/v0.15.0...v0.15.1) (2023-01-02)
 
 #### Fixes
