@@ -1,7 +1,7 @@
 use super::*;
 
 /// VVENUE  [(ical-venue)](https://tools.ietf.org/html/draft-norris-ical-venue-01)
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Debug, Default, PartialEq, Eq, Clone)]
 pub struct Venue {
     pub(super) inner: InnerComponent,
 }

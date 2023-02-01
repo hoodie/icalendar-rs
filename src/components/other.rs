@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Debug, Default, PartialEq, Eq, Clone)]
 pub struct Other {
     name: String,
     pub(super) inner: InnerComponent,
