@@ -205,6 +205,26 @@ impl From<NaiveDateTime> for CalendarDateTime {
     }
 }
 
+#[cfg(feature = "chrono-tz")]
+impl From<(NaiveDateTime, chrono_tz::Tz)> for CalendarDateTime {
+    fn from((date_time, tzid): (NaiveDateTime, chrono_tz::Tz)) -> Self {
+        Self::WithTimezone {
+            date_time,
+            tzid: tzid.name().into(),
+        }
+    }
+}
+
+#[cfg(feature = "chrono-tz")]
+impl TryFrom<(NaiveDateTime, &str)> for CalendarDateTime {
+    type Error = String;
+
+    fn try_from((dt, maybe_tz): (NaiveDateTime, &str)) -> Result<Self, Self::Error> {
+        let tzid: chrono_tz::Tz = maybe_tz.parse()?;
+        Ok(CalendarDateTime::from((dt, tzid)))
+    }
+}
+
 impl FromStr for CalendarDateTime {
     type Err = ();
 
@@ -288,6 +308,21 @@ impl From<Date<Utc>> for DatePerhapsTime {
 impl From<NaiveDateTime> for DatePerhapsTime {
     fn from(dt: NaiveDateTime) -> Self {
         Self::DateTime(dt.into())
+    }
+}
+
+#[cfg(feature = "chrono-tz")]
+impl TryFrom<(NaiveDateTime, &str)> for DatePerhapsTime {
+    type Error = String;
+
+    fn try_from(value: (NaiveDateTime, &str)) -> Result<Self, Self::Error> {
+        Ok(Self::DateTime(value.try_into()?))
+    }
+}
+#[cfg(feature = "chrono-tz")]
+impl From<(NaiveDateTime, chrono_tz::Tz)> for DatePerhapsTime {
+    fn from(both: (NaiveDateTime, chrono_tz::Tz)) -> Self {
+        Self::DateTime(both.into())
     }
 }
 
