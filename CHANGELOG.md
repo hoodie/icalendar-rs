@@ -1,5 +1,16 @@
 # Changelog
 
+### [v0.15.3](https://github.com/hoodie/icalendar-rs/compare/v0.15.2...v0.15.3) (2023-02-12)
+
+#### Features
+
+* raise MSRV to 1.60
+  ([c434a85](https://github.com/hoodie/icalendar-rs/commit/c434a85065f901d39083c0f965cb8cd390bda0e4))
+* create start and end from naivedatetime+timezone tuple
+  ([0d9eda8](https://github.com/hoodie/icalendar-rs/commit/0d9eda8d839e646a4b12691c57fb4d6c23a1cdd8))
+* add better api and examples for dates with timezones
+  ([6245b27](https://github.com/hoodie/icalendar-rs/commit/6245b27d6d291d982cf705526d91a4dede8ebe02))
+
 ### [v0.15.2](https://github.com/hoodie/icalendar-rs/compare/v0.15.1...v0.15.2) (2023-02-01)
 
 #### Features
