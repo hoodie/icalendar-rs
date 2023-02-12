@@ -12,7 +12,7 @@ documentation = "https://docs.rs/icalendar/"
 repository = "https://github.com/hoodie/icalendar-rs"
 readme = "README.md"
 
-rust-version = "1.56"
+rust-version = "1.60"
 exclude = ["fixtures", ".github", ".gitignore", "*.json"]
 
 [features]
