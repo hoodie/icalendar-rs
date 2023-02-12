@@ -52,9 +52,17 @@ let my_calendar = Calendar::new()
     .push(
         // add an all-day event
         Event::new()
-            .all_day(NaiveDate::from_ymd(2016, 3, 15))
+            .all_day(NaiveDate::from_ymd_opt(2016, 3, 15).unwrap())
             .summary("My Birthday")
             .description("Hey, I'm gonna have a party\nBYOB: Bring your own beer.\nHendrik")
+            .done(),
+    )
+    .push(
+        // local event with timezone
+        Event::new()
+            .starts(CalendarDateTime::from_ymd_hm_tzid(2023, 3, 15, 18, 45, Berlin).unwrap())
+            .summary("Birthday Party")
+            .description("I'm gonna have a party\nBYOB: Bring your own beer.\nHendrik")
             .done(),
     )
     .done();

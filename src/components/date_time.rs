@@ -1,6 +1,7 @@
+#![allow(dead_code, unused)]
 use std::str::FromStr;
 
-use chrono::*;
+use chrono::{Date, DateTime, Duration, NaiveDate, NaiveDateTime, Offset, TimeZone as _, Utc};
 
 use crate::{Property, ValueType};
 
@@ -47,6 +48,9 @@ pub enum CalendarDateTime {
     /// `FORM #1: DATE WITH LOCAL TIME`: floating, follows current time-zone of the attendee.
     ///
     /// Conversion from [`chrono::NaiveDateTime`] results in this variant.
+    ///
+    /// ## Note
+    /// finding this in a calendar is a red flag, datetimes should end in `'Z'` for `UTC` or have a `TZID` property
     Floating(NaiveDateTime),
 
     /// `FORM #2: DATE WITH UTC TIME`: rendered with Z suffix character.
@@ -112,6 +116,68 @@ impl CalendarDateTime {
     pub(crate) fn from_naive_string(s: &str) -> Option<Self> {
         parse_naive_date_time(s).map(CalendarDateTime::Floating)
     }
+
+    /// attempts to convert the into UTC
+    #[cfg(feature = "chrono-tz")]
+    pub fn try_into_utc(&self) -> Option<DateTime<Utc>> {
+        match self {
+            CalendarDateTime::Floating(_) => None, // we shouldn't guess here
+            CalendarDateTime::Utc(inner) => Some(*inner),
+            CalendarDateTime::WithTimezone { date_time, tzid } => tzid
+                .parse::<chrono_tz::Tz>()
+                .ok()
+                .and_then(|tz| tz.from_local_datetime(date_time).single())
+                .map(|tz| tz.with_timezone(&Utc)),
+        }
+    }
+
+    #[cfg(feature = "chrono-tz")]
+    pub(crate) fn with_timezone(dt: NaiveDateTime, tz_id: chrono_tz::Tz) -> Self {
+        Self::WithTimezone {
+            date_time: dt,
+            tzid: tz_id.name().to_owned(),
+        }
+    }
+
+    /// will return [`None`] if date is not valid
+    #[cfg(feature = "chrono-tz")]
+    pub fn from_ymd_hm_tzid(
+        year: i32,
+        month: u32,
+        day: u32,
+        hour: u32,
+        min: u32,
+        tz_id: chrono_tz::Tz,
+    ) -> Option<Self> {
+        NaiveDate::from_ymd_opt(year, month, day)
+            .and_then(|date| date.and_hms_opt(hour, min, 0))
+            .zip(Some(tz_id))
+            .map(|(dt, tz)| Self::with_timezone(dt, tz))
+    }
+
+    /// Create a new instance with the given timezone
+    #[cfg(feature = "chrono-tz")]
+    pub fn from_date_time<TZ: chrono::TimeZone<Offset = O>, O: chrono_tz::OffsetName>(
+        dt: DateTime<TZ>,
+    ) -> Self {
+        Self::WithTimezone {
+            date_time: dt.naive_local(),
+            tzid: dt.offset().tz_id().to_owned(),
+        }
+    }
+}
+
+/// will return [`None`] if date is not valid
+#[cfg(feature = "chrono-tz")]
+pub fn ymd_hm_tzid(
+    year: i32,
+    month: u32,
+    day: u32,
+    hour: u32,
+    min: u32,
+    tz_id: chrono_tz::Tz,
+) -> Option<CalendarDateTime> {
+    CalendarDateTime::from_ymd_hm_tzid(year, month, day, hour, min, tz_id)
 }
 
 /// Converts from time zone-aware UTC date-time to [`CalendarDateTime::Utc`].
@@ -121,10 +187,41 @@ impl From<DateTime<Utc>> for CalendarDateTime {
     }
 }
 
+// impl<TZ: chrono::TimeZone<Offset = O>, O: chrono_tz::OffsetName> From<DateTime<TZ>>
+//     for CalendarDateTime
+// {
+//     fn from(date_time: DateTime<TZ>) -> Self {
+//         CalendarDateTime::WithTimezone {
+//             date_time: date_time.naive_local(),
+//             tzid: date_time.offset().tz_id().to_owned(),
+//         }
+//     }
+// }
+
 /// Converts from time zone-less date-time to [`CalendarDateTime::Floating`].
 impl From<NaiveDateTime> for CalendarDateTime {
     fn from(dt: NaiveDateTime) -> Self {
         Self::Floating(dt)
+    }
+}
+
+#[cfg(feature = "chrono-tz")]
+impl From<(NaiveDateTime, chrono_tz::Tz)> for CalendarDateTime {
+    fn from((date_time, tzid): (NaiveDateTime, chrono_tz::Tz)) -> Self {
+        Self::WithTimezone {
+            date_time,
+            tzid: tzid.name().into(),
+        }
+    }
+}
+
+#[cfg(feature = "chrono-tz")]
+impl TryFrom<(NaiveDateTime, &str)> for CalendarDateTime {
+    type Error = String;
+
+    fn try_from((dt, maybe_tz): (NaiveDateTime, &str)) -> Result<Self, Self::Error> {
+        let tzid: chrono_tz::Tz = maybe_tz.parse()?;
+        Ok(CalendarDateTime::from((dt, tzid)))
     }
 }
 
@@ -168,6 +265,17 @@ impl DatePerhapsTime {
     }
 }
 
+#[cfg(feature = "chrono-tz")]
+pub fn with_timezone<T: chrono::TimeZone + chrono_tz::OffsetName>(
+    dt: DateTime<T>,
+) -> DatePerhapsTime {
+    CalendarDateTime::WithTimezone {
+        date_time: dt.naive_local(),
+        tzid: dt.timezone().tz_id().to_owned(),
+    }
+    .into()
+}
+
 impl From<CalendarDateTime> for DatePerhapsTime {
     fn from(dt: CalendarDateTime) -> Self {
         Self::DateTime(dt)
@@ -176,9 +284,19 @@ impl From<CalendarDateTime> for DatePerhapsTime {
 
 impl From<DateTime<Utc>> for DatePerhapsTime {
     fn from(dt: DateTime<Utc>) -> Self {
-        Self::DateTime(dt.into())
+        Self::DateTime(CalendarDateTime::Utc(dt))
     }
 }
+
+// CANT HAVE NICE THINGS until specializations are stable
+// OR: breaking change and make this the default
+// impl<TZ: chrono::TimeZone<Offset = O>, O: chrono_tz::OffsetName> From<DateTime<TZ>>
+//     for DatePerhapsTime
+// {
+//     fn from(date_time: DateTime<TZ>) -> Self {
+//         Self::DateTime(CalendarDateTime::from(date_time))
+//     }
+// }
 
 #[allow(deprecated)]
 impl From<Date<Utc>> for DatePerhapsTime {
@@ -190,6 +308,21 @@ impl From<Date<Utc>> for DatePerhapsTime {
 impl From<NaiveDateTime> for DatePerhapsTime {
     fn from(dt: NaiveDateTime) -> Self {
         Self::DateTime(dt.into())
+    }
+}
+
+#[cfg(feature = "chrono-tz")]
+impl TryFrom<(NaiveDateTime, &str)> for DatePerhapsTime {
+    type Error = String;
+
+    fn try_from(value: (NaiveDateTime, &str)) -> Result<Self, Self::Error> {
+        Ok(Self::DateTime(value.try_into()?))
+    }
+}
+#[cfg(feature = "chrono-tz")]
+impl From<(NaiveDateTime, chrono_tz::Tz)> for DatePerhapsTime {
+    fn from(both: (NaiveDateTime, chrono_tz::Tz)) -> Self {
+        Self::DateTime(both.into())
     }
 }
 

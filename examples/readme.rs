@@ -1,4 +1,6 @@
 use chrono::*;
+#[cfg(feature = "chrono-tz")]
+use chrono_tz::Europe::Berlin;
 use icalendar::*;
 
 fn main() {
@@ -34,6 +36,27 @@ fn main() {
                 .all_day(NaiveDate::from_ymd_opt(2016, 3, 15).unwrap())
                 .summary("My Birthday")
                 .description("Hey, I'm gonna have a party\nBYOB: Bring your own beer.\nHendrik")
+                .done(),
+        )
+        .push(
+            // local event with timezone
+            Event::new()
+                .starts({
+                    #[cfg(feature = "chrono-tz")]
+                    {
+                        CalendarDateTime::from_ymd_hm_tzid(2023, 3, 15, 18, 45, Berlin).unwrap()
+                    }
+                    #[cfg(not(feature = "chrono-tz"))]
+                    {
+                        // probably not when you think
+                        NaiveDate::from_ymd_opt(2016, 3, 15)
+                            .unwrap()
+                            .and_hms_opt(18, 45, 0)
+                            .unwrap()
+                    }
+                })
+                .summary("Birthday Party")
+                .description("I'm gonna have a party\nBYOB: Bring your own beer.\nHendrik")
                 .done(),
         )
         .done();

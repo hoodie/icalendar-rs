@@ -14,7 +14,7 @@ mod todo;
 mod venue;
 
 use alarm::*;
-pub use date_time::{CalendarDateTime, DatePerhapsTime};
+use date_time::{CalendarDateTime, DatePerhapsTime};
 pub use event::*;
 pub use other::*;
 pub use todo::*;
