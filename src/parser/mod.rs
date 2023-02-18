@@ -56,8 +56,9 @@ pub fn read_calendar_simple(input: &str) -> Result<Vec<Component<'_>>, nom::erro
 /// This version produces nice and readable errors with line numbers thanks the the awesomeness of [`nom`].
 /// Line numbers are in regard to the normalized/unfolded version of the input, so better keep those around for reference.
 ///
-pub fn read_calendar(input: &str) -> Result<Calendar<'_>, String> {
-    components(input)
+pub fn read_calendar<'a>(input: &'a str) -> Result<Calendar<'_>, String> {
+    // jcomponents::<'_, VerboseError<&str>>(input)
+    components::<'a, nom_supreme::error::ErrorTree<&'a str>>(input)
         .finish()
         .map(|(_, mut components)| {
             let root_is_calendar = components
@@ -78,7 +79,8 @@ pub fn read_calendar(input: &str) -> Result<Calendar<'_>, String> {
                 }
             }
         })
-        .map_err(|e: VerboseError<&str>| format!("error: {}", convert_error(input, e.clone())))
+        // .map_err(|e| format!("error: {}", convert_error(input, e.clone())))
+        .map_err(|error| format!("error: {error:#?}"))
 }
 
 /// Parse iCalendar file content into an array of [`Component`]s

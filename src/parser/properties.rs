@@ -259,7 +259,7 @@ fn parse_property_with_no_value() {
     assert_parser!(property, sample_0, expectation);
 }
 
-pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str> + nom_supreme::tag::TagError<&'a str, &'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Property, E> {
     context(

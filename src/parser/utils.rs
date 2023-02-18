@@ -13,7 +13,7 @@ use pretty_assertions::assert_eq;
 use super::parsed_string::ParseString;
 
 // TODO: how do I express <<alpha_or_dash, but not "END">>
-pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str> + nom_supreme::tag::TagError<&'a str, &'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, &str, E> {
     if &input[0..=2] == "END" || &input[0..=4] == "BEGIN" {
@@ -26,7 +26,7 @@ pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     }
 }
 
-pub fn valid_key_sequence<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+pub fn valid_key_sequence<'a, E: ParseError<&'a str> + ContextError<&'a str> + nom_supreme::tag::TagError<&'a str, &'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, &str, E> {
     take_while(|c: char| {
@@ -34,7 +34,7 @@ pub fn valid_key_sequence<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     })(input)
 }
 
-pub fn valid_key_sequence_cow<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+pub fn valid_key_sequence_cow<'a, E: ParseError<&'a str> + ContextError<&'a str> + nom_supreme::tag::TagError<&'a str, &'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, ParseString<'a>, E> {
     map(

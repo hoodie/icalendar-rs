@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 return Ok(());
             }
         };
-        println!("{}", parsed_calendar);
+        println!("{:#?}", parsed_calendar);
     }
     Ok(())
 }

@@ -127,13 +127,13 @@ fn remove_empty_string_parsed(input: Option<ParseString<'_>>) -> Option<ParseStr
     None
 }
 
-fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str> + nom_supreme::tag::TagError<&'a str, &'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Parameter<'a>, E> {
     alt((pair_parameter, base_parameter))(input)
 }
 
-fn pair_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+fn pair_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str> + nom_supreme::tag::TagError<&'a str, &'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Parameter<'a>, E> {
     map(
@@ -155,7 +155,7 @@ fn pair_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     )(input)
 }
 
-fn base_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+fn base_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str> + nom_supreme::tag::TagError<&'a str, &'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Parameter<'a>, E> {
     map(
@@ -207,7 +207,7 @@ pub fn parse_parameter_list() {
     );
 }
 
-pub fn parameters<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+pub fn parameters<'a, E: ParseError<&'a str> + ContextError<&'a str> + nom_supreme::tag::TagError<&'a str, &'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Vec<Parameter>, E> {
     many0(parameter)(input)

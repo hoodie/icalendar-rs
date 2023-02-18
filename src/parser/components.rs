@@ -3,7 +3,7 @@ use std::{fmt, str::FromStr};
 use chrono::Utc;
 use nom::{
     branch::alt,
-    bytes::complete::tag,
+    // bytes::complete::tag,
     combinator::{all_consuming, complete, cut, map},
     error::{context, convert_error, ContextError, ParseError, VerboseError},
     multi::{many0, many_till},
@@ -12,6 +12,7 @@ use nom::{
 
 #[cfg(test)]
 use nom::error::ErrorKind;
+use nom_supreme::tag::complete::tag;
 use uuid::Uuid;
 
 #[cfg(test)]
@@ -231,7 +232,7 @@ pub fn read_component(input: &str) -> Result<Component<'_>, String> {
         .map_err(|e: VerboseError<&str>| format!("error: {}", convert_error(input, e.clone())))
 }
 
-pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str> + nom_supreme::tag::TagError<&'a str, &'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Component, E> {
     let (input, name) = line("BEGIN:", valid_key_sequence_cow)(input)?;
@@ -436,7 +437,7 @@ fn test_faulty_component() {
     );
 }
 
-pub fn components<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+pub fn components<'a, E: ParseError<&'a str> + ContextError<&'a str> + nom_supreme::tag::TagError<&'a str, &'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Vec<Component>, E> {
     complete(many0(all_consuming(component)))(input)
