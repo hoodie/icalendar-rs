@@ -2,11 +2,11 @@ use nom::{
     branch::alt,
     bytes::complete::{tag, take_till1},
     character::complete::space0,
-    combinator::{eof, map, opt},
+    combinator::{eof, opt},
     error::{convert_error, ContextError, ParseError, VerboseError},
     multi::many0,
     sequence::{preceded, separated_pair, tuple},
-    Finish, IResult,
+    Finish, IResult, Parser,
 };
 
 #[cfg(test)]
@@ -136,47 +136,37 @@ fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 fn pair_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Parameter<'a>, E> {
-    map(
-        preceded(
-            tuple((tag(";"), space0)),
-            separated_pair(
-                valid_key_sequence_cow, //key
-                tag("="),
-                map(
-                    opt(alt((eof, take_till1(|x| x == ';' || x == ':')))),
-                    remove_empty_string,
-                ),
-            ),
+    preceded(
+        tuple((tag(";"), space0)),
+        separated_pair(
+            valid_key_sequence_cow, //key
+            tag("="),
+            opt(alt((eof, take_till1(|x| x == ';' || x == ':')))).map(remove_empty_string),
         ),
-        |(key, val)| Parameter {
-            key,
-            val: val.map(ParseString::from),
-        },
-    )(input)
+    )
+    .map(|(key, val)| Parameter {
+        key,
+        val: val.map(ParseString::from),
+    })
+    .parse(input)
 }
 
 fn base_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Parameter<'a>, E> {
-    map(
-        tuple((
-            preceded(
-                tuple((tag(";"), space0)),
-                valid_key_sequence_cow, //key
-            ),
-            map(
-                opt(preceded(
-                    tag("="),
-                    map(
-                        alt((eof, take_till1(|x| x == ';' || x == ':'))),
-                        ParseString::from,
-                    ),
-                )),
-                remove_empty_string_parsed,
-            ),
-        )),
-        |(key, val)| Parameter { key, val },
-    )(input)
+    tuple((
+        preceded(
+            tuple((tag(";"), space0)),
+            valid_key_sequence_cow, //key
+        ),
+        opt(preceded(
+            tag("="),
+            alt((eof, take_till1(|x| x == ';' || x == ':'))).map(ParseString::from),
+        ))
+        .map(remove_empty_string_parsed),
+    ))
+    .map(|(key, val)| Parameter { key, val })
+    .parse(input)
 }
 
 // parameter list

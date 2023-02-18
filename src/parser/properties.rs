@@ -14,10 +14,10 @@ use nom::{
     branch::alt,
     bytes::complete::{tag, take_until, take_while},
     character::complete::{line_ending, multispace0},
-    combinator::{cut, map, opt},
+    combinator::{cut, opt},
     error::{context, convert_error, ContextError, ParseError, VerboseError},
     sequence::{preceded, separated_pair, tuple},
-    Finish, IResult,
+    Finish, IResult, Parser,
 };
 
 #[cfg(test)]
@@ -264,48 +264,43 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 ) -> IResult<&'a str, Property, E> {
     context(
         "property",
-        cut(map(
-            tuple((
-                alt((
-                    separated_pair(
-                        tuple((
-                            // preceded(multispace0, alpha_or_dash), // key
-                            cut(context(
-                                // this must be interpreted as component by `component()`
-                                // if you get here at all then the parser is in a wrong state
-                                "property cannot be END or BEGIN",
-                                map(preceded(multispace0, property_key), ParseString::from),
-                            )), // key
-                            parameters, // params
-                        )),
-                        context("property separator", tag(":")), // separator
-                        context(
-                            "property value",
-                            map(
-                                alt((
-                                    take_until("\r\n"),
-                                    take_until("\n"),
-                                    // this is for single line prop parsing, just so I can leave off the '\n'
-                                    take_while(|_| true),
-                                )),
-                                ParseString::from,
-                            ),
-                        ), // val TODO: replace this with something simpler!
-                    ),
+        cut(tuple((
+            alt((
+                separated_pair(
+                    tuple((
+                        // preceded(multispace0, alpha_or_dash), // key
+                        cut(context(
+                            // this must be interpreted as component by `component()`
+                            // if you get here at all then the parser is in a wrong state
+                            "property cannot be END or BEGIN",
+                            preceded(multispace0, property_key).map(ParseString::from),
+                        )), // key
+                        parameters, // params
+                    )),
+                    context("property separator", tag(":")), // separator
                     context(
-                        "no-value property",
-                        map(valid_key_sequence_cow, |key| {
-                            ((key, vec![]), ParseString::from(""))
-                        }), // key and nothing else
-                    ),
-                )),
-                opt(line_ending),
+                        "property value",
+                        alt((
+                            take_until("\r\n"),
+                            take_until("\n"),
+                            // this is for single line prop parsing, just so I can leave off the '\n'
+                            take_while(|_| true),
+                        ))
+                        .map(ParseString::from),
+                    ), // val TODO: replace this with something simpler!
+                ),
+                context(
+                    "no-value property",
+                    valid_key_sequence_cow.map(|key| ((key, vec![]), ParseString::from(""))), // key and nothing else
+                ),
             )),
-            |(((key, params), val), _)| Property {
-                name: key,
-                val,
-                params,
-            },
-        )),
-    )(input)
+            opt(line_ending),
+        ))
+        .map(|(((key, params), val), _)| Property {
+            name: key,
+            val,
+            params,
+        })),
+    )
+    .parse(input)
 }

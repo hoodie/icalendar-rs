@@ -1,7 +1,7 @@
 use nom::{
     bytes::complete::{tag_no_case, take_while},
     character::complete::line_ending,
-    combinator::{complete, map},
+    combinator::complete,
     error::{ContextError, ParseError},
     multi::many0,
     sequence::{delimited, preceded},
@@ -31,18 +31,18 @@ pub fn valid_key_sequence<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 ) -> IResult<&'a str, &str, E> {
     take_while(|c: char| {
         c == '.' || c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()
-    })(input)
+    })
+    .parse(input)
 }
 
 pub fn valid_key_sequence_cow<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, ParseString<'a>, E> {
-    map(
-        take_while(|c: char| {
-            c == '.' || c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()
-        }),
-        ParseString::from,
-    )(input)
+    take_while(|c: char| {
+        c == '.' || c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()
+    })
+    .map(ParseString::from)
+    .parse(input)
 }
 
 pub fn line<'a, O, E: ParseError<&'a str>, F: Parser<&'a str, O, E>>(

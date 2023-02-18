@@ -4,10 +4,10 @@ use chrono::Utc;
 use nom::{
     branch::alt,
     bytes::complete::tag,
-    combinator::{all_consuming, complete, cut, map},
+    combinator::{all_consuming, complete, cut},
     error::{context, convert_error, ContextError, ParseError, VerboseError},
     multi::{many0, many_till},
-    Finish, IResult,
+    Finish, IResult, Parser,
 };
 
 #[cfg(test)]
@@ -236,29 +236,28 @@ pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 ) -> IResult<&'a str, Component, E> {
     let (input, name) = line("BEGIN:", valid_key_sequence_cow)(input)?;
 
-    let (input, (properties, components)) = map(
-        many_till(
-            cut(context(
-                "component",
-                alt((
-                    map(line_separated(component), ComponentChild::Component),
-                    map(line_separated(property), ComponentChild::Property),
-                )),
+    let (input, (properties, components)) = many_till(
+        cut(context(
+            "component",
+            alt((
+                line_separated(component).map(ComponentChild::Component),
+                line_separated(property).map(ComponentChild::Property),
             )),
-            line("END:", cut(context("mismatching end", tag(name.as_str())))),
-        ),
-        |(body_elements, _)| {
-            let mut properties = Vec::new();
-            let mut components = Vec::new();
-            for el in body_elements {
-                match el {
-                    ComponentChild::Component(c) => components.push(c),
-                    ComponentChild::Property(p) => properties.push(p),
-                }
+        )),
+        line("END:", cut(context("mismatching end", tag(name.as_str())))),
+    )
+    .map(|(body_elements, _)| {
+        let mut properties = Vec::new();
+        let mut components = Vec::new();
+        for el in body_elements {
+            match el {
+                ComponentChild::Component(c) => components.push(c),
+                ComponentChild::Property(p) => properties.push(p),
             }
-            (properties, components)
-        },
-    )(input)?;
+        }
+        (properties, components)
+    })
+    .parse(input)?;
 
     let (input, _) = many0(tag("\n"))(input)?;
 
