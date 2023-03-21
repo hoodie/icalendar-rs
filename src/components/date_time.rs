@@ -305,14 +305,17 @@ impl From<Date<Utc>> for DatePerhapsTime {
     }
 }
 
-impl std::convert::Into<NaiveDateTime> for DatePerhapsTime {
-    fn into(self) -> NaiveDateTime {
+impl Into<DateTime<Utc>> for DatePerhapsTime {
+    fn into(self) -> DateTime<Utc> {
         match self {
-            DatePerhapsTime::Date(date) => date.and_hms_opt(0, 0, 0).unwrap(),
-            DatePerhapsTime::DateTime(dt) => match dt {
-                CalendarDateTime::Floating(ndt) => ndt,
-                CalendarDateTime::Utc(utc_dt) => utc_dt.naive_utc(),
-                CalendarDateTime::WithTimezone { date_time, .. } => date_time,
+            DatePerhapsTime::Date(date) => {
+                let ndt = date.and_hms_opt(0, 0, 0).unwrap();
+                DateTime::<Utc>::from_utc(ndt, Utc)
+            }
+            DatePerhapsTime::DateTime(cdt) => match cdt {
+                CalendarDateTime::Utc(utc) => utc,
+                CalendarDateTime::Floating(ndt) => DateTime::<Utc>::from_utc(ndt, Utc),
+                CalendarDateTime::WithTimezone { date_time, tzid } => unimplemented!(),
             },
         }
     }

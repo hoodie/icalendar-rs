@@ -1,4 +1,3 @@
-use chrono::NaiveDateTime;
 use std::cmp::Ordering;
 
 use super::*;
@@ -9,20 +8,20 @@ pub struct Event {
 }
 
 impl Ord for Event {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    fn cmp(&self, other: &Self) -> Ordering {
         self.partial_cmp(other).unwrap()
     }
 }
 
 impl PartialOrd for Event {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let this = self.get_start();
         let that = other.get_start();
         let tup = (this, that);
         match tup {
             (Some(this_start), Some(that_start)) => {
-                let this_start: NaiveDateTime = this_start.into();
-                let that_start: NaiveDateTime = that_start.into();
+                let this_start: DateTime<Utc> = this_start.into();
+                let that_start: DateTime<Utc> = that_start.into();
                 Some(this_start.cmp(&that_start))
             }
             (Some(_), None) => Some(Ordering::Greater),
