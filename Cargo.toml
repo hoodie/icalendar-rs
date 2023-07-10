@@ -34,8 +34,12 @@ features = ["clock", "std", "wasmbind"]
 version = "7"
 optional = true
 
-[dependencies.uuid]
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies.uuid]
 features = ["v4"]
+version = "1"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies.uuid]
+features = ["v4", "js"]
 version = "1"
 
 [dev-dependencies]
