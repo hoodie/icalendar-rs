@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.15.5](https://github.com/hoodie/icalendar-rs/compare/v0.15.4...v0.15.5) (2023-07-21)
+
+#### Features
+
+* add wasm support
+([336dee7](https://github.com/hoodie/icalendar-rs/commit/336dee785da9a9763c854731893f6877a763a9c2))
+
 ### [v0.15.4](https://github.com/hoodie/icalendar-rs/compare/v0.15.3...v0.15.4) (2023-02-17)
 
 #### Features
