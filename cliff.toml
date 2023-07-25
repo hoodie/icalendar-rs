@@ -1,30 +1,44 @@
 [changelog]
 header = """
-# Changelog\n
-All notable changes to this project will be documented in this file.\n
+# Changelog
 """
 
 body = """
 {% if version %}\
-    ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
-{% else %}\
+    ## [[{{ version | trim_start_matches(pat="v") }}]\
+        {% if previous %}\
+            {% if previous.version%}(https://github.com/hoodie/icalendar-rs/compare/\
+                {{ previous.version }}...{{ version }}\
+            ){% endif %}\
+        {% endif %}] – {{ timestamp | date(format="%Y-%m-%d") }}\
+{% else %}
     ## [unreleased]
-{% endif %}\
-{% if previous %}\
-    {% if previous.commit_id %}
-        [{{ previous.commit_id | truncate(length=7, end="") }}]({{ previous.commit_id }})...\
-            [{{ commit_id | truncate(length=7, end="") }}]({{ commit_id }})
-    {% endif %}\
-{% endif %}\
+{% endif %}
+
 {% for group, commits in commits | group_by(attribute="group") %}
-    ### {{ group | upper_first }}
-    {% for commit in commits %}
-        - {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}]({{ commit.id }}))\
-          {% for footer in commit.footers -%}
-            , {{ footer.token }}{{ footer.separator }}{{ footer.value }}\
-          {% endfor %}\
-    {% endfor %}
+    ### {{ group | striptags | trim }}
+    {% for commit in commits
+    | filter(attribute="scope")
+    | sort(attribute="scope") %}
+        - *({{commit.scope}})*{% if commit.breaking %} [**breaking**]{% endif %} \
+            {{ commit.message }} ([{{ commit.id | truncate(length=7, end="") }}]({{ commit.id }}))\
+            {% for footer in commit.footers -%}\
+                , *{{ footer.token }}{{ footer.separator }}{{ footer.value }}*\
+            {% endfor %}\
+    {%- endfor -%}
+    {% raw %}\n{% endraw %}\
+    {%- for commit in commits %}
+        {%- if commit.scope -%}
+        {% else %}
+            - {% if commit.breaking %} [**breaking**]{% endif %} \
+                {{ commit.message }} ([{{ commit.id | truncate(length=7, end="") }}]({{ commit.id }}))\
+                {% for footer in commit.footers -%}\
+                  , *{{ footer.token }}{{ footer.separator }}{{ footer.value }}*\
+                {% endfor %}\
+        {% endif -%}
+    {% endfor -%}
 {% endfor %}\n
+
 """
 trim = true
 
@@ -33,25 +47,22 @@ conventional_commits = true
 filter_unconventional = true
 split_commits = false
 commit_parsers = [
-    { message = "^feat", group = "Features"},
-    { message = "^fix", group = "Bug Fixes"},
-    { message = "^doc", group = "Documentation"},
-    { message = "^perf", group = "Performance"},
+    { message = "^feat", group = "Features" },
+    { message = "^fix\\(deps\\): Dependency updates", skip = true},
+    { message = "^fix", group = "Bug Fixes" },
+    { message = "^doc", group = "Documentation" },
+    { message = "^perf", group = "Performance" },
     # { message = "^refactor", group = "Refactor"},
     # { message = "^style", group = "Styling"},
     # { message = "^test", group = "Testing"},
 ]
 filter_commits = true
-commit_preprocessors = [
-    { pattern = 'Merged PR #[0-9]: (.*)', replace = "$1"},
-    { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/goto-opensource/secure-frame-rs/issues/${2}))"},
-    { pattern = "https://github.com/orhun/git-cliff/commit/([a-f0-9]{7})[a-f0-9]*", replace = "commit # [${1}](${0})"}
-]
+commit_preprocessors = []
 protect_breaking_commits = true
 tag_pattern = "v[0-9]*"
 ignore_tags = ""
 topo_order = false
 sort_commits = "oldest"
 link_parsers = [
-    { pattern = "#(\\d+)", href = "https://github.com/goto-opensource/secure-frame-rs/issues/$1"},
-] 
+    { pattern = "#(\\d+)", href = "https://github.com/hoodie/icalendar-rs/issues/$1" },
+]
