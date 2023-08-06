@@ -1,15 +1,15 @@
 //! # Parsing iCalendar document parser
 //!
 //! I would have loved to provide a zero-copy parser here however the *Internet Calendaring and Scheduling Core Object Specification (iCalendar)*
-//! allows, nay demands special line folding
+//! allows, nay demands special line folding:
 //! >    Lines of text SHOULD NOT be longer than 75 octets, excluding the line break.  Long content lines SHOULD be split into a multiple line representations using a line "folding" technique.
 //! > -- [rfc5545 3.1]
 //!
 //! For this reason parsing iCal is a bit indirect.
 //! In this module you find the following functions to parser iCalendar document.
-//! `unfold()` will unfold the iCal content and turn it into the nice machine-readable format it ought to be.
-//! `read_calendar()` returns a Vector of `Component`s
-//! `read_calendar_verbose()` does the same thing but produces nicer parsing errors with line numbers (referencing the normalized content).
+//! [`unfold()`] will unfold the iCal content and turn it into the nice machine-readable format it ought to be.
+//! [`read_calendar_simple()`] returns a Vector of [`Component`]s
+//! [`read_calendar()`] does the same thing but produces nicer parsing errors with line numbers (referencing the normalized content).
 //!
 //! You don't have to use `normalize()` on your document if your calendar does not obey the folding rules specified in [rfc5545 3.1].
 //! If it unexpectedly does, the errors might be a tad confusing.
