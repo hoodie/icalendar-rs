@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.15.7](https://github.com/hoodie/icalendar-rs/compare/v0.15.6...v0.15.7) (2023-08-10)
+
+#### Fixes
+
+* update references to renamed parser functions
+([d90d950](https://github.com/hoodie/icalendar-rs/commit/d90d95005d3b3103649f34bbcf80f78f8e813585))
+
 ### [v0.15.6](https://github.com/hoodie/icalendar-rs/compare/v0.15.5...v0.15.6) (2023-07-22)
 
 #### Fixes
