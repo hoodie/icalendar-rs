@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.15.8](https://github.com/hoodie/icalendar-rs/compare/v0.15.7...v0.15.8) (2023-10-30)
+
+#### Fixes
+
+* **deps:** update rust crate chrono-tz to 0.8.4
+([49d60e1](https://github.com/hoodie/icalendar-rs/commit/49d60e11e73a8d5fd214322dce6a2fbe7d50dd8f))
+
 ### [v0.15.7](https://github.com/hoodie/icalendar-rs/compare/v0.15.6...v0.15.7) (2023-08-10)
 
 #### Fixes
