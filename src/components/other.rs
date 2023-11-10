@@ -25,7 +25,7 @@ impl Component for Other {
     }
 
     /// Read-only access to `multi_properties`
-    fn multi_properties(&self) -> &Vec<Property> {
+    fn multi_properties(&self) -> &BTreeMap<String, Vec<Property>> {
         &self.inner.multi_properties
     }
 
@@ -40,7 +40,7 @@ impl Component for Other {
 
     /// Adds a `Property` of which there may be many
     fn append_multi_property(&mut self, property: impl Into<Property>) -> &mut Self {
-        self.inner.multi_properties.push(property.into());
+        self.inner.insert_multi(property);
         self
     }
 

@@ -23,6 +23,25 @@ use nom::{
 #[cfg(test)]
 use nom::error::ErrorKind;
 
+/// [RFC-5545](https://datatracker.ietf.org/doc/html/rfc5545) states that the following
+/// "MAY occur more than once" in a VEVENT, VTODO, VJOURNAL, and VFREEBUSY.
+/// Note: A VJOURNAL can also contain multiple DECRIPTION but this is not covered here.
+const MULTIS: [&str; 13] = [
+    "ATTACH",
+    "ATTENDEE",
+    "CATEGORIES",
+    "COMMENT",
+    "CONTACT",
+    "EXDATE",
+    "FREEBUSY",
+    "IANA-PROP",
+    "RDATE",
+    "RELATED",
+    "RESOURCES",
+    "RSTATUS",
+    "X-PROP",
+];
+
 /// Zero-copy version of [`crate::properties::Property`]
 #[derive(PartialEq, Eq, Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -58,6 +77,10 @@ impl Property<'_> {
         write!(line, ":{}", self.val.as_str())?;
         write_crlf!(out, "{}", fold_line(&line))?;
         Ok(())
+    }
+
+    pub(crate) fn is_multi_property(&self) -> bool {
+        MULTIS.contains(&self.name.as_str())
     }
 }
 

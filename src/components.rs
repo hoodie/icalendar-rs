@@ -23,7 +23,7 @@ pub use venue::*;
 #[derive(Debug, Default, PartialEq, Eq, Clone)]
 pub(crate) struct InnerComponent {
     pub properties: BTreeMap<String, Property>,
-    pub multi_properties: Vec<Property>,
+    pub multi_properties: BTreeMap<String, Vec<Property>>,
     pub components: Vec<Other>,
 }
 
@@ -50,6 +50,17 @@ impl InnerComponent {
         }
     }
 
+    pub(crate) fn insert_multi(&mut self, property: impl Into<Property>) -> &mut Self {
+        let property = property.into();
+        let key = property.key().to_owned();
+
+        self.multi_properties
+            .entry(key)
+            .and_modify(|v| v.push(property.to_owned()))
+            .or_insert(vec![property.to_owned()]);
+        self
+    }
+
     #[cfg(test)]
     pub fn property_value(&self, key: &str) -> Option<&str> {
         Some(self.properties.get(key)?.value())
@@ -72,7 +83,7 @@ pub trait Component {
     fn components(&self) -> &[Other];
 
     /// Read-only access to `multi_properties`
-    fn multi_properties(&self) -> &Vec<Property>;
+    fn multi_properties(&self) -> &BTreeMap<String, Vec<Property>>;
 
     /// Gets the value of a property.
     fn property_value(&self, key: &str) -> Option<&str> {
@@ -96,7 +107,7 @@ pub trait Component {
             write_crlf!(out, "UID:{}", Uuid::new_v4())?;
         }
 
-        for property in self.multi_properties() {
+        for property in self.multi_properties().values().flatten() {
             property.fmt_write(out)?;
         }
 
@@ -355,7 +366,7 @@ macro_rules! component_impl {
             }
 
             /// Read-only access to `multi_properties`
-            fn multi_properties(&self) -> &Vec<Property> {
+            fn multi_properties(&self) -> &BTreeMap<String, Vec<Property>> {
                 &self.inner.multi_properties
             }
 
@@ -375,7 +386,7 @@ macro_rules! component_impl {
 
             /// Adds a [`Property`] of which there may be many
             fn append_multi_property(&mut self, property: impl Into<Property>) -> &mut Self {
-                self.inner.multi_properties.push(property.into());
+                self.inner.insert_multi(property);
                 self
             }
         }
