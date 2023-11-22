@@ -1,5 +1,24 @@
 # Changelog
 
+## [v0.16.0](https://github.com/hoodie/icalendar-rs/compare/v0.15.9...v0.16.0) (2023-11-22)
+
+### ⚠ BREAKING CHANGE
+
+* `Component::multi_properties()` now returns a `&BTreeMap`
+
+
+### Fixes
+
+* parsing multi-properties
+([6fe3e1f](https://github.com/hoodie/icalendar-rs/commit/6fe3e1f46007c89521e834d825d21c97f78f01d7))
+
+### [v0.15.9](https://github.com/hoodie/icalendar-rs/compare/v0.15.8...v0.15.9) (2023-11-22)
+
+#### Fixes
+
+* parsing multi-properties
+([c0ffee9](https://github.com/hoodie/icalendar-rs/commit/c0ffee9dfaaa27e18692349602b50c5d87a422a5))
+
 ### [v0.15.8](https://github.com/hoodie/icalendar-rs/compare/v0.15.7...v0.15.8) (2023-10-30)
 
 #### Fixes
