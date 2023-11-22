@@ -287,11 +287,9 @@ pub fn inner_component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, InnerComponent, E> {
     match component::<(_, _)>(input) {
-        Ok(result) => {
-            return Ok((result.0, InnerComponent::from(result.1)));
-        }
+        Ok(result) => Ok((result.0, InnerComponent::from(result.1))),
         Err(_e) => todo!(),
-    };
+    }
 }
 
 #[test]

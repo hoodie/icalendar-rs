@@ -1,4 +1,4 @@
-use std::{env, fs, io};
+use std::{env, fmt::Write, fs, io};
 #[allow(dead_code)]
 pub fn print_with_lines(content: &str) {
     println!(
@@ -6,8 +6,10 @@ pub fn print_with_lines(content: &str) {
         content
             .lines()
             .enumerate()
-            .map(|(num, content)| format!("{:4}. {}\n", num + 1, content))
-            .collect::<String>()
+            .fold(String::new(), |mut out, (num, content)| {
+                let _ = writeln!(out, "{:4}. {}", num + 1, content);
+                out
+            })
     );
 }
 
