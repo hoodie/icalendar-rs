@@ -131,15 +131,26 @@ impl From<Component<'_>> for Other {
 
 impl From<Component<'_>> for InnerComponent {
     fn from(component: Component) -> Self {
-        Self {
+        let mut from_component = Self {
             properties: component
                 .properties
-                .into_iter()
-                .map(|p| (p.name.clone().into_owned().into(), p.into()))
+                .iter()
+                .filter(|p| !p.is_multi_property())
+                .map(|p| (p.name.clone().into_owned().into(), p.to_owned().into()))
                 .collect(),
             components: component.components.into_iter().map(Other::from).collect(),
             multi_properties: Default::default(),
+        };
+
+        for p in component
+            .properties
+            .into_iter()
+            .filter(Property::is_multi_property)
+        {
+            from_component.insert_multi(p);
         }
+
+        from_component
     }
 }
 
@@ -269,6 +280,18 @@ pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
             components,
         },
     ))
+}
+
+#[cfg(test)]
+pub fn inner_component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    input: &'a str,
+) -> IResult<&'a str, InnerComponent, E> {
+    match component::<(_, _)>(input) {
+        Ok(result) => {
+            return Ok((result.0, InnerComponent::from(result.1)));
+        }
+        Err(_e) => todo!(),
+    };
 }
 
 #[test]
@@ -420,6 +443,60 @@ END:VEVENT
                 components: vec![]
             }
             ]
+        }
+    );
+}
+
+#[test]
+fn test_multi_properties() {
+    let multi_properties = From::from([(
+        "ATTENDEE".into(),
+        vec![
+            Property {
+                name: "ATTENDEE".into(),
+                val: "mailto:email@example.com".into(),
+                params: vec![
+                    Parameter {
+                        key: "EMAIL".into(),
+                        val: Some("\"email@example.com\"".into()),
+                    },
+                    Parameter {
+                        key: "CUTYPE".into(),
+                        val: Some("INDIVIDUAL".into()),
+                    },
+                ],
+            }
+            .into(),
+            Property {
+                name: "ATTENDEE".into(),
+                val: "mailto:dmail@example.com".into(),
+                params: vec![
+                    Parameter {
+                        key: "EMAIL".into(),
+                        val: Some("\"dmail@example.com\"".into()),
+                    },
+                    Parameter {
+                        key: "CUTYPE".into(),
+                        val: Some("INDIVIDUAL".into()),
+                    },
+                ],
+            }
+            .into(),
+        ],
+    )]);
+
+    assert_parser!(
+        inner_component,
+        r#"
+BEGIN:VEVENT
+ATTENDEE;CUTYPE=INDIVIDUAL;EMAIL="email@example.com":mailto:email@example.com
+ATTENDEE;CUTYPE=INDIVIDUAL;EMAIL="dmail@example.com":mailto:dmail@example.com
+END:VEVENT
+"#,
+        InnerComponent {
+            properties: Default::default(),
+            multi_properties,
+            components: vec![]
         }
     );
 }
