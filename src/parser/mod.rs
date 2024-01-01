@@ -61,7 +61,7 @@ pub fn read_calendar(input: &str) -> Result<Calendar<'_>, String> {
         .finish()
         .map(|(_, mut components)| {
             let root_is_calendar = components
-                .get(0)
+                .first()
                 .map(|first_root| first_root.name == "VCALENDAR")
                 .unwrap_or(false);
 

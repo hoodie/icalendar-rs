@@ -72,7 +72,7 @@ END:VCALENDAR
 impl<'a> From<Vec<Component<'a>>> for crate::Calendar {
     fn from(mut components: Vec<Component<'a>>) -> Self {
         let root_is_calendar = components
-            .get(0)
+            .first()
             .map(|first_root| first_root.name == "VCALENDAR")
             .unwrap_or(false);
 
