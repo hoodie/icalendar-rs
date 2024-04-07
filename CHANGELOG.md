@@ -1,5 +1,15 @@
 # Changelog
 
+### [v0.16.1](https://github.com/hoodie/icalendar-rs/compare/v0.16.0...v0.16.1) (2024-04-07)
+
+#### Fixes
+
+* forbid index slicing in parser
+([c0ffeec](https://github.com/hoodie/icalendar-rs/commit/c0ffeec8ad4f4875fc79e3d9cab02ab250990fdb)),
+closes [#91](https://github.com/hoodie/icalendar-rs/issues/91)
+* **deps:** update rust crate chrono-tz to 0.8.5
+([4ef3052](https://github.com/hoodie/icalendar-rs/commit/4ef3052bc0073c9cce0a5eae4f534b3ea7fbd5fe))
+
 ## [v0.16.0](https://github.com/hoodie/icalendar-rs/compare/v0.15.9...v0.16.0) (2023-11-22)
 
 ### ⚠ BREAKING CHANGE
