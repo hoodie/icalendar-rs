@@ -5,7 +5,7 @@
 [![build](https://img.shields.io/github/actions/workflow/status/hoodie/icalendar-rs/ci.yml?branch=main)](https://github.com/hoodie/icalendar-rs/actions?query=workflow%3A"Continuous+Integration")
 [![Crates.io](https://img.shields.io/crates/d/icalendar)](https://crates.io/crates/icalendar)
 [![contributors](https://img.shields.io/github/contributors/hoodie/icalendar-rs)](https://github.com/hoodie/icalendar-rs/graphs/contributors)
-![maintenance](https://img.shields.io/maintenance/yes/2023)
+![maintenance](https://img.shields.io/maintenance/yes/2025)
 
 [![version](https://img.shields.io/crates/v/icalendar)](https://crates.io/crates/icalendar/)
 [![documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://docs.rs/icalendar/)
