@@ -81,6 +81,11 @@ pub fn read_calendar(input: &str) -> Result<Calendar<'_>, String> {
         .map_err(|e: VerboseError<&str>| format!("error: {}", convert_error(input, e.clone())))
 }
 
+#[test]
+fn begin_crash() {
+    assert!(read_calendar("BEGIN:").is_ok());
+}
+
 /// Parse iCalendar file content into an array of [`Component`]s
 ///
 /// This version produces nice and readable errors with line numbers thanks the the awesomeness of [`nom`].

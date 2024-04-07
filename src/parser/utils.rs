@@ -16,7 +16,7 @@ use super::parsed_string::ParseString;
 pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, &str, E> {
-    if &input[0..=2] == "END" || &input[0..=4] == "BEGIN" {
+    if input.get(0..=2) == Some("END") || input.get(0..=4) == Some("BEGIN") {
         IResult::Err(Err::Error(nom::error::make_error(
             input,
             nom::error::ErrorKind::Satisfy,
