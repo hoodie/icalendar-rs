@@ -1,9 +1,11 @@
 #![allow(dead_code, unused)]
 use std::str::FromStr;
 
-use chrono::{Date, DateTime, Duration, NaiveDate, NaiveDateTime, Offset, TimeZone as _, Utc};
+use chrono::{Date, DateTime, Duration as ChronoDuration, NaiveDate, NaiveDateTime, Offset, TimeZone as _, Utc};
 
 use crate::{Property, ValueType};
+
+use super::properties::Duration;
 
 const NAIVE_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%S";
 const UTC_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";
@@ -23,9 +25,7 @@ pub(crate) fn format_utc_date_time(utc_dt: DateTime<Utc>) -> String {
 }
 
 pub(crate) fn parse_duration(s: &str) -> Option<Duration> {
-    iso8601::duration(s)
-        .ok()
-        .and_then(|iso| Duration::from_std(iso.into()).ok())
+    Duration::from_str(s).ok()
 }
 
 pub(crate) fn naive_date_to_property(date: NaiveDate, key: &str) -> Property {

@@ -1,4 +1,4 @@
-use chrono::*;
+use chrono::{Local, Utc, Duration as ChronoDuration};
 use icalendar::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -6,7 +6,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .summary("buy groceries")
         .description("* soy-milk\n* oak-meal\n* vegan chocolate\n* kale\n* bacon\nabcdefghijklmnopqrstuvwxyz")
         .starts(Local::now().naive_local())
-        .ends(Local::now().naive_local() + Duration::hours(24))
+        .ends(Local::now().naive_local() + ChronoDuration::hours(24))
         .priority(12)
         .percent_complete(28)
         .status(TodoStatus::InProcess)

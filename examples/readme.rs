@@ -1,4 +1,4 @@
-use chrono::*;
+use chrono::{Utc, NaiveDate, Duration as ChronoDuration};
 #[cfg(feature = "chrono-tz")]
 use chrono_tz::Europe::Berlin;
 use icalendar::*;
@@ -14,7 +14,7 @@ fn main() {
                 .description("here I have something really important to do")
                 .starts(Utc::now())
                 .class(Class::Confidential)
-                .ends(Utc::now() + Duration::days(1))
+                .ends(Utc::now() + ChronoDuration::days(1))
                 .append_property(
                     Property::new("TEST", "FOOBAR")
                         .add_parameter("IMPORTANCE", "very")

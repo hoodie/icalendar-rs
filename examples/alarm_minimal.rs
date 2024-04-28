@@ -1,11 +1,11 @@
-use chrono::*;
+use chrono::{Utc, Duration as ChronoDuration};
 use icalendar::*;
 
 fn main() {
     // alarm will occur one minute from now
     let event_with_absolute_audio_alarm = Event::new()
         .alarm(
-            Alarm::audio(Utc::now() + Duration::minutes(1))
+            Alarm::audio(Utc::now() + ChronoDuration::minutes(1))
                 .duration_and_repeat(Duration::minutes(1), 4),
         )
         .done();

@@ -20,7 +20,7 @@ UID:uid4@example.com\r
 BEGIN:VALARM\r
 ACTION:AUDIO\r
 DTSTAMP:19980130T134500Z\r
-DURATION:PT3600S\r
+DURATION:PT1H\r
 REPEAT:4\r
 TRIGGER;VALUE=DATE-TIME:19980403T120000Z\r
 UID:OverwriteForConsistency\r
@@ -47,7 +47,7 @@ fn test_alarm_to_string() {
         .summary("Submit Income Taxes")
         .append_component(
             Alarm::audio(Utc.with_ymd_and_hms(1998, 4, 3, 12, 0, 0).unwrap())
-                .duration_and_repeat(chrono::Duration::hours(1), 4)
+                .duration_and_repeat(icalendar::Duration::hours(1), 4)
                 .uid("OverwriteForConsistency")
                 .add_property("DTSTAMP", "19980130T134500Z")
                 .done(),
