@@ -485,9 +485,34 @@ pub mod properties {
         type Err = ();
     
         fn from_str(s: &str) -> Result<Self, Self::Err> {
-            let value = iso8601::duration(s);
-            if let Ok(value) = value {
-                Duration::try_from(value)
+            if s.is_empty() {
+                return Err(())
+            }
+            let mut positiv:bool = true;
+
+            let mut it = s.chars();
+            let first = it.next();
+            if let Some(first) = first {
+                if first == '-' {
+                    positiv = false;
+                } 
+            }
+            
+            let parsed = if positiv {
+                iso8601::duration(s)
+            } else {
+                iso8601::duration(it.as_str())
+            };
+
+            if let Ok(parsed) = parsed {
+                let parsed = Duration::try_from(parsed)?;
+
+                if !positiv {
+                    Ok(-parsed)
+                } else {
+                    Ok(parsed)
+                }
+                
             } else {
                 Err(())
             }
@@ -499,6 +524,8 @@ pub mod properties {
         type Error = ();
     
         fn try_from(value: iso8601::Duration) -> Result<Self, Self::Error> {
+            // What happens if the format is P1W1D? 
+            // I think this didnt work before either
             match value {
                 iso8601::Duration::YMDHMS { year, month, day, hour, minute, second, millisecond: _ } => {
                     if (year | month ) > 0 {
@@ -780,4 +807,25 @@ pub mod properties {
             Some(Trigger::Duration(dur, Some(Related::Start)))
         );
     }
+
+    #[test]
+    fn test_duration_parse_full_positiv() {
+        let dur_str = "P1DT1H1M1S";
+        
+        pretty_assertions::assert_eq!(
+            Duration::from_str(dur_str).unwrap().to_string(),
+            dur_str
+        );
+    }
+
+    #[test]
+    fn test_duration_parse_full_negativ() {
+        let dur_str = "-P1DT1H1M1S";
+
+        pretty_assertions::assert_eq!(
+            Duration::from_str(dur_str).unwrap().to_string(),
+            dur_str
+        );
+    }
+
 }
