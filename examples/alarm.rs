@@ -1,12 +1,12 @@
-use chrono::{Utc, Duration as ChronoDuration, };
+use chrono::*;
 use icalendar::*;
 
 fn main() {
     let mut calendar = Calendar::new();
 
     let now = Utc::now();
-    let soon = Utc::now() + ChronoDuration::minutes(12);
-    let tomorrow = Utc::now() + ChronoDuration::days(1);
+    let soon = Utc::now() + chrono::Duration::minutes(12);
+    let tomorrow = Utc::now() + chrono::Duration::days(1);
 
     let todo_test_audio = Todo::new()
         .summary("TODO with audio alarm -15min")
@@ -16,23 +16,23 @@ fn main() {
         .status(TodoStatus::NeedsAction)
         .percent_complete(98)
         .alarm(
-            Alarm::audio(-Duration::minutes(10))
-                .duration_and_repeat(Duration::minutes(1), 4),
+            Alarm::audio(-icalendar::Duration::minutes(10))
+                .duration_and_repeat(icalendar::Duration::minutes(1), 4),
         )
         .done();
 
     let event_test_display = Event::new()
         .summary("test event")
         .description("here I have something really important to do")
-        .starts(Utc::now() + ChronoDuration::minutes(5))
+        .starts(Utc::now() + chrono::Duration::minutes(5))
         .class(Class::Confidential)
-        .ends(Utc::now() + ChronoDuration::hours(1))
+        .ends(Utc::now() + chrono::Duration::hours(1))
         .alarm(
             Alarm::display(
                         "you should test your implementation",
-                Utc::now() + ChronoDuration::minutes(1),
+                Utc::now() + chrono::Duration::minutes(1),
             )
-            .duration_and_repeat(Duration::minutes(1), 4),
+            .duration_and_repeat(icalendar::Duration::minutes(1), 4),
         )
         .done();
 
@@ -45,9 +45,9 @@ fn main() {
         .alarm(
             Alarm::display(
                         "you should test your implementation",
-                        (-Duration::minutes(10), Related::End),
+                        (-icalendar::Duration::minutes(10), Related::End),
             )
-            .duration_and_repeat(Duration::minutes(1), 4),
+            .duration_and_repeat(icalendar::Duration::minutes(1), 4),
         )
         .done();
 
@@ -58,8 +58,8 @@ fn main() {
         .due(tomorrow)
         .status(TodoStatus::NeedsAction)
         .alarm(
-            Alarm::audio(now + ChronoDuration::minutes(1))
-                .duration_and_repeat(Duration::minutes(1), 4),
+            Alarm::audio(now + chrono::Duration::minutes(1))
+                .duration_and_repeat(icalendar::Duration::minutes(1), 4),
         )
         .done();
 

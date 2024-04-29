@@ -1,7 +1,7 @@
 #![cfg(feature = "parser")]
 use std::str::FromStr;
 
-use chrono::{Utc, Duration as ChronoDuration};
+use chrono::*;
 use icalendar::parser;
 use icalendar::*;
 
@@ -11,7 +11,7 @@ fn main() {
         .description("here I have something really important to do")
         .starts(Utc::now())
         .class(Class::Confidential)
-        .ends(Utc::now() + ChronoDuration::days(1))
+        .ends(Utc::now() + chrono::Duration::days(1))
         .append_property(
             Property::new("TEST", "FOOBAR")
                 .add_parameter("IMPORTANCE", "very")

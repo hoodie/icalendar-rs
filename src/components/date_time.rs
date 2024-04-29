@@ -1,7 +1,7 @@
 #![allow(dead_code, unused)]
 use std::str::FromStr;
 
-use chrono::{Date, DateTime, Duration as ChronoDuration, NaiveDate, NaiveDateTime, Offset, TimeZone as _, Utc};
+use chrono::{Date, DateTime, NaiveDate, NaiveDateTime, Offset, TimeZone as _, Utc};
 
 use crate::{Property, ValueType};
 
