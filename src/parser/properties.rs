@@ -119,7 +119,7 @@ impl FromStr for crate::Property {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(crate::parser::Property::try_from(s)?.into())
+        Ok(Property::try_from(s)?.into())
     }
 }
 
