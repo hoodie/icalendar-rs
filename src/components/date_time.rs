@@ -5,7 +5,7 @@ use chrono::{Date, DateTime, NaiveDate, NaiveDateTime, Offset, TimeZone as _, Ut
 
 use crate::{Property, ValueType};
 
-use super::properties::Duration;
+use super::Duration;
 
 const NAIVE_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%S";
 const UTC_DATE_TIME_FORMAT: &str = "%Y%m%dT%H%M%SZ";

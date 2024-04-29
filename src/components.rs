@@ -7,6 +7,7 @@ use crate::properties::*;
 use date_time::{format_utc_date_time, naive_date_to_property, parse_utc_date_time};
 
 pub mod alarm;
+pub mod duration;
 pub(crate) mod date_time;
 mod event;
 mod other;
@@ -15,6 +16,7 @@ mod venue;
 
 use alarm::*;
 use date_time::{CalendarDateTime, DatePerhapsTime};
+pub use duration::*;
 pub use event::*;
 pub use other::*;
 pub use todo::*;

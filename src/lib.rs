@@ -104,9 +104,9 @@ mod properties;
 pub use crate::{
     calendar::{Calendar, CalendarComponent},
     components::{
-        alarm::{Alarm, Related, Trigger, Duration},
+        alarm::{Alarm, Related, Trigger},
         date_time::{CalendarDateTime, DatePerhapsTime},
-        Component, Event, EventLike, Todo, Venue,
+        Component, Event, EventLike, Todo, Venue, Duration
     },
     properties::{Class, EventStatus, Parameter, Property, TodoStatus, ValueType},
 };
