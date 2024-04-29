@@ -1,6 +1,5 @@
 use chrono::*;
 
-use super::date_time::parse_utc_date_time;
 use super::*;
 
 /// VTODO  [(RFC 5545, Section 3.6.2 )](https://tools.ietf.org/html/rfc5545#section-3.6.2)

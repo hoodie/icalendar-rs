@@ -1,7 +1,7 @@
 #![allow(dead_code, unused)]
 use std::str::FromStr;
 
-use chrono::{Date, DateTime, Duration, NaiveDate, NaiveDateTime, Offset, TimeZone as _, Utc};
+use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, Offset, TimeZone as _, Utc};
 
 use crate::{Property, ValueType};
 
@@ -299,8 +299,8 @@ impl From<DateTime<Utc>> for DatePerhapsTime {
 // }
 
 #[allow(deprecated)]
-impl From<Date<Utc>> for DatePerhapsTime {
-    fn from(dt: Date<Utc>) -> Self {
+impl From<chrono::Date<Utc>> for DatePerhapsTime {
+    fn from(dt: chrono::Date<Utc>) -> Self {
         Self::Date(dt.naive_utc())
     }
 }

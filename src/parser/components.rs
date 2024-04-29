@@ -170,7 +170,7 @@ impl FromStr for CalendarComponent {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let from_parsed = crate::CalendarComponent::from(read_component(&unfold(s))?);
+        let from_parsed = CalendarComponent::from(read_component(&unfold(s))?);
         Ok(from_parsed)
     }
 }

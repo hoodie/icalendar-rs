@@ -156,7 +156,7 @@ impl Property {
 }
 
 impl TryInto<String> for Property {
-    type Error = std::fmt::Error;
+    type Error = fmt::Error;
 
     fn try_into(self) -> Result<String, Self::Error> {
         let mut out_string = String::new();

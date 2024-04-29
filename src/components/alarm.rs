@@ -282,7 +282,7 @@ fn test_email() {
 
 pub mod properties {
 
-    use crate::components::{alarm::properties::Parameter, date_time::parse_duration};
+    use crate::components::date_time::parse_duration;
 
     use super::*;
 
@@ -316,14 +316,13 @@ pub mod properties {
         }
     }
 
-    impl ToString for Action {
-        /// convert the ACTION into its serialized representation
-        fn to_string(&self) -> String {
+    impl fmt::Display for Action {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             match self {
-                Action::Audio => "AUDIO".into(),
-                Action::Email => "EMAIL".into(),
-                Action::Display => "DISPLAY".into(),
-                Action::Other(other) => other.clone(),
+                Action::Audio => write!(f, "AUDIO"),
+                Action::Email => write!(f, "EMAIL"),
+                Action::Display => write!(f, "DISPLAY"),
+                Action::Other(other) => write!(f, "{}", other),
             }
         }
     }
@@ -411,7 +410,7 @@ pub mod properties {
     pub enum Trigger {
         /// Duration in relation to either Start or End of the event
         Duration(Duration, Option<Related>),
-        /// Absolute DateTime of the Trigger
+        /// Absolute `DateTime` of the Trigger
         DateTime(CalendarDateTime),
     }
 

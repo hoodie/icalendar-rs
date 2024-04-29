@@ -1,6 +1,5 @@
 use chrono::*;
 use icalendar::*;
-use std::convert::TryInto;
 
 #[test]
 fn try_into_string() -> Result<(), Box<dyn std::error::Error>> {

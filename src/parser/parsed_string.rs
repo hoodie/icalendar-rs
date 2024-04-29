@@ -53,9 +53,9 @@ impl From<String> for ParseString<'static> {
     }
 }
 
-impl ToString for ParseString<'_> {
-    fn to_string(&self) -> String {
-        self.to_owned().into()
+impl std::fmt::Display for ParseString<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 

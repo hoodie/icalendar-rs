@@ -1,5 +1,5 @@
 use chrono::Duration;
-use std::{fmt, iter::FromIterator, mem, ops::Deref};
+use std::{fmt, mem, ops::Deref};
 
 use crate::{components::*, Parameter, Property};
 
@@ -232,7 +232,7 @@ impl fmt::Display for Calendar {
 }
 
 impl TryInto<String> for &Calendar {
-    type Error = std::fmt::Error;
+    type Error = fmt::Error;
     fn try_into(self) -> Result<String, Self::Error> {
         let mut out_string = String::new();
         self.fmt_write(&mut out_string)?;
@@ -279,7 +279,7 @@ impl<C: Into<CalendarComponent>> FromIterator<C> for Calendar {
 }
 #[test]
 fn from_adds_default_properties() {
-    let todo = crate::Todo::default();
+    let todo = Todo::default();
     let cal = Calendar::from([todo]);
     assert!(cal.property_value("VERSION").is_some());
     assert!(cal.property_value("CALSCALE").is_some());

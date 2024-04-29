@@ -2,7 +2,6 @@
 use std::str::FromStr;
 
 use chrono::*;
-use icalendar::parser;
 use icalendar::*;
 
 fn main() {

@@ -129,7 +129,7 @@ pub trait Component {
     }
 
     /// Serializes this component into [`rfc5545`](http://tools.ietf.org/html/rfc5545) again
-    fn try_into_string(&self) -> Result<String, std::fmt::Error> {
+    fn try_into_string(&self) -> Result<String, fmt::Error> {
         let mut out_string = String::new();
         self.fmt_write(&mut out_string)?;
         Ok(out_string)
@@ -185,7 +185,7 @@ pub trait Component {
     ///
     /// Ranges from 0 to 10, larger values will be truncated
     fn priority(&mut self, priority: u32) -> &mut Self {
-        let priority = ::std::cmp::min(priority, 10);
+        let priority = std::cmp::min(priority, 10);
         self.add_property("PRIORITY", &priority.to_string())
     }
 
