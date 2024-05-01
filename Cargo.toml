@@ -21,7 +21,7 @@ default = ["parser"]
 parser = ["dep:nom"]
 
 [dependencies]
-serde = { version = "1.0", optional = true, features = ["derive"] }
+serde = { version = "1.0.200", optional = true, features = ["derive"] }
 serde_json = { version = "1.0", optional = true }
 iso8601 = "0.6"
 chrono-tz = {version = "0.9", optional = true }
