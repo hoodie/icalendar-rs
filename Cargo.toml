@@ -44,7 +44,7 @@ features = ["v4", "js"]
 version = "1.8"
 
 [dev-dependencies]
-pretty_assertions = "1"
+pretty_assertions = "1.4.0"
 
 [package.metadata.docs.rs]
 all-features = true
