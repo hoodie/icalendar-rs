@@ -5,7 +5,7 @@ use nom::{
     combinator::{eof, opt},
     error::{convert_error, ContextError, ParseError, VerboseError},
     multi::many0,
-    sequence::{delimited, preceded, separated_pair, tuple},
+    sequence::{delimited, preceded, separated_pair},
     Finish, IResult, Parser,
 };
 
@@ -130,14 +130,14 @@ fn remove_empty_string_parsed(input: Option<ParseString<'_>>) -> Option<ParseStr
 fn parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Parameter<'a>, E> {
-    alt((pair_parameter, base_parameter))(input)
+    alt((pair_parameter, base_parameter)).parse(input)
 }
 
 fn pair_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Parameter<'a>, E> {
     preceded(
-        tuple((tag(";"), space0)),
+        (tag(";"), space0),
         separated_pair(
             valid_key_sequence_cow, //key
             tag("="),
@@ -159,9 +159,9 @@ fn pair_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 fn base_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Parameter<'a>, E> {
-    tuple((
+    (
         preceded(
-            tuple((tag(";"), space0)),
+            (tag(";"), space0),
             valid_key_sequence_cow, //key
         ),
         opt(preceded(
@@ -174,9 +174,9 @@ fn base_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
             .map(ParseString::from),
         ))
         .map(remove_empty_string_parsed),
-    ))
-    .map(|(key, val)| Parameter { key, val })
-    .parse(input)
+    )
+        .map(|(key, val)| Parameter { key, val })
+        .parse(input)
 }
 
 // parameter list
@@ -215,5 +215,5 @@ pub fn parse_parameter_list() {
 pub fn parameters<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Vec<Parameter>, E> {
-    many0(parameter)(input)
+    many0(parameter).parse(input)
 }
