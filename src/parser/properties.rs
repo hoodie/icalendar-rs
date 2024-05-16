@@ -16,7 +16,7 @@ use nom::{
     character::complete::{line_ending, multispace0},
     combinator::{cut, opt},
     error::{context, convert_error, ContextError, ParseError, VerboseError},
-    sequence::{preceded, separated_pair, tuple},
+    sequence::{preceded, separated_pair},
     Finish, IResult, Parser,
 };
 
@@ -287,10 +287,10 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 ) -> IResult<&'a str, Property, E> {
     context(
         "property",
-        cut(tuple((
+        cut((
             alt((
                 separated_pair(
-                    tuple((
+                    (
                         // preceded(multispace0, alpha_or_dash), // key
                         cut(context(
                             // this must be interpreted as component by `component()`
@@ -299,7 +299,7 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                             preceded(multispace0, property_key).map(ParseString::from),
                         )), // key
                         parameters, // params
-                    )),
+                    ),
                     context("property separator", tag(":")), // separator
                     context(
                         "property value",
@@ -318,12 +318,12 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                 ),
             )),
             opt(line_ending),
-        ))
-        .map(|(((key, params), val), _)| Property {
-            name: key,
-            val,
-            params,
-        })),
+        )
+            .map(|(((key, params), val), _)| Property {
+                name: key,
+                val,
+                params,
+            })),
     )
     .parse(input)
 }
