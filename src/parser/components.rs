@@ -456,7 +456,7 @@ fn test_multi_properties() {
                 params: vec![
                     Parameter {
                         key: "EMAIL".into(),
-                        val: Some("\"email@example.com\"".into()),
+                        val: Some("email@example.com".into()),
                     },
                     Parameter {
                         key: "CUTYPE".into(),
@@ -471,7 +471,7 @@ fn test_multi_properties() {
                 params: vec![
                     Parameter {
                         key: "EMAIL".into(),
-                        val: Some("\"dmail@example.com\"".into()),
+                        val: Some("dmail@example.com".into()),
                     },
                     Parameter {
                         key: "CUTYPE".into(),

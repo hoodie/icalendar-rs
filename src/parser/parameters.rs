@@ -1,11 +1,11 @@
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_till1},
+    bytes::complete::{is_not, tag, take_till1},
     character::complete::space0,
     combinator::{eof, opt},
     error::{convert_error, ContextError, ParseError, VerboseError},
     multi::many0,
-    sequence::{preceded, separated_pair, tuple},
+    sequence::{delimited, preceded, separated_pair, tuple},
     Finish, IResult, Parser,
 };
 
@@ -141,7 +141,12 @@ fn pair_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         separated_pair(
             valid_key_sequence_cow, //key
             tag("="),
-            opt(alt((eof, take_till1(|x| x == ';' || x == ':')))).map(remove_empty_string),
+            opt(alt((
+                eof,
+                delimited(tag("\""), is_not("\""), tag("\"")),
+                take_till1(|x| x == ';' || x == ':'),
+            )))
+            .map(remove_empty_string),
         ),
     )
     .map(|(key, val)| Parameter {
@@ -161,7 +166,12 @@ fn base_parameter<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         ),
         opt(preceded(
             tag("="),
-            alt((eof, take_till1(|x| x == ';' || x == ':'))).map(ParseString::from),
+            alt((
+                eof,
+                delimited(tag("\""), is_not("\""), tag("\"")),
+                take_till1(|x| x == ';' || x == ':'),
+            ))
+            .map(ParseString::from),
         ))
         .map(remove_empty_string_parsed),
     ))
@@ -194,6 +204,11 @@ pub fn parse_parameter_list() {
             Parameter::new_ref("KEY", Some("VALUE")),
             Parameter::new_ref("DATE", Some("20170218")),
         ]
+    );
+    assert_parser!(
+        parameters,
+        ";TEXT=\"quoted text with \\;\"",
+        vec![Parameter::new_ref("TEXT", Some("quoted text with \\;")),]
     );
 }
 
