@@ -12,14 +12,39 @@ impl ParseString<'_> {
             Cow::Owned(ref s) => ParseString(Cow::Owned(s.clone())),
         }
     }
+
     pub fn into_owned(self) -> ParseString<'static> {
         match self.0 {
             Cow::Borrowed(s) => ParseString(Cow::Owned(s.to_owned())),
             Cow::Owned(s) => ParseString(Cow::Owned(s)),
         }
     }
+
     pub fn as_str(&self) -> &str {
         self.0.as_ref()
+    }
+}
+
+impl<'a> ParseString<'a> {
+    pub fn unescape_text(self) -> ParseString<'a> {
+        if self.0.contains(r#"\\"#)
+            || self.0.contains(r#"\,"#)
+            || self.0.contains(r#"\;"#)
+            || self.0.contains(r#"\:"#)
+            || self.0.contains(r#"\N"#)
+            || self.0.contains(r#"\n"#)
+        {
+            self.0
+                .replace(r#"\\"#, r#"\"#)
+                .replace(r#"\,"#, ",")
+                .replace(r#"\;"#, ";")
+                .replace(r#"\:"#, ":")
+                .replace(r#"\N"#, "\n")
+                .replace(r#"\n"#, "\n")
+                .into()
+        } else {
+            self
+        }
     }
 }
 
