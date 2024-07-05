@@ -6,8 +6,8 @@ use icalendar::*;
 
 fn main() {
     let event = Event::new()
-        .summary("test event")
-        .description("here I have something really important to do")
+        .summary(";IMPORTANCE=very;test event")
+        .description("here; I have something; really important to do")
         .starts(Utc::now())
         .class(Class::Confidential)
         .ends(Utc::now() + Duration::days(1))
@@ -15,6 +15,9 @@ fn main() {
             Property::new("TEST", "FOOBAR")
                 .add_parameter("IMPORTANCE", "very")
                 .add_parameter("DUE", "tomorrow")
+                .add_parameter("COMPLEX", r#"this is code; I think"#)
+                .add_parameter("keyval", "color:red")
+                .add_parameter("CODE", "this is code; so I quote")
                 .done(),
         )
         .uid("my.own.id")
@@ -34,10 +37,10 @@ fn main() {
 
     println!("{}", &ical); // print what we built
     println!("{}", from_parsed); // print what parsed
-    println!("{:#?}", built_calendar); // inner representation of what we built
-    println!("{:#?}", from_parsed); // inner representation of what we built and then parsed
+    println!("built calendar:\n{:#?}", built_calendar); // inner representation of what we built
+    println!("from parsed:\n{:#?}", from_parsed); // inner representation of what we built and then parsed
     println!(
-        "{:#?}",
+        "read_calenar:\n{:#?}",
         parser::read_calendar(&parser::unfold(&ical)).unwrap()
     ); // inner presentation of the parser's data structure
 }
