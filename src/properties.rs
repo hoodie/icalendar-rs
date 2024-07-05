@@ -53,7 +53,7 @@ impl Property {
     pub fn new(key: &str, val: &str) -> Self {
         Property {
             key: key.to_owned(),
-            val: val.replace('\n', "\\n"),
+            val: val.to_owned(),
             params: HashMap::new(),
         }
     }
@@ -62,7 +62,7 @@ impl Property {
     pub fn new_pre_alloc(key: String, val: String) -> Self {
         Property {
             key,
-            val: val.replace('\n', "\\n"),
+            val,
             params: HashMap::new(),
         }
     }
@@ -140,16 +140,38 @@ impl Property {
         }
     }
 
+    /// <https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.11>
+    fn escape_text(input: &str) -> String {
+        input
+            .replace('\\', r#"\\"#)
+            .replace(',', r#"\,"#)
+            .replace(';', r#"\;"#)
+            .replace(':', r#"\:"#)
+            .replace('\n', r#"\N"#)
+    }
+
+    fn quote_if_contains_colon(input: &str) -> String {
+        if input.contains([':', ';']) {
+            let mut quoted = String::with_capacity(input.len() + 2);
+            quoted.push('"');
+            quoted.push_str(input);
+            quoted.push('"');
+            quoted
+        } else {
+            input.to_string()
+        }
+    }
+
     /// Writes this Property to `out`
     pub(crate) fn fmt_write<W: Write>(&self, out: &mut W) -> Result<(), fmt::Error> {
         // A nice starting capacity for the majority of content lines
         let mut line = String::with_capacity(150);
 
         write!(line, "{}", self.key)?;
-        for Parameter { key, val: value } in self.params.values() {
-            write!(line, ";{}={}", key, value)?;
+        for Parameter { key, val } in self.params.values() {
+            write!(line, ";{}={}", key, Self::quote_if_contains_colon(val))?;
         }
-        write!(line, ":{}", self.val)?;
+        write!(line, ":{}", Self::escape_text(&self.val))?;
         write_crlf!(out, "{}", fold_line(&line))?;
         Ok(())
     }
