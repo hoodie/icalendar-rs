@@ -30,7 +30,7 @@ END:VTODO\r
 BEGIN:VALARM\r
 TRIGGER;RELATED=END:-P2D\r
 ACTION:EMAIL\r
-ATTENDEE:mailto:john_doe@example.com\r
+ATTENDEE:mailto:\"john_doe@example.com\"\r
 SUMMARY:*** REMINDER: SEND AGENDA FOR WEEKLY STAFF MEETING ***\r
 DESCRIPTION:A draft agenda needs to be sent out to the attendees to the wee\r
  kly managers meeting (MGR-LIST). Attached is a pointer the document templat\r

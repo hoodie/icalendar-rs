@@ -5,7 +5,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let event = Event::new()
         .summary("test event")
         .append_property(
-            "TEST;IMPORTANCE=very;DUE=tomorrow:FOOBAR\n"
+            r#"TEST;IMPORTANCE=very;DUE=tomorrow:FOOBAR;COMPLEX=\n"#
                 .parse::<Property>()
                 .unwrap(),
         )
