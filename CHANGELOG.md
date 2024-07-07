@@ -1,5 +1,16 @@
 # Changelog
 
+### [v0.16.2](https://github.com/hoodie/icalendar-rs/compare/v0.16.1...v0.16.2) (2024-07-07)
+
+#### Fixes
+
+* correctly escape and unescape text
+([c0ffeee](https://github.com/hoodie/icalendar-rs/commit/c0ffeee430ad12b4bd927cb44f65fc6991f9f743))
+* accept quoted parameters
+([38d992c](https://github.com/hoodie/icalendar-rs/commit/38d992cf75a4dfa15dc2b0cbcdc1b51b155c13c6))
+* **deps:** update rust crate chrono-tz to 0.9
+([37157d5](https://github.com/hoodie/icalendar-rs/commit/37157d5e2a230374fad0178562394568bfd9dfc9))
+
 ### [v0.16.1](https://github.com/hoodie/icalendar-rs/compare/v0.16.0...v0.16.1) (2024-04-07)
 
 #### Fixes
