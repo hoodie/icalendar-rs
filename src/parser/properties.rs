@@ -168,10 +168,20 @@ fn test_property() {
     // TODO: newlines followed by spaces must be ignored
     assert_parser!(
         property,
+        "KEY4;foo=bar:VALUE\\n newline separated\n",
+        Property {
+            name: "KEY4".into(),
+            val: "VALUE\n newline separated".into(),
+            params: vec![Parameter::new_ref("foo", Some("bar"))]
+        }
+    );
+
+    assert_parser!(
+        property,
         "KEY3;foo=bar:VALUE\\n newline separated\n",
         Property {
             name: "KEY3".into(),
-            val: "VALUE\\n newline separated".into(),
+            val: "VALUE\n newline separated".into(),
             params: vec![Parameter::new_ref("foo", Some("bar"))]
         }
     );
@@ -192,7 +202,6 @@ fn test_property_with_dash() {
 
 #[test]
 fn parse_properties_from_rfc() {
-    // TODO: newlines followed by spaces must be ignored
     assert_parser!(
         property,
         "home.tel;type=fax,voice,msg:+49 3581 123456\n",
@@ -202,7 +211,7 @@ fn parse_properties_from_rfc() {
             params: vec![Parameter::new_ref("type", Some("fax,voice,msg"),)]
         }
     );
-    // TODO: newlines followed by spaces must be ignored
+
     assert_parser!(
         property,
         "email;internet:mb@goerlitz.de\n",
@@ -221,7 +230,7 @@ fn parse_property_with_breaks() {
 
     let expectation = Property {
         name: "DESCRIPTION".into(),
-        val: "Hey, I'm gonna have a party\\n BYOB: Bring your own beer.\\n Hendrik\\n".into(),
+        val: "Hey, I'm gonna have a party\n BYOB: Bring your own beer.\n Hendrik\n".into(),
         params: vec![],
     };
 
@@ -309,8 +318,9 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                             // this is for single line prop parsing, just so I can leave off the '\n'
                             take_while(|_| true),
                         ))
-                        .map(ParseString::from),
-                    ), // val TODO: replace this with something simpler!
+                        .map(ParseString::from)
+                        .map(ParseString::unescape_text),
+                    ),
                 ),
                 context(
                     "no-value property",
