@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 
+use aho_corasick::AhoCorasick;
+
 /// A zero-copy string parsed from an iCal input.
 #[derive(Debug, Eq, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -27,24 +29,12 @@ impl ParseString<'_> {
 
 impl<'a> ParseString<'a> {
     pub fn unescape_text(self) -> ParseString<'a> {
-        if self.0.contains(r#"\\"#)
-            || self.0.contains(r#"\,"#)
-            || self.0.contains(r#"\;"#)
-            || self.0.contains(r#"\:"#)
-            || self.0.contains(r#"\N"#)
-            || self.0.contains(r#"\n"#)
-        {
-            self.0
-                .replace(r#"\\"#, r#"\"#)
-                .replace(r#"\,"#, ",")
-                .replace(r#"\;"#, ";")
-                .replace(r#"\:"#, ":")
-                .replace(r#"\N"#, "\n")
-                .replace(r#"\n"#, "\n")
-                .into()
-        } else {
-            self
-        }
+        let ac = AhoCorasick::builder()
+            .match_kind(aho_corasick::MatchKind::LeftmostFirst)
+            .build([r#"\\"#, r#"\,"#, r#"\;"#, r#"\:"#, r#"\N"#, r#"\n"#])
+            .unwrap();
+        ac.replace_all(self.0.as_ref(), &[r#"\"#, ",", ";", ":", "\n", "\n"])
+            .into()
     }
 }
 
