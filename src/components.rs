@@ -428,6 +428,22 @@ mod tests {
     use super::*;
 
     #[test]
+    fn get_url() {
+        let url = "http://hoodie.de/";
+        let event = Event::new().url(url).done();
+
+        let serialized = event.to_string();
+        let reparsed =
+            dbg!(Other::try_from(crate::parser::Component::<'_>::try_from(serialized.as_str()).unwrap())
+                .unwrap());
+
+        assert_eq!(event.get_url(), Some(url));
+        assert_eq!(reparsed.get_url(), Some(url));
+        eprintln!("{}", serialized);
+        dbg!(event);
+    }
+
+    #[test]
     fn get_properties_unset() {
         let event = Event::new();
         assert_eq!(event.get_priority(), None);
