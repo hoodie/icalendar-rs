@@ -25,7 +25,7 @@ use super::*;
 /// When it is time for the Alarm to occur we have to define what is actually supposed to happen.
 /// The RFC5545 know three different actions, two of which are currently implemented.
 ///
-/// 1. Display  
+/// 1. Display
 /// 2. Audio
 /// 3. Email (not yet implemented)
 ///

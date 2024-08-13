@@ -3,7 +3,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::{parser::utils::valid_key_sequence_cow, properties::fold_line};
+use crate::{parser::utils::valid_key_sequence_cow, properties::fold_line, value_types::ValueType};
 
 use super::{
     parameters::{parameters, Parameter},
@@ -124,7 +124,7 @@ impl FromStr for crate::Property {
 }
 
 #[test]
-fn test_property() {
+fn properties() {
     assert_parser!(
         property,
         "KEY:VALUE\n",
@@ -164,23 +164,57 @@ fn test_property() {
             params: vec![Parameter::new_ref("foo", Some("bar"))]
         }
     );
+}
 
-    // TODO: newlines followed by spaces must be ignored
-    assert_parser!(
-        property,
-        "KEY4;foo=bar:VALUE\\n newline separated\n",
-        Property {
-            name: "KEY4".into(),
-            val: "VALUE\n newline separated".into(),
-            params: vec![Parameter::new_ref("foo", Some("bar"))]
-        }
+#[test]
+fn unescape_text() {
+    assert_eq!(
+        "DESCRIPTION:https\\://example.com\n"
+            .parse::<crate::Property>()
+            .map(|p| p.val)
+            .unwrap(),
+        "https://example.com"
     );
 
     assert_parser!(
         property,
-        "KEY3;foo=bar:VALUE\\n newline separated\n",
+        "DESCRIPTION:https\\://example.com\n",
         Property {
-            name: "KEY3".into(),
+            name: "DESCRIPTION".into(),
+            val: "https://example.com".into(),
+            params: Default::default()
+        }
+    );
+}
+
+#[test]
+fn property_escape_url_as_url() {
+    assert_eq!(
+        "URL:https://example.com\n"
+            .parse::<crate::Property>()
+            .map(|p| p.val)
+            .unwrap(),
+        "https://example.com"
+    );
+
+    assert_parser!(
+        property,
+        "URL:https://example.com\n",
+        Property {
+            name: "URL".into(),
+            val: "https://example.com".into(),
+            params: Default::default()
+        }
+    );
+}
+
+#[test]
+fn property_escape_description_as_text() {
+    assert_parser!(
+        property,
+        "DESCRIPTION;foo=bar:VALUE\\n newline separated\n",
+        Property {
+            name: "DESCRIPTION".into(),
             val: "VALUE\n newline separated".into(),
             params: vec![Parameter::new_ref("foo", Some("bar"))]
         }
@@ -188,7 +222,39 @@ fn test_property() {
 }
 
 #[test]
-fn test_property_with_dash() {
+fn property_escape_by_value_param() {
+    assert_parser!(
+        property,
+        "FOO;VALUE=TEXT:VALUE\\n newline separated\n",
+        Property {
+            name: "FOO".into(),
+            val: "VALUE\n newline separated".into(),
+            params: vec![Parameter::new_ref("VALUE", Some("TEXT"))]
+        }
+    );
+
+    assert_parser!(
+        property,
+        "FOO_AS_TEXT;VALUE=TEXT:https\\://example.com\n",
+        Property {
+            name: "FOO_AS_TEXT".into(),
+            val: "https://example.com".into(),
+            params: vec![Parameter::new_ref("VALUE", Some("TEXT"))]
+        }
+    );
+    assert_parser!(
+        property,
+        "FOO_AS_URL;VALUE=URL:https\\://example.com\n",
+        Property {
+            name: "FOO_AS_URL".into(),
+            val: "https\\://example.com".into(),
+            params: vec![Parameter::new_ref("VALUE", Some("URL"))]
+        }
+    );
+}
+
+#[test]
+fn property_with_dash() {
     assert_parser!(
         property,
         "X-HOODIE-KEY:VALUE\n",
@@ -291,6 +357,15 @@ fn parse_property_with_no_value() {
     assert_parser!(property, sample_0, expectation);
 }
 
+fn determin_value_type(name: &ParseString, params: &[Parameter]) -> Option<ValueType> {
+    params
+        .iter()
+        .find(|param| param.key == "VALUE")
+        .and_then(|Parameter { val, .. }| val.as_ref())
+        .and_then(|typ| ValueType::from_str(typ.as_str()).ok())
+        .or_else(|| ValueType::by_name(name.as_str()))
+}
+
 pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, Property, E> {
@@ -318,8 +393,7 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                             // this is for single line prop parsing, just so I can leave off the '\n'
                             take_while(|_| true),
                         ))
-                        .map(ParseString::from)
-                        .map(ParseString::unescape_text),
+                        .map(ParseString::from),
                     ),
                 ),
                 context(
@@ -329,10 +403,14 @@ pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
             )),
             opt(line_ending),
         ))
-        .map(|(((key, params), val), _)| Property {
-            name: key,
-            val,
-            params,
+        .map(|(((name, params), val), _)| {
+            let val = if let Some(value_type) = determin_value_type(&name, &params) {
+                val.unescape_by_value_type(value_type)
+            } else {
+                val
+            };
+
+            Property { name, val, params }
         })),
     )
     .parse(input)

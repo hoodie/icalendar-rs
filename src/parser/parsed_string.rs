@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 
+use crate::ValueType;
+
 /// A zero-copy string parsed from an iCal input.
 #[derive(Debug, Eq, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -26,6 +28,13 @@ impl ParseString<'_> {
 }
 
 impl<'a> ParseString<'a> {
+    pub fn unescape_by_value_type(self, value_type: ValueType) -> ParseString<'a> {
+        match value_type {
+            ValueType::Text => self.unescape_text(),
+            _ => self,
+        }
+    }
+
     pub fn unescape_text(self) -> ParseString<'a> {
         if self.0.contains(r#"\\"#)
             || self.0.contains(r#"\,"#)

@@ -1,7 +1,6 @@
-#![allow(dead_code, unused)]
 use std::str::FromStr;
 
-use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, Offset, TimeZone as _, Utc};
+use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, TimeZone as _, Utc};
 
 use crate::{Property, ValueType};
 
@@ -131,7 +130,9 @@ impl CalendarDateTime {
         }
     }
 
+    /// TODO: make public or delete
     #[cfg(feature = "chrono-tz")]
+    #[allow(dead_code)]
     pub(crate) fn with_timezone(dt: NaiveDateTime, tz_id: chrono_tz::Tz) -> Self {
         Self::WithTimezone {
             date_time: dt,
@@ -267,7 +268,9 @@ impl DatePerhapsTime {
     }
 }
 
+/// TODO: make public or delete
 #[cfg(feature = "chrono-tz")]
+#[allow(dead_code)]
 pub fn with_timezone<T: chrono::TimeZone + chrono_tz::OffsetName>(
     dt: DateTime<T>,
 ) -> DatePerhapsTime {
