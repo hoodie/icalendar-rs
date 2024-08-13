@@ -100,6 +100,7 @@ mod components;
 #[cfg(feature = "parser")]
 pub mod parser;
 mod properties;
+mod value_types;
 
 pub use crate::{
     calendar::{Calendar, CalendarComponent},
@@ -108,7 +109,8 @@ pub use crate::{
         date_time::{CalendarDateTime, DatePerhapsTime},
         Component, Event, EventLike, Todo, Venue,
     },
-    properties::{Class, EventStatus, Parameter, Property, TodoStatus, ValueType},
+    properties::{Class, EventStatus, Parameter, Property, TodoStatus},
+    value_types::ValueType,
 };
 
 #[cfg(feature = "chrono-tz")]

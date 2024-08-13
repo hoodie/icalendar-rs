@@ -2,7 +2,10 @@ use std::{
     collections::HashMap,
     fmt::{self, Write},
     mem,
+    str::FromStr,
 };
+
+use crate::value_types::ValueType;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 /// key-value pairs inside of `Property`s
@@ -89,7 +92,10 @@ impl Property {
 
     /// Returns the `VALUE` parameter, if any is specified.
     pub fn value_type(&self) -> Option<ValueType> {
-        ValueType::from_str(&self.params.get("VALUE")?.val)
+        self.params
+            .get("VALUE")
+            .and_then(|p| ValueType::from_str(&p.val).ok())
+            .or_else(|| ValueType::by_name(self.key()))
     }
 
     // /// Returns the value as a certain type
@@ -171,7 +177,11 @@ impl Property {
         for Parameter { key, val } in self.params.values() {
             write!(line, ";{}={}", key, Self::quote_if_contains_colon(val))?;
         }
-        write!(line, ":{}", Self::escape_text(&self.val))?;
+        let value_type = self.value_type();
+        match value_type {
+            Some(ValueType::Text) => write!(line, ":{}", Self::escape_text(&self.val))?,
+            _ => write!(line, ":{}", self.val)?,
+        }
         write_crlf!(out, "{}", fold_line(&line))?;
         Ok(())
     }
@@ -220,85 +230,6 @@ impl From<Class> for Property {
                 Class::Confidential => "CONFIDENTIAL",
             }),
             params: HashMap::new(),
-        }
-    }
-}
-
-/// see 8.3.4. [Value Data Types Registry](https://tools.ietf.org/html/rfc5545#section-8.3.4)
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum ValueType {
-    /// [`Binary`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.1)
-    Binary,
-    /// [`Boolean`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.2)
-    Boolean,
-    /// [`CalAddress`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.3)
-    CalAddress,
-    /// [`Date`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.4)
-    Date,
-    /// [`DateTime`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.5)
-    DateTime,
-    /// [`Duration`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.6)
-    Duration,
-    /// [`Float`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.7)
-    Float,
-    /// [`Integer`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.8)
-    Integer,
-    /// [`Period`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.9)
-    Period,
-    /// [`Recur`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10)
-    Recur,
-    /// [`Text`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.11)
-    Text,
-    /// [`Time`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.12)
-    Time,
-    /// [`Uri`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.13)
-    Uri,
-    /// [`UtcOffset`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.14)
-    UtcOffset,
-}
-
-impl ValueType {
-    pub(crate) fn from_str(s: &str) -> Option<Self> {
-        match s {
-            "BINARY" => Some(Self::Binary),
-            "BOOLEAN" => Some(Self::Boolean),
-            "CAL-ADDRESS" => Some(Self::CalAddress),
-            "DATE" => Some(Self::Date),
-            "DATE-TIME" => Some(Self::DateTime),
-            "DURATION" => Some(Self::Duration),
-            "FLOAT" => Some(Self::Float),
-            "INTEGER" => Some(Self::Integer),
-            "PERIOD" => Some(Self::Period),
-            "RECUR" => Some(Self::Recur),
-            "TEXT" => Some(Self::Text),
-            "TIME" => Some(Self::Time),
-            "URI" => Some(Self::Uri),
-            "UTC-OFFSET" => Some(Self::UtcOffset),
-            _ => None,
-        }
-    }
-}
-
-impl From<ValueType> for Parameter {
-    fn from(val: ValueType) -> Self {
-        Parameter {
-            key: String::from("VALUE"),
-            val: String::from(match val {
-                ValueType::Binary => "BINARY",
-                ValueType::Boolean => "BOOLEAN",
-                ValueType::CalAddress => "CAL-ADDRESS",
-                ValueType::Date => "DATE",
-                ValueType::DateTime => "DATE-TIME",
-                ValueType::Duration => "DURATION",
-                ValueType::Float => "FLOAT",
-                ValueType::Integer => "INTEGER",
-                ValueType::Period => "PERIOD",
-                ValueType::Recur => "RECUR",
-                ValueType::Text => "TEXT",
-                ValueType::Time => "TIME",
-                ValueType::Uri => "URI",
-                ValueType::UtcOffset => "UTC-OFFSET",
-            }),
         }
     }
 }
@@ -371,6 +302,31 @@ impl From<EventStatus> for Property {
                 EventStatus::Cancelled => "CANCELLED",
             }),
             params: HashMap::new(),
+        }
+    }
+}
+
+// TODO: why do we add this?
+impl From<ValueType> for Parameter {
+    fn from(val: ValueType) -> Self {
+        Parameter {
+            key: String::from("VALUE"),
+            val: String::from(match val {
+                ValueType::Binary => "BINARY",
+                ValueType::Boolean => "BOOLEAN",
+                ValueType::CalAddress => "CAL-ADDRESS",
+                ValueType::Date => "DATE",
+                ValueType::DateTime => "DATE-TIME",
+                ValueType::Duration => "DURATION",
+                ValueType::Float => "FLOAT",
+                ValueType::Integer => "INTEGER",
+                ValueType::Period => "PERIOD",
+                ValueType::Recur => "RECUR",
+                ValueType::Text => "TEXT",
+                ValueType::Time => "TIME",
+                ValueType::Uri => "URI",
+                ValueType::UtcOffset => "UTC-OFFSET",
+            }),
         }
     }
 }
