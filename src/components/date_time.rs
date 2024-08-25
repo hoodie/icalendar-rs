@@ -28,7 +28,7 @@ pub(crate) fn parse_duration(s: &str) -> Option<Duration> {
 }
 
 pub(crate) fn naive_date_to_property(date: NaiveDate, key: &str) -> Property {
-    Property::new(key, &date.format(NAIVE_DATE_FORMAT).to_string())
+    Property::new(key, date.format(NAIVE_DATE_FORMAT).to_string())
         .append_parameter(ValueType::Date)
         .done()
 }
@@ -97,11 +97,11 @@ impl CalendarDateTime {
     pub(crate) fn to_property(&self, key: &str) -> Property {
         match self {
             CalendarDateTime::Floating(naive_dt) => {
-                Property::new(key, &naive_dt.format(NAIVE_DATE_TIME_FORMAT).to_string())
+                Property::new(key, naive_dt.format(NAIVE_DATE_TIME_FORMAT).to_string())
             }
-            CalendarDateTime::Utc(utc_dt) => Property::new(key, &format_utc_date_time(*utc_dt)),
+            CalendarDateTime::Utc(utc_dt) => Property::new(key, format_utc_date_time(*utc_dt)),
             CalendarDateTime::WithTimezone { date_time, tzid } => {
-                Property::new(key, &date_time.format(NAIVE_DATE_TIME_FORMAT).to_string())
+                Property::new(key, date_time.format(NAIVE_DATE_TIME_FORMAT).to_string())
                     .add_parameter("TZID", tzid)
                     .done()
             }
