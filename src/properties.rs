@@ -380,14 +380,15 @@ impl From<chrono::Duration> for Property {
 // Fold a content line as described in RFC 5545, Section 3.1
 #[allow(clippy::indexing_slicing)]
 pub(crate) fn fold_line(line: &str) -> String {
-    let limit = 75;
+    const LIMIT: usize = 75;
     let len = line.len();
-    let mut ret = String::with_capacity(len + (len / limit * 3));
+    let mut ret = String::with_capacity(len + (len / LIMIT * 3));
     let mut bytes_remaining = len;
 
     let mut pos = 0;
-    let mut next_pos = limit;
-    while bytes_remaining > limit {
+    let mut next_pos = LIMIT;
+
+    while bytes_remaining > LIMIT {
         let pos_is_whitespace = |line: &str, next_pos| {
             line.chars()
                 .nth(next_pos)
@@ -409,7 +410,7 @@ pub(crate) fn fold_line(line: &str) -> String {
 
         bytes_remaining -= next_pos - pos;
         pos = next_pos;
-        next_pos += limit;
+        next_pos += LIMIT - 1;
     }
 
     ret.push_str(&line[len - bytes_remaining..]);
