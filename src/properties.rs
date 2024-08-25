@@ -53,14 +53,15 @@ impl From<(&str, &str)> for Property {
 
 impl Property {
     /// Guess what this does :D
-    pub fn new(key: &str, val: &str) -> Self {
+    pub fn new(key: impl Into<String>, val: impl Into<String>) -> Self {
         Property {
-            key: key.to_owned(),
-            val: val.to_owned(),
+            key: key.into(),
+            val: val.into(),
             params: HashMap::new(),
         }
     }
 
+    #[deprecated]
     /// if you already have `String`s I'll gladly take
     pub fn new_pre_alloc(key: String, val: String) -> Self {
         Property {
@@ -333,22 +334,22 @@ impl From<ValueType> for Parameter {
 
 impl From<TodoStatus> for Property {
     fn from(val: TodoStatus) -> Self {
-        Property::new_pre_alloc(
-            String::from("STATUS"),
-            String::from(match val {
+        Property::new(
+            "STATUS",
+            match val {
                 TodoStatus::NeedsAction => "NEEDS-ACTION",
                 TodoStatus::Completed => "COMPLETED",
                 TodoStatus::InProcess => "IN-PROCESS",
                 TodoStatus::Cancelled => "CANCELLED",
                 //TodoStatus::Custom(s)   => "CU",
-            }),
+            },
         )
     }
 }
 
 impl From<chrono::Duration> for Property {
     fn from(duration: chrono::Duration) -> Self {
-        Property::new_pre_alloc(String::from("DURATION"), duration.to_string())
+        Property::new("DURATION", duration.to_string())
     }
 }
 //pub enum AttendeeRole {

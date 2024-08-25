@@ -351,7 +351,7 @@ pub mod properties {
 
     impl From<Repeat> for Property {
         fn from(r: Repeat) -> Self {
-            Property::new_pre_alloc("REPEAT".into(), r.0.to_string())
+            Property::new("REPEAT", r.0.to_string())
         }
     }
 
@@ -544,14 +544,12 @@ pub mod properties {
         fn from(trigger: Trigger) -> Self {
             match trigger {
                 Trigger::Duration(duration, Some(related)) => {
-                    Property::new_pre_alloc("TRIGGER".into(), duration.to_string())
+                    Property::new("TRIGGER", duration.to_string())
                         .append_parameter(related)
                         .done()
                 }
 
-                Trigger::Duration(duration, None) => {
-                    Property::new_pre_alloc("TRIGGER".into(), duration.to_string())
-                }
+                Trigger::Duration(duration, None) => Property::new("TRIGGER", duration.to_string()),
 
                 Trigger::DateTime(dt) => dt
                     .to_property("TRIGGER")
