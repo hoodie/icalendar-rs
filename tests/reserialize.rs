@@ -33,8 +33,8 @@ ACTION:EMAIL\r
 ATTENDEE:\"mailto:john_doe@example.com\"\r
 SUMMARY:*** REMINDER: SEND AGENDA FOR WEEKLY STAFF MEETING ***\r
 DESCRIPTION:A draft agenda needs to be sent out to the attendees to the wee\r
- kly managers meeting (MGR-LIST). Attached is a pointer the document templat\r
- e for the agenda file.\r
+ kly managers meeting (MGR-LIST). Attached is a pointer the document templa\r
+ te for the agenda file.\r
 ATTACH;FMTTYPE=application/msword:http://example.com/templates/agenda.doc\r
 END:VALARM\r
 END:VCALENDAR\r
