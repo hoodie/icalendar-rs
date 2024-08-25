@@ -145,13 +145,14 @@ pub trait Component {
     fn append_multi_property(&mut self, property: impl Into<Property>) -> &mut Self;
 
     /// Construct and append a [`Property`]
-    fn add_property(&mut self, key: &str, val: &str) -> &mut Self {
+    fn add_property(&mut self, key: impl Into<String>, val: impl Into<String>) -> &mut Self {
         self.append_property(Property::new(key, val))
     }
 
+    #[deprecated]
     /// Construct and append a [`Property`]
     fn add_property_pre_alloc(&mut self, key: String, val: String) -> &mut Self {
-        self.append_property(Property::new_pre_alloc(key, val))
+        self.append_property(Property::new(key, val))
     }
 
     /// Construct and append a [`Property`]
@@ -254,7 +255,7 @@ pub trait Component {
 
     /// Set the sequence
     fn sequence(&mut self, sequence: u32) -> &mut Self {
-        self.add_property_pre_alloc("SEQUENCE".into(), sequence.to_string())
+        self.add_property("SEQUENCE", sequence.to_string())
     }
 
     /// Gets the SEQUENCE
