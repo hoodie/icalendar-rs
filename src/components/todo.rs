@@ -26,7 +26,7 @@ impl Todo {
     ///
     /// Ranges between 0 - 100
     pub fn percent_complete(&mut self, percent: u8) -> &mut Self {
-        self.add_property("PERCENT-COMPLETE", &percent.to_string())
+        self.add_property("PERCENT-COMPLETE", percent.to_string())
     }
 
     /// Gets the [`PERCENT-COMPLETE`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.8) property.
@@ -54,7 +54,7 @@ impl Todo {
     /// Per [RFC 5545, Section 3.8.2.1](https://tools.ietf.org/html/rfc5545#section-3.8.2.1), this
     /// must be a date-time in UTC format.
     pub fn completed(&mut self, dt: DateTime<Utc>) -> &mut Self {
-        self.add_property("COMPLETED", &format_utc_date_time(dt))
+        self.add_property("COMPLETED", format_utc_date_time(dt))
     }
 
     /// Gets the [`COMPLETED`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.1) property

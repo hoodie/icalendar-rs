@@ -164,7 +164,7 @@ pub trait Component {
     ///
     /// This must be a UTC date-time value.
     fn timestamp(&mut self, dt: DateTime<Utc>) -> &mut Self {
-        self.add_property("DTSTAMP", &format_utc_date_time(dt))
+        self.add_property("DTSTAMP", format_utc_date_time(dt))
     }
 
     /// Gets the [`DTSTAMP`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.2) property.
@@ -187,7 +187,7 @@ pub trait Component {
     /// Ranges from 0 to 10, larger values will be truncated
     fn priority(&mut self, priority: u32) -> &mut Self {
         let priority = std::cmp::min(priority, 10);
-        self.add_property("PRIORITY", &priority.to_string())
+        self.add_property("PRIORITY", priority.to_string())
     }
 
     // /// Add the [`ATTACH`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.1) property
