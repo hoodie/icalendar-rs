@@ -1,5 +1,19 @@
 # Changelog
 
+### [v0.16.5](https://github.com/hoodie/icalendar-rs/compare/v0.16.4...v0.16.5) (2024-08-26)
+
+#### Fixes
+
+* deprecate pre_alloc version by making the default new generic
+([4ba04cb](https://github.com/hoodie/icalendar-rs/commit/4ba04cb51b2c1c8ab85f91d72ffa3b01b0f2b467))
+
+### [v0.16.4](https://github.com/hoodie/icalendar-rs/compare/v0.16.3...v0.16.4) (2024-08-25)
+
+#### Fixes
+
+* take added space into account when wrapping lines
+([b7b35c2](https://github.com/hoodie/icalendar-rs/commit/b7b35c2c197d234be459dc56b6fdefdd441dc843))
+
 ### [v0.16.3](https://github.com/hoodie/icalendar-rs/compare/v0.16.2...v0.16.3) (2024-08-13)
 
 #### Fixes
@@ -29,7 +43,7 @@ closes [#91](https://github.com/hoodie/icalendar-rs/issues/91)
 * **deps:** update rust crate chrono-tz to 0.8.5
 ([4ef3052](https://github.com/hoodie/icalendar-rs/commit/4ef3052bc0073c9cce0a5eae4f534b3ea7fbd5fe))
 
-## [v0.16.0](https://github.com/hoodie/icalendar-rs/compare/v0.15.8...v0.16.0) (2023-11-22)
+## [v0.16.0](https://github.com/hoodie/icalendar-rs/compare/v0.15.9...v0.16.0) (2023-11-22)
 
 ### ⚠ BREAKING CHANGE
 
@@ -40,6 +54,13 @@ closes [#91](https://github.com/hoodie/icalendar-rs/issues/91)
 
 * parsing multi-properties
 ([6fe3e1f](https://github.com/hoodie/icalendar-rs/commit/6fe3e1f46007c89521e834d825d21c97f78f01d7))
+
+### [v0.15.9](https://github.com/hoodie/icalendar-rs/compare/v0.15.8...v0.15.9) (2023-11-22)
+
+#### Fixes
+
+* parsing multi-properties
+([c0ffee9](https://github.com/hoodie/icalendar-rs/commit/c0ffee9dfaaa27e18692349602b50c5d87a422a5))
 
 ### [v0.15.8](https://github.com/hoodie/icalendar-rs/compare/v0.15.7...v0.15.8) (2023-10-30)
 
