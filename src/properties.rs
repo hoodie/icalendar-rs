@@ -153,7 +153,6 @@ impl Property {
             .replace('\\', r#"\\"#)
             .replace(',', r#"\,"#)
             .replace(';', r#"\;"#)
-            .replace(':', r#"\:"#)
             .replace('\n', r#"\N"#)
     }
 
