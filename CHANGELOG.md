@@ -1,5 +1,7 @@
 # Changelog
 
+### [v0.16.7](https://github.com/hoodie/icalendar-rs/compare/v0.16.6...v0.16.7) (2024-09-08)
+
 ### [v0.16.6](https://github.com/hoodie/icalendar-rs/compare/v0.16.5...v0.16.6) (2024-09-08)
 
 #### Fixes
