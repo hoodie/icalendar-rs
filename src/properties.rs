@@ -447,6 +447,21 @@ mod tests {
         assert_eq!(expected, Property::escape_text(line));
     }
 
+    #[test]
+    fn escape_special_characters_in_serialized_property() {
+        let line = "\n\\;,:";
+        let expected = r"\N\\\;\,:";
+
+        let prop = Property::new("DESCRIPTION", line)
+            .append_parameter(Parameter::new("VALUE", "TEXT"))
+            .done();
+        let expected = format!("DESCRIPTION;VALUE=TEXT:{expected}\r\n");
+
+        let mut buf = String::new();
+        prop.fmt_write(&mut buf).unwrap();
+        assert_eq!(expected, buf);
+    }
+
     #[cfg(feature = "parser")]
     #[test]
     fn preserve_spaces() {
@@ -461,5 +476,14 @@ mod tests {
 
             assert_eq!(line, unfolded);
         }
+    }
+
+    #[test]
+    fn serialize_property() {
+        let prop = Property::new("SUMMARY", "This is a summary");
+        let expected = "SUMMARY:This is a summary\r\n";
+        let mut buf = String::new();
+        prop.fmt_write(&mut buf).unwrap();
+        assert_eq!(expected, buf);
     }
 }
