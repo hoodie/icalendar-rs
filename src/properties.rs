@@ -153,7 +153,6 @@ impl Property {
             .replace('\\', r#"\\"#)
             .replace(',', r#"\,"#)
             .replace(';', r#"\;"#)
-            .replace(':', r#"\:"#)
             .replace('\n', r#"\N"#)
     }
 
@@ -438,6 +437,14 @@ mod tests {
         let expected = "Content lines shouldn't be folded in the middle \
              of a UTF-8 character. 老\r\n 虎.";
         assert_eq!(expected, fold_line(line));
+    }
+
+    #[test]
+    fn escape_special_characters_in_text() {
+        let line = "\n\\;,:";
+
+        let expected = r"\N\\\;\,:";
+        assert_eq!(expected, Property::escape_text(line));
     }
 
     #[cfg(feature = "parser")]
