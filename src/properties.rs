@@ -34,6 +34,12 @@ impl Parameter {
     }
 }
 
+impl From<(&str, &str)> for Parameter {
+    fn from((key, val): (&str, &str)) -> Self {
+        Parameter::new(key, val)
+    }
+}
+
 //type EntryParameters = Vec<Parameter>;
 pub type EntryParameters = HashMap<String, Parameter>;
 
@@ -453,7 +459,7 @@ mod tests {
         let expected = r"\N\\\;\,:";
 
         let prop = Property::new("DESCRIPTION", line)
-            .append_parameter(Parameter::new("VALUE", "TEXT"))
+            .append_parameter(("VALUE", "TEXT"))
             .done();
         let expected = format!("DESCRIPTION;VALUE=TEXT:{expected}\r\n");
 
