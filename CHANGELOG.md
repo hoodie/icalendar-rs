@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.16.6](https://github.com/hoodie/icalendar-rs/compare/v0.16.5...v0.16.6) (2024-09-08)
+
+#### Fixes
+
+* remove colon escape in text property
+([70d442a](https://github.com/hoodie/icalendar-rs/commit/70d442a00f0a6db348bf5966f356ae90b76ca278))
+
 ### [v0.16.5](https://github.com/hoodie/icalendar-rs/compare/v0.16.4...v0.16.5) (2024-08-26)
 
 #### Fixes
@@ -208,12 +215,12 @@ closes [#61](https://github.com/hoodie/icalendar-rs/issues/61)
 
 * Adds a new variant to `CalendarDateTime` enum.
 * Changes the type of `Component::all_day`.
-* Removes `Component::start_date` and`Component::end_date`.
-
-* Changes the type of `Component::starts` and`Component::ends`.
-
-* Changes the type of `Component::timestamp` and`Component::get_timestamp`.
-
+* Removes `Component::start_date` and
+`Component::end_date`.
+* Changes the type of `Component::starts` and
+`Component::ends`.
+* Changes the type of `Component::timestamp` and
+`Component::get_timestamp`.
 
 
 ### Features
