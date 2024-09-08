@@ -439,6 +439,14 @@ mod tests {
         assert_eq!(expected, fold_line(line));
     }
 
+    #[test]
+    fn escape_special_characters_in_text() {
+        let line = "\n\\;,:";
+
+        let expected = r"\N\\\;\,:";
+        assert_eq!(expected, Property::escape_text(line));
+    }
+
     #[cfg(feature = "parser")]
     #[test]
     fn preserve_spaces() {
