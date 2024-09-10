@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.16.8](https://github.com/hoodie/icalendar-rs/compare/v0.16.7...v0.16.8) (2024-09-10)
+
+#### Fixes
+
+* **deps:** update rust crate chrono-tz to 0.10
+([d884935](https://github.com/hoodie/icalendar-rs/commit/d8849355776863a8ec943535539f025b01949721))
+
 ### [v0.16.7](https://github.com/hoodie/icalendar-rs/compare/v0.16.6...v0.16.7) (2024-09-08)
 
 ### [v0.16.6](https://github.com/hoodie/icalendar-rs/compare/v0.16.5...v0.16.6) (2024-09-08)
@@ -52,7 +59,7 @@ closes [#91](https://github.com/hoodie/icalendar-rs/issues/91)
 * **deps:** update rust crate chrono-tz to 0.8.5
 ([4ef3052](https://github.com/hoodie/icalendar-rs/commit/4ef3052bc0073c9cce0a5eae4f534b3ea7fbd5fe))
 
-## [v0.16.0](https://github.com/hoodie/icalendar-rs/compare/v0.15.9...v0.16.0) (2023-11-22)
+## [v0.16.0](https://github.com/hoodie/icalendar-rs/compare/v0.15.8...v0.16.0) (2023-11-22)
 
 ### ⚠ BREAKING CHANGE
 
@@ -63,13 +70,6 @@ closes [#91](https://github.com/hoodie/icalendar-rs/issues/91)
 
 * parsing multi-properties
 ([6fe3e1f](https://github.com/hoodie/icalendar-rs/commit/6fe3e1f46007c89521e834d825d21c97f78f01d7))
-
-### [v0.15.9](https://github.com/hoodie/icalendar-rs/compare/v0.15.8...v0.15.9) (2023-11-22)
-
-#### Fixes
-
-* parsing multi-properties
-([c0ffee9](https://github.com/hoodie/icalendar-rs/commit/c0ffee9dfaaa27e18692349602b50c5d87a422a5))
 
 ### [v0.15.8](https://github.com/hoodie/icalendar-rs/compare/v0.15.7...v0.15.8) (2023-10-30)
 
@@ -217,12 +217,12 @@ closes [#61](https://github.com/hoodie/icalendar-rs/issues/61)
 
 * Adds a new variant to `CalendarDateTime` enum.
 * Changes the type of `Component::all_day`.
-* Removes `Component::start_date` and
-`Component::end_date`.
-* Changes the type of `Component::starts` and
-`Component::ends`.
-* Changes the type of `Component::timestamp` and
-`Component::get_timestamp`.
+* Removes `Component::start_date` and`Component::end_date`.
+
+* Changes the type of `Component::starts` and`Component::ends`.
+
+* Changes the type of `Component::timestamp` and`Component::get_timestamp`.
+
 
 
 ### Features
