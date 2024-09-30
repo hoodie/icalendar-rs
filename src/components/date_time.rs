@@ -260,7 +260,7 @@ impl DatePerhapsTime {
         }
     }
 
-    pub(crate) fn to_property(&self, key: &str) -> Property {
+    pub fn to_property(&self, key: &str) -> Property {
         match self {
             Self::DateTime(date_time) => date_time.to_property(key),
             Self::Date(date) => naive_date_to_property(*date, key),
