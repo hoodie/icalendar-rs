@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.16.9](https://github.com/hoodie/icalendar-rs/compare/v0.16.8...v0.16.9) (2024-10-06)
+
+#### Features
+
+* add `LAST_MODIFIED` and `CREATED` getters and setters
+([fb4021c](https://github.com/hoodie/icalendar-rs/commit/fb4021c71cb612cb6331a1d55200faa291c5b2af))
+
 ### [v0.16.8](https://github.com/hoodie/icalendar-rs/compare/v0.16.7...v0.16.8) (2024-09-10)
 
 #### Fixes
