@@ -282,6 +282,30 @@ pub trait Component {
     fn get_url(&self) -> Option<&str> {
         self.property_value("URL")
     }
+
+    /// Set the [`LAST_MODIFIED`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.3) [`Property`]
+    ///
+    /// This must be a UTC date-time value.
+    fn last_modified(&mut self, dt: DateTime<Utc>) -> &mut Self {
+        self.add_property("LAST_MODIFIED", format_utc_date_time(dt))
+    }
+
+    /// Gets the [`LAST_MODIFIED`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.3) property.
+    fn get_last_modified(&self) -> Option<DateTime<Utc>> {
+        parse_utc_date_time(self.property_value("LAST_MODIFIED")?)
+    }
+
+    /// Set the [`CREATED`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.1) [`Property`]
+    ///
+    /// This must be a UTC date-time value.
+    fn created(&mut self, dt: DateTime<Utc>) -> &mut Self {
+        self.add_property("CREATED", format_utc_date_time(dt))
+    }
+
+    /// Gets the [`CREATED`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.1) property.
+    fn get_created(&self) -> Option<DateTime<Utc>> {
+        parse_utc_date_time(self.property_value("CREATED")?)
+    }
 }
 
 /// Common trait of [`Event`] and [`Todo`]
@@ -451,6 +475,8 @@ mod tests {
         assert_eq!(event.get_uid(), None);
         assert_eq!(event.get_class(), None);
         assert_eq!(event.get_timestamp(), None);
+        assert_eq!(event.get_last_modified(), None);
+        assert_eq!(event.get_created(), None);
         assert_eq!(event.get_url(), None);
     }
 
@@ -493,10 +519,14 @@ mod tests {
         let utc_date_time = Utc.with_ymd_and_hms(2001, 3, 13, 14, 15, 16).unwrap();
         let event = Event::new()
             .timestamp(utc_date_time)
+            .last_modified(utc_date_time)
+            .created(utc_date_time)
             .starts(utc_date_time)
             .ends(utc_date_time)
             .done();
         assert_eq!(event.get_timestamp(), Some(utc_date_time));
+        assert_eq!(event.get_last_modified(), Some(utc_date_time));
+        assert_eq!(event.get_created(), Some(utc_date_time));
         assert_eq!(event.get_start(), Some(utc_date_time.into()));
         assert_eq!(event.get_end(), Some(utc_date_time.into()));
     }
