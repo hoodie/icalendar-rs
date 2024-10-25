@@ -1,5 +1,7 @@
 <div align="center">
 
+# iCalendar in Rust
+
 [![build](https://img.shields.io/github/actions/workflow/status/hoodie/icalendar-rs/ci.yml?branch=main)](https://github.com/hoodie/icalendar-rs/actions?query=workflow%3A"Continuous+Integration")
 [![Crates.io](https://img.shields.io/crates/d/icalendar)](https://crates.io/crates/icalendar)
 [![contributors](https://img.shields.io/github/contributors/hoodie/icalendar-rs)](https://github.com/hoodie/icalendar-rs/graphs/contributors)
@@ -12,8 +14,6 @@
 A builder and parser for [`rfc5545`](http://tools.ietf.org/html/rfc5545) iCalendar.
 
 </div>
-
-# iCalendar in Rust
 
 You want to help make this more mature? Please talk to me, Pull Requests and suggestions are very welcome.
 
@@ -85,21 +85,17 @@ println!("{}", my_calendar);
 There is a feature called `"parser"` which allows you to read calendars again like this:
 
 ```rust
-use std::fs::File;
-use std::io::Read;
+use std::fs::read_to_string;
+
 use icalendar::{Calendar, CalendarComponent, Component};
 
-let mut file = File::open("fixtures/icalendar-rb/event.ics").unwrap();
-let mut contents = String::new();
-file.read_to_string(&mut contents);
+let contents = read_to_string("fixtures/icalendar-rb/event.ics").unwrap();
+
 let parsed_calendar: Calendar = contents.parse().unwrap();
 
 for component in &parsed_calendar.components {
-    match component {
-        CalendarComponent::Event(event) => {
-            println!("Event: {}", event.get_summary().unwrap())
-        },
-        _ => {}
+    if let CalendarComponent::Event(event) = component {
+        println!("Event: {}", event.get_summary().unwrap())
     }
 }
 
@@ -119,6 +115,6 @@ at your option.
 
 ## Contribution
 
-Any help in form of descriptive and friendly [issues](https://github.com/hoodie/icalendar-rs/issues) or comprehensive pull requests are welcome! 
+Any help in form of descriptive and friendly [issues](https://github.com/hoodie/icalendar-rs/issues) or comprehensive pull requests are welcome!
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in icalendar-rs by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
