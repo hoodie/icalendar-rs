@@ -1,7 +1,5 @@
 <div align="center">
 
-# iCalendar in Rust
-
 [![build](https://img.shields.io/github/actions/workflow/status/hoodie/icalendar-rs/ci.yml?branch=main)](https://github.com/hoodie/icalendar-rs/actions?query=workflow%3A"Continuous+Integration")
 [![Crates.io](https://img.shields.io/crates/d/icalendar)](https://crates.io/crates/icalendar)
 [![contributors](https://img.shields.io/github/contributors/hoodie/icalendar-rs)](https://github.com/hoodie/icalendar-rs/graphs/contributors)
@@ -11,19 +9,27 @@
 [![documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://docs.rs/icalendar/)
 [![license](https://img.shields.io/crates/l/icalendar.svg?style=flat)](https://crates.io/crates/icalendar/)
 
-A builder [and parser] for [`rfc5545`](http://tools.ietf.org/html/rfc5545) iCalendar.
+A builder and parser for [`rfc5545`](http://tools.ietf.org/html/rfc5545) iCalendar.
+
 </div>
 
+# iCalendar in Rust
 
 You want to help make this more mature? Please talk to me, Pull Requests and suggestions are very welcome.
 
-## Example
+## Examples
+Below are two examples of how to use this library. See the `examples` directory as well as the documentation for many more.
 
-Use the builder-pattern to assemble the full calender or event by event.
+### Building a new Calendar
+
+Use the builder-pattern to assemble the full calendar or event by event.
 Display printing produces the rfc5545 format.
 
 ```rust
-// lets create a calendar
+use icalendar::{Calendar, CalendarDateTime, Class, Component, Event, EventLike, Property, Todo};
+use chrono::{Duration, NaiveDate, NaiveTime, Utc};
+
+// let's create a calendar
 let my_calendar = Calendar::new()
     .name("example calendar")
     .push(
@@ -58,9 +64,13 @@ let my_calendar = Calendar::new()
             .done(),
     )
     .push(
-        // local event with timezone
+        // event with utc timezone
         Event::new()
-            .starts(CalendarDateTime::from_ymd_hm_tzid(2023, 3, 15, 18, 45, Berlin).unwrap())
+            .starts(CalendarDateTime::from(
+                NaiveDate::from_ymd_opt(2024, 10, 24).unwrap()
+                    .and_time(NaiveTime::from_hms_opt(20, 10, 00).unwrap())
+                    .and_utc()
+            ))
             .summary("Birthday Party")
             .description("I'm gonna have a party\nBYOB: Bring your own beer.\nHendrik")
             .done(),
@@ -71,21 +81,39 @@ println!("{}", my_calendar);
 
 ```
 
-## Parsing
+### Parsing a Calendar
 There is a feature called `"parser"` which allows you to read calendars again like this:
 
 ```rust
-//... continue from previous example
+use std::fs::File;
+use std::io::Read;
+use icalendar::{Calendar, CalendarComponent, Component};
 
-let parsed_calendar = my_calendar.parse::<Calendar>()?;
+let mut file = File::open("fixtures/icalendar-rb/event.ics").unwrap();
+let mut contents = String::new();
+file.read_to_string(&mut contents);
+let parsed_calendar: Calendar = contents.parse().unwrap();
+
+for component in &parsed_calendar.components {
+    match component {
+        CalendarComponent::Event(event) => {
+            println!("Event: {}", event.get_summary().unwrap())
+        },
+        _ => {}
+    }
+}
+
 ```
+
+## Structure
+A [`Calendar`] represents a full calendar, which contains multiple [`Component`]s. These may be either [`Event`]s, [`Todo`]s, or [`Venue`]s. Components in turn have [`Property`]s, which may have [`Parameter`]s.
 
 ## License
 
 icalendar-rs is licensed under either of
 
-* Apache License, Version 2.0, (LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0)
-* MIT license (LICENSE-MIT or http://opensource.org/licenses/MIT)
+* Apache License, Version 2.0, (LICENSE-APACHE or <http://www.apache.org/licenses/LICENSE-2.0>)
+* MIT license (LICENSE-MIT or <http://opensource.org/licenses/MIT>)
 
 at your option.
 
