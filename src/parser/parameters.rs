@@ -42,7 +42,7 @@ impl<'a> TryFrom<&'a str> for Parameter<'a> {
     }
 }
 
-impl<'a> From<Parameter<'a>> for crate::properties::Parameter {
+impl From<Parameter<'_>> for crate::properties::Parameter {
     fn from(parameter: Parameter<'_>) -> crate::properties::Parameter {
         crate::properties::Parameter::new(
             parameter.key.as_ref(),

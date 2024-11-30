@@ -41,8 +41,8 @@ pub struct Component<'a> {
     pub components: Vec<Component<'a>>,
 }
 
+#[cfg(test)]
 impl<'a> Component<'a> {
-    #[cfg(test)]
     pub(crate) fn new_empty(name: &'a str) -> Component<'a> {
         Component {
             name: name.into(),
@@ -50,7 +50,9 @@ impl<'a> Component<'a> {
             components: Default::default(),
         }
     }
+}
 
+impl Component<'_> {
     pub fn find_prop<S: AsRef<str>>(&self, name: S) -> Option<&Property> {
         self.properties
             .iter()
@@ -155,7 +157,7 @@ impl From<Component<'_>> for InnerComponent {
 }
 
 impl<'a> From<Component<'a>> for CalendarComponent {
-    fn from(component: Component<'_>) -> CalendarComponent {
+    fn from(component: Component<'a>) -> CalendarComponent {
         use crate::{Event, Todo, Venue};
         match component.name.as_ref() {
             "VEVENT" => Event::from(InnerComponent::from(component)).into(),
