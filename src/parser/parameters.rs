@@ -214,6 +214,6 @@ pub fn parse_parameter_list() {
 
 pub fn parameters<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
-) -> IResult<&'a str, Vec<Parameter>, E> {
+) -> IResult<&'a str, Vec<Parameter<'a>>, E> {
     many0(parameter)(input)
 }

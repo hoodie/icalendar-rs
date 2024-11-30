@@ -368,7 +368,7 @@ fn determin_value_type(name: &ParseString, params: &[Parameter]) -> Option<Value
 
 pub fn property<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
-) -> IResult<&'a str, Property, E> {
+) -> IResult<&'a str, Property<'a>, E> {
     context(
         "property",
         cut(tuple((

@@ -244,7 +244,7 @@ pub fn read_component(input: &str) -> Result<Component<'_>, String> {
 
 pub fn component<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
-) -> IResult<&'a str, Component, E> {
+) -> IResult<&'a str, Component<'a>, E> {
     let (input, name) = line("BEGIN:", valid_key_sequence_cow)(input)?;
 
     let (input, (properties, components)) = many_till(
@@ -512,6 +512,6 @@ fn test_faulty_component() {
 
 pub fn components<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
-) -> IResult<&'a str, Vec<Component>, E> {
+) -> IResult<&'a str, Vec<Component<'a>>, E> {
     complete(many0(all_consuming(component)))(input)
 }

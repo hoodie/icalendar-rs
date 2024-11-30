@@ -15,7 +15,7 @@ use super::parsed_string::ParseString;
 // TODO: how do I express <<alpha_or_dash, but not "END">>
 pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
-) -> IResult<&'a str, &str, E> {
+) -> IResult<&'a str, &'a str, E> {
     if input.get(0..=2) == Some("END") || input.get(0..=4) == Some("BEGIN") {
         IResult::Err(Err::Error(nom::error::make_error(
             input,
@@ -28,7 +28,7 @@ pub fn property_key<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 
 pub fn valid_key_sequence<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
-) -> IResult<&'a str, &str, E> {
+) -> IResult<&'a str, &'a str, E> {
     take_while(|c: char| {
         c == '.' || c == ',' || c == '/' || c == '_' || c == '-' || c.is_alphanumeric()
     })
