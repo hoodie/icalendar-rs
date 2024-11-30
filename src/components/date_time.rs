@@ -297,7 +297,9 @@ impl From<DatePerhapsTime> for NaiveDate {
             DatePerhapsTime::Date(date) => date,
             DatePerhapsTime::DateTime(CalendarDateTime::Floating(date_time)) => date_time.date(),
             DatePerhapsTime::DateTime(CalendarDateTime::Utc(date_time)) => date_time.date_naive(),
-            DatePerhapsTime::DateTime(CalendarDateTime::WithTimezone { date_time, tzid: _ }) => date_time.date(),
+            DatePerhapsTime::DateTime(CalendarDateTime::WithTimezone { date_time, tzid: _ }) => {
+                date_time.date()
+            }
         }
     }
 }
