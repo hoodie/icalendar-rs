@@ -266,6 +266,16 @@ impl DatePerhapsTime {
             Self::Date(date) => naive_date_to_property(*date, key),
         }
     }
+    /// Discards time, assumes UTC, and returns an owned instance of a pure date
+    pub fn date_naive(&self) -> NaiveDate {
+        use crate::DatePerhapsTime::*;
+        match self {
+            Date(date) => date.to_owned(),
+            DateTime(CalendarDateTime::Floating(date_time)) => date_time.date(),
+            DateTime(CalendarDateTime::Utc(date_time)) => date_time.date_naive(),
+            DateTime(CalendarDateTime::WithTimezone { date_time, tzid: _ }) => date_time.date(),
+        }
+    }
 }
 
 /// TODO: make public or delete
@@ -279,6 +289,17 @@ pub fn with_timezone<T: chrono::TimeZone + chrono_tz::OffsetName>(
         tzid: dt.timezone().tz_id().to_owned(),
     }
     .into()
+}
+
+impl From<DatePerhapsTime> for NaiveDate {
+    fn from(dt: DatePerhapsTime) -> Self {
+        match dt {
+            DatePerhapsTime::Date(date) => date,
+            DatePerhapsTime::DateTime(CalendarDateTime::Floating(date_time)) => date_time.date(),
+            DatePerhapsTime::DateTime(CalendarDateTime::Utc(date_time)) => date_time.date_naive(),
+            DatePerhapsTime::DateTime(CalendarDateTime::WithTimezone { date_time, tzid: _ }) => date_time.date(),
+        }
+    }
 }
 
 impl From<CalendarDateTime> for DatePerhapsTime {
