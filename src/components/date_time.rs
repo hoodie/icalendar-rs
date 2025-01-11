@@ -248,7 +248,8 @@ pub enum DatePerhapsTime {
 }
 
 impl DatePerhapsTime {
-    pub(crate) fn from_property(property: &Property) -> Option<Self> {
+    /// Attempts to convert the given property into a `DatePerhapsTime`.
+    pub fn from_property(property: &Property) -> Option<Self> {
         if property.value_type() == Some(ValueType::Date) {
             Some(
                 NaiveDate::parse_from_str(property.value(), NAIVE_DATE_FORMAT)
@@ -260,12 +261,14 @@ impl DatePerhapsTime {
         }
     }
 
-    pub(crate) fn to_property(&self, key: &str) -> Property {
+    /// Converts this `DatePerhapsTime` into a `Property`.
+    pub fn to_property(&self, key: &str) -> Property {
         match self {
             Self::DateTime(date_time) => date_time.to_property(key),
             Self::Date(date) => naive_date_to_property(*date, key),
         }
     }
+
     /// Discards time, assumes UTC, and returns an owned instance of a pure date
     pub fn date_naive(&self) -> NaiveDate {
         use crate::DatePerhapsTime::*;
