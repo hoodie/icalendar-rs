@@ -195,6 +195,21 @@ impl Calendar {
         self
     }
 
+    /// Gets the value of the `REFRESH-INTERVAL` or `X-PUBLISHED-TTL` property.
+    pub fn get_ttl(&self) -> Option<Duration> {
+        self.property_value("REFRESH-INTERVAL")
+            .and_then(|refresh_interval| iso8601::duration(refresh_interval).ok())
+            .or_else(|| {
+                self.property_value("X-PUBLISHED-TTL")
+                    .and_then(|published_ttl| iso8601::duration(published_ttl).ok())
+            })
+            .map(std::time::Duration::from)
+            .map(Duration::from_std)
+            .transpose()
+            .ok()
+            .flatten()
+    }
+
     /// End of builder pattern.
     /// copies over everything
     pub fn done(&mut self) -> Self {
