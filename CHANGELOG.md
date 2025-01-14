@@ -1,5 +1,14 @@
 # Changelog
 
+### [v0.16.11](https://github.com/hoodie/icalendar-rs/compare/v0.16.10...v0.16.11) (2025-01-14)
+
+#### Features
+
+* expose `DatePerhapsTime` property roundtrip methods as public API
+([9972fd5](https://github.com/hoodie/icalendar-rs/commit/9972fd5796e6e6d302a1c6bb7213c5fb463525b6))
+* add `get_ttl` counterpart method to `Calendar`
+([e8c09f3](https://github.com/hoodie/icalendar-rs/commit/e8c09f3aa2430f3495c93244e29a026e2592fc5a))
+
 ### [v0.16.10](https://github.com/hoodie/icalendar-rs/compare/v0.16.9...v0.16.10) (2024-11-30)
 
 #### Features
@@ -74,7 +83,7 @@ closes [#91](https://github.com/hoodie/icalendar-rs/issues/91)
 * **deps:** update rust crate chrono-tz to 0.8.5
 ([4ef3052](https://github.com/hoodie/icalendar-rs/commit/4ef3052bc0073c9cce0a5eae4f534b3ea7fbd5fe))
 
-## [v0.16.0](https://github.com/hoodie/icalendar-rs/compare/v0.15.9...v0.16.0) (2023-11-22)
+## [v0.16.0](https://github.com/hoodie/icalendar-rs/compare/v0.15.8...v0.16.0) (2023-11-22)
 
 ### ⚠ BREAKING CHANGE
 
@@ -85,13 +94,6 @@ closes [#91](https://github.com/hoodie/icalendar-rs/issues/91)
 
 * parsing multi-properties
 ([6fe3e1f](https://github.com/hoodie/icalendar-rs/commit/6fe3e1f46007c89521e834d825d21c97f78f01d7))
-
-### [v0.15.9](https://github.com/hoodie/icalendar-rs/compare/v0.15.8...v0.15.9) (2023-11-22)
-
-#### Fixes
-
-* parsing multi-properties
-([c0ffee9](https://github.com/hoodie/icalendar-rs/commit/c0ffee9dfaaa27e18692349602b50c5d87a422a5))
 
 ### [v0.15.8](https://github.com/hoodie/icalendar-rs/compare/v0.15.7...v0.15.8) (2023-10-30)
 
